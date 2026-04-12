@@ -14,6 +14,14 @@ export async function GET() {
     const result = await cloudinary.api.ping();
     return NextResponse.json({ status: "✅ Cloudinary connected", result });
   } catch (err: any) {
-    return NextResponse.json({ status: "❌ Cloudinary error", error: err?.message });
+    return NextResponse.json({
+      status: "❌ Cloudinary error",
+      message: err?.message,
+      http_code: err?.http_code,
+      error: JSON.stringify(err),
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      secret_length: process.env.CLOUDINARY_API_SECRET?.length,
+    });
   }
 }
