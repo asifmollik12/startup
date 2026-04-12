@@ -16,8 +16,9 @@ export default function AdminSettings() {
     const fd = new FormData();
     fd.append("file", file);
     const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const { url } = await res.json();
-    setLogoUrl(url);
+    if (!res.ok) { alert("Upload failed. Check Cloudinary env vars."); return; }
+    const data = await res.json();
+    if (data.url) setLogoUrl(data.url);
   };
 
   const removeLogo = () => {

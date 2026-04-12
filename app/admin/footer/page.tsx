@@ -66,8 +66,9 @@ export default function AdminFooter() {
     const fd = new FormData();
     fd.append("file", file);
     const res = await fetch("/api/upload", { method: "POST", body: fd });
-    const { url } = await res.json();
-    setFooterLogoUrl(url);
+    if (!res.ok) { alert("Upload failed. Check Cloudinary env vars."); return; }
+    const data = await res.json();
+    if (data.url) setFooterLogoUrl(data.url);
   };
 
   const removeLogo = () => {
