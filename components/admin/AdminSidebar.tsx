@@ -31,15 +31,11 @@ export default function AdminSidebar() {
           // eslint-disable-next-line @next/next/no-img-element
           <div className="flex items-center gap-3">
             <img src={logoUrl} alt="Site Logo" className="h-8 w-auto object-contain" />
-            <div className="text-[9px] tracking-widest uppercase text-gray-500">Admin Panel</div>
           </div>
         ) : (
           <div className="flex items-center gap-3">
             <div className="bg-brand-red text-white font-serif font-bold text-sm px-2 py-1 leading-tight">SUN</div>
-            <div>
-              <div className="text-white font-bold text-sm tracking-tight">START-UP NEWS</div>
-              <div className="text-[9px] tracking-widest uppercase text-gray-500">Admin Panel</div>
-            </div>
+            <div className="text-white font-bold text-sm tracking-tight">START-UP NEWS</div>
           </div>
         )}
       </div>
