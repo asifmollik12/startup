@@ -1,16 +1,23 @@
 "use client";
-import { useState } from "react";
-import { ideas as initialIdeas } from "@/lib/data";
+import { useState, useEffect } from "react";
 import { Idea } from "@/lib/types";
 import { Plus, Pencil, Trash2, Search, Trophy, ThumbsUp } from "lucide-react";
 import IdeaModal from "@/components/admin/IdeaModal";
 
 export default function AdminIdeas() {
-  const [ideas, setIdeas] = useState<Idea[]>(initialIdeas);
+  const [ideas, setIdeas] = useState<Idea[]>([]);
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Idea | null>(null);
   const [creating, setCreating] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/ideas")
+      .then((r) => r.json())
+      .then((data) => setIdeas(data.map((i: any) => ({ ...i, id: i._id }))))
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered = ideas.filter(
     (i) =>
@@ -19,17 +26,30 @@ export default function AdminIdeas() {
       i.submittedBy.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSave = (data: Idea) => {
+  const handleSave = async (data: Idea) => {
     if (creating) {
-      setIdeas((prev) => [...prev, { ...data, id: String(Date.now()) }]);
+      const res = await fetch("/api/ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const created = await res.json();
+      setIdeas((prev) => [{ ...created, id: created._id }, ...prev]);
     } else {
-      setIdeas((prev) => prev.map((i) => (i.id === data.id ? data : i)));
+      const res = await fetch(`/api/ideas/${data.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const updated = await res.json();
+      setIdeas((prev) => prev.map((i) => (i.id === data.id ? { ...updated, id: updated._id } : i)));
     }
     setEditing(null);
     setCreating(false);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/ideas/${id}`, { method: "DELETE" });
     setIdeas((prev) => prev.filter((i) => i.id !== id));
     setDeleteId(null);
   };
@@ -41,23 +61,15 @@ export default function AdminIdeas() {
           <h1 className="text-2xl font-bold text-white">Best Ideas</h1>
           <p className="text-gray-500 text-sm mt-0.5">{ideas.length} ideas submitted</p>
         </div>
-        <button
-          onClick={() => setCreating(true)}
-          className="flex items-center gap-2 bg-brand-red text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors"
-        >
+        <button onClick={() => setCreating(true)} className="flex items-center gap-2 bg-brand-red text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors">
           <Plus size={16} /> Add Idea
         </button>
       </div>
 
       <div className="relative w-full max-w-sm">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-        <input
-          type="search"
-          placeholder="Search ideas..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-gray-900 border border-gray-700 text-sm text-gray-300 placeholder-gray-500 pl-9 pr-4 py-2.5 rounded-lg focus:outline-none focus:border-brand-red transition-colors"
-        />
+        <input type="search" placeholder="Search ideas..." value={search} onChange={(e) => setSearch(e.target.value)}
+          className="w-full bg-gray-900 border border-gray-700 text-sm text-gray-300 placeholder-gray-500 pl-9 pr-4 py-2.5 rounded-lg focus:outline-none focus:border-brand-red transition-colors" />
       </div>
 
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
@@ -75,7 +87,8 @@ export default function AdminIdeas() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {filtered.map((idea) => (
+              {loading && <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-500">Loading...</td></tr>}
+              {!loading && filtered.map((idea) => (
                 <tr key={idea.id} className="hover:bg-gray-800/40 transition-colors">
                   <td className="px-5 py-4">
                     <p className="font-medium text-white line-clamp-1">{idea.title}</p>
@@ -87,45 +100,31 @@ export default function AdminIdeas() {
                   <td className="px-5 py-4 text-gray-400 hidden lg:table-cell">{idea.submittedBy}</td>
                   <td className="px-5 py-4 text-gray-400 hidden lg:table-cell">{idea.month}</td>
                   <td className="px-5 py-4 hidden sm:table-cell">
-                    <span className="flex items-center gap-1 text-white font-bold text-xs">
-                      <ThumbsUp size={11} className="text-blue-400" />{idea.votes.toLocaleString()}
-                    </span>
+                    <span className="flex items-center gap-1 text-white font-bold text-xs"><ThumbsUp size={11} className="text-blue-400" />{idea.votes.toLocaleString()}</span>
                   </td>
                   <td className="px-5 py-4 hidden sm:table-cell">
                     {idea.winner ? (
-                      <span className="flex items-center gap-1 text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold w-fit">
-                        <Trophy size={9} /> Winner
-                      </span>
+                      <span className="flex items-center gap-1 text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold w-fit"><Trophy size={9} /> Winner</span>
                     ) : (
                       <span className="text-[10px] bg-gray-700 text-gray-400 px-2 py-0.5 rounded font-medium">Submitted</span>
                     )}
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => setEditing(idea)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
-                        <Pencil size={14} />
-                      </button>
-                      <button onClick={() => setDeleteId(idea.id)} className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
-                        <Trash2 size={14} />
-                      </button>
+                      <button onClick={() => setEditing(idea)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"><Pencil size={14} /></button>
+                      <button onClick={() => setDeleteId(idea.id)} className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"><Trash2 size={14} /></button>
                     </div>
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && (
-                <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-500">No ideas found.</td></tr>
-              )}
+              {!loading && filtered.length === 0 && <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-500">No ideas found.</td></tr>}
             </tbody>
           </table>
         </div>
       </div>
 
       {(editing || creating) && (
-        <IdeaModal
-          idea={creating ? null : editing}
-          onSave={handleSave}
-          onClose={() => { setEditing(null); setCreating(false); }}
-        />
+        <IdeaModal idea={creating ? null : editing} onSave={handleSave} onClose={() => { setEditing(null); setCreating(false); }} />
       )}
 
       {deleteId && (

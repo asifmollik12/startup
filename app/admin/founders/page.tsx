@@ -1,16 +1,23 @@
 "use client";
-import { useState } from "react";
-import { founders as initialFounders } from "@/lib/data";
+import { useState, useEffect } from "react";
 import { Founder } from "@/lib/types";
 import { Plus, Pencil, Trash2, Search, Trophy } from "lucide-react";
 import FounderModal from "@/components/admin/FounderModal";
 
 export default function AdminFounders() {
-  const [founders, setFounders] = useState<Founder[]>(initialFounders);
+  const [founders, setFounders] = useState<Founder[]>([]);
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Founder | null>(null);
   const [creating, setCreating] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/founders")
+      .then((r) => r.json())
+      .then((data) => setFounders(data.map((f: any) => ({ ...f, id: f._id }))))
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered = founders.filter(
     (f) =>
@@ -19,17 +26,30 @@ export default function AdminFounders() {
       f.industry.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSave = (data: Founder) => {
+  const handleSave = async (data: Founder) => {
     if (creating) {
-      setFounders((prev) => [...prev, { ...data, id: String(Date.now()) }]);
+      const res = await fetch("/api/founders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const created = await res.json();
+      setFounders((prev) => [{ ...created, id: created._id }, ...prev]);
     } else {
-      setFounders((prev) => prev.map((f) => (f.id === data.id ? data : f)));
+      const res = await fetch(`/api/founders/${data.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const updated = await res.json();
+      setFounders((prev) => prev.map((f) => (f.id === data.id ? { ...updated, id: updated._id } : f)));
     }
     setEditing(null);
     setCreating(false);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/founders/${id}`, { method: "DELETE" });
     setFounders((prev) => prev.filter((f) => f.id !== id));
     setDeleteId(null);
   };
@@ -41,23 +61,15 @@ export default function AdminFounders() {
           <h1 className="text-2xl font-bold text-white">Founders</h1>
           <p className="text-gray-500 text-sm mt-0.5">{founders.length} founder profiles</p>
         </div>
-        <button
-          onClick={() => setCreating(true)}
-          className="flex items-center gap-2 bg-brand-red text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors"
-        >
+        <button onClick={() => setCreating(true)} className="flex items-center gap-2 bg-brand-red text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors">
           <Plus size={16} /> Add Founder
         </button>
       </div>
 
       <div className="relative w-full max-w-sm">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-        <input
-          type="search"
-          placeholder="Search founders..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-gray-900 border border-gray-700 text-sm text-gray-300 placeholder-gray-500 pl-9 pr-4 py-2.5 rounded-lg focus:outline-none focus:border-brand-red transition-colors"
-        />
+        <input type="search" placeholder="Search founders..." value={search} onChange={(e) => setSearch(e.target.value)}
+          className="w-full bg-gray-900 border border-gray-700 text-sm text-gray-300 placeholder-gray-500 pl-9 pr-4 py-2.5 rounded-lg focus:outline-none focus:border-brand-red transition-colors" />
       </div>
 
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
@@ -74,13 +86,12 @@ export default function AdminFounders() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {filtered.map((founder) => (
+              {loading && <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">Loading...</td></tr>}
+              {!loading && filtered.map((founder) => (
                 <tr key={founder.id} className="hover:bg-gray-800/40 transition-colors">
                   <td className="px-5 py-4">
-                    <div>
-                      <p className="font-medium text-white">{founder.name}</p>
-                      <p className="text-xs text-gray-500">{founder.title}</p>
-                    </div>
+                    <p className="font-medium text-white">{founder.name}</p>
+                    <p className="text-xs text-gray-500">{founder.title}</p>
                   </td>
                   <td className="px-5 py-4 text-gray-400 hidden md:table-cell">{founder.company}</td>
                   <td className="px-5 py-4 hidden lg:table-cell">
@@ -91,39 +102,25 @@ export default function AdminFounders() {
                   </td>
                   <td className="px-5 py-4 hidden sm:table-cell">
                     {founder.rank ? (
-                      <span className="flex items-center gap-1 text-xs text-amber-400 font-bold">
-                        <Trophy size={11} /> #{founder.rank}
-                      </span>
-                    ) : (
-                      <span className="text-gray-600 text-xs">—</span>
-                    )}
+                      <span className="flex items-center gap-1 text-xs text-amber-400 font-bold"><Trophy size={11} /> #{founder.rank}</span>
+                    ) : <span className="text-gray-600 text-xs">—</span>}
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => setEditing(founder)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
-                        <Pencil size={14} />
-                      </button>
-                      <button onClick={() => setDeleteId(founder.id)} className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
-                        <Trash2 size={14} />
-                      </button>
+                      <button onClick={() => setEditing(founder)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"><Pencil size={14} /></button>
+                      <button onClick={() => setDeleteId(founder.id)} className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"><Trash2 size={14} /></button>
                     </div>
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && (
-                <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">No founders found.</td></tr>
-              )}
+              {!loading && filtered.length === 0 && <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">No founders found.</td></tr>}
             </tbody>
           </table>
         </div>
       </div>
 
       {(editing || creating) && (
-        <FounderModal
-          founder={creating ? null : editing}
-          onSave={handleSave}
-          onClose={() => { setEditing(null); setCreating(false); }}
-        />
+        <FounderModal founder={creating ? null : editing} onSave={handleSave} onClose={() => { setEditing(null); setCreating(false); }} />
       )}
 
       {deleteId && (

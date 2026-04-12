@@ -14,16 +14,20 @@ const SiteLogoContext = createContext<LogoContextValue>({
 export function SiteLogoProvider({ children }: { children: React.ReactNode }) {
   const [logoUrl, setLogoUrlState] = useState<string | null>(null);
 
-  // Load from localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem("site_logo");
-    if (stored) setLogoUrlState(stored);
+    fetch("/api/settings?key=site_logo")
+      .then((r) => r.json())
+      .then((val) => { if (val) setLogoUrlState(val); })
+      .catch(() => {});
   }, []);
 
-  const setLogoUrl = (url: string | null) => {
+  const setLogoUrl = async (url: string | null) => {
     setLogoUrlState(url);
-    if (url) localStorage.setItem("site_logo", url);
-    else localStorage.removeItem("site_logo");
+    await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "site_logo", value: url }),
+    });
   };
 
   return (

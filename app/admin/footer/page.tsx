@@ -59,13 +59,15 @@ export default function AdminFooter() {
   const [logoName, setLogoName] = useState<string | null>(null);
   const logoRef = useRef<HTMLInputElement>(null);
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setLogoName(file.name);
-    const reader = new FileReader();
-    reader.onload = (ev) => setFooterLogoUrl(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const { url } = await res.json();
+    setFooterLogoUrl(url);
   };
 
   const removeLogo = () => {

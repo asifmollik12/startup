@@ -1,6 +1,5 @@
 "use client";
-import { useState } from "react";
-import { startups as initialStartups } from "@/lib/data";
+import { useState, useEffect } from "react";
 import { Startup } from "@/lib/types";
 import { Plus, Pencil, Trash2, Search, DollarSign } from "lucide-react";
 import StartupModal from "@/components/admin/StartupModal";
@@ -14,11 +13,19 @@ const stageColors: Record<string, string> = {
 };
 
 export default function AdminStartups() {
-  const [startups, setStartups] = useState<Startup[]>(initialStartups);
+  const [startups, setStartups] = useState<Startup[]>([]);
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Startup | null>(null);
   const [creating, setCreating] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/startups")
+      .then((r) => r.json())
+      .then((data) => setStartups(data.map((s: any) => ({ ...s, id: s._id }))))
+      .finally(() => setLoading(false));
+  }, []);
 
   const filtered = startups.filter(
     (s) =>
@@ -27,17 +34,30 @@ export default function AdminStartups() {
       s.location.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSave = (data: Startup) => {
+  const handleSave = async (data: Startup) => {
     if (creating) {
-      setStartups((prev) => [...prev, { ...data, id: String(Date.now()) }]);
+      const res = await fetch("/api/startups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const created = await res.json();
+      setStartups((prev) => [{ ...created, id: created._id }, ...prev]);
     } else {
-      setStartups((prev) => prev.map((s) => (s.id === data.id ? data : s)));
+      const res = await fetch(`/api/startups/${data.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const updated = await res.json();
+      setStartups((prev) => prev.map((s) => (s.id === data.id ? { ...updated, id: updated._id } : s)));
     }
     setEditing(null);
     setCreating(false);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    await fetch(`/api/startups/${id}`, { method: "DELETE" });
     setStartups((prev) => prev.filter((s) => s.id !== id));
     setDeleteId(null);
   };
@@ -49,23 +69,15 @@ export default function AdminStartups() {
           <h1 className="text-2xl font-bold text-white">Startups</h1>
           <p className="text-gray-500 text-sm mt-0.5">{startups.length} startups listed</p>
         </div>
-        <button
-          onClick={() => setCreating(true)}
-          className="flex items-center gap-2 bg-brand-red text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors"
-        >
+        <button onClick={() => setCreating(true)} className="flex items-center gap-2 bg-brand-red text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors">
           <Plus size={16} /> Add Startup
         </button>
       </div>
 
       <div className="relative w-full max-w-sm">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-        <input
-          type="search"
-          placeholder="Search startups..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-gray-900 border border-gray-700 text-sm text-gray-300 placeholder-gray-500 pl-9 pr-4 py-2.5 rounded-lg focus:outline-none focus:border-brand-red transition-colors"
-        />
+        <input type="search" placeholder="Search startups..." value={search} onChange={(e) => setSearch(e.target.value)}
+          className="w-full bg-gray-900 border border-gray-700 text-sm text-gray-300 placeholder-gray-500 pl-9 pr-4 py-2.5 rounded-lg focus:outline-none focus:border-brand-red transition-colors" />
       </div>
 
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
@@ -82,56 +94,41 @@ export default function AdminStartups() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {filtered.map((startup) => (
+              {loading && <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">Loading...</td></tr>}
+              {!loading && filtered.map((startup) => (
                 <tr key={startup.id} className="hover:bg-gray-800/40 transition-colors">
                   <td className="px-5 py-4">
-                    <div>
-                      <p className="font-medium text-white">{startup.name}</p>
-                      <p className="text-xs text-gray-500 line-clamp-1">{startup.tagline}</p>
-                    </div>
+                    <p className="font-medium text-white">{startup.name}</p>
+                    <p className="text-xs text-gray-500 line-clamp-1">{startup.tagline}</p>
                   </td>
                   <td className="px-5 py-4 hidden md:table-cell">
                     <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded font-medium">{startup.industry}</span>
                   </td>
                   <td className="px-5 py-4 text-gray-400 hidden lg:table-cell">{startup.location}</td>
                   <td className="px-5 py-4 hidden sm:table-cell">
-                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${stageColors[startup.stage] ?? "bg-gray-700 text-gray-400"}`}>
-                      {startup.stage}
-                    </span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded font-medium ${stageColors[startup.stage] ?? "bg-gray-700 text-gray-400"}`}>{startup.stage}</span>
                   </td>
                   <td className="px-5 py-4 hidden lg:table-cell">
                     {startup.funding ? (
-                      <span className="flex items-center gap-1 text-green-400 font-bold text-xs">
-                        <DollarSign size={11} />{startup.funding}
-                      </span>
+                      <span className="flex items-center gap-1 text-green-400 font-bold text-xs"><DollarSign size={11} />{startup.funding}</span>
                     ) : <span className="text-gray-600 text-xs">—</span>}
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => setEditing(startup)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
-                        <Pencil size={14} />
-                      </button>
-                      <button onClick={() => setDeleteId(startup.id)} className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
-                        <Trash2 size={14} />
-                      </button>
+                      <button onClick={() => setEditing(startup)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"><Pencil size={14} /></button>
+                      <button onClick={() => setDeleteId(startup.id)} className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"><Trash2 size={14} /></button>
                     </div>
                   </td>
                 </tr>
               ))}
-              {filtered.length === 0 && (
-                <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">No startups found.</td></tr>
-              )}
+              {!loading && filtered.length === 0 && <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">No startups found.</td></tr>}
             </tbody>
           </table>
         </div>
       </div>
 
       {(editing || creating) && (
-        <StartupModal
-          startup={creating ? null : editing}
-          onSave={handleSave}
-          onClose={() => { setEditing(null); setCreating(false); }}
-        />
+        <StartupModal startup={creating ? null : editing} onSave={handleSave} onClose={() => { setEditing(null); setCreating(false); }} />
       )}
 
       {deleteId && (

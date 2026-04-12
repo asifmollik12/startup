@@ -15,14 +15,19 @@ export function FooterLogoProvider({ children }: { children: React.ReactNode }) 
   const [footerLogoUrl, setFooterLogoUrlState] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("footer_logo");
-    if (stored) setFooterLogoUrlState(stored);
+    fetch("/api/settings?key=footer_logo")
+      .then((r) => r.json())
+      .then((val) => { if (val) setFooterLogoUrlState(val); })
+      .catch(() => {});
   }, []);
 
-  const setFooterLogoUrl = (url: string | null) => {
+  const setFooterLogoUrl = async (url: string | null) => {
     setFooterLogoUrlState(url);
-    if (url) localStorage.setItem("footer_logo", url);
-    else localStorage.removeItem("footer_logo");
+    await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "footer_logo", value: url }),
+    });
   };
 
   return (
