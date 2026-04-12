@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { Idea } from "@/lib/models/Idea";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   await connectDB();
   const ideas = await Idea.find().sort({ createdAt: -1 }).lean();

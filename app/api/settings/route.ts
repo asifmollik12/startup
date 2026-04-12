@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { SiteSettings } from "@/lib/models/SiteSettings";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: NextRequest) {
   await connectDB();
   const { searchParams } = new URL(req.url);

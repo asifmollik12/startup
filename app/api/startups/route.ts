@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import { Startup } from "@/lib/models/Startup";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   await connectDB();
   const startups = await Startup.find().sort({ createdAt: -1 }).lean();
