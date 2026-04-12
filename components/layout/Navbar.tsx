@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Menu, X, Search } from "lucide-react";
 import { articles, founders, startups } from "@/lib/data";
+import SiteLogo from "@/components/SiteLogo";
 
 const navLinks = [
   { label: "Articles", href: "/articles" },
@@ -93,13 +94,7 @@ export default function Navbar() {
       <div className="container-wide">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-3">
-            <div className="bg-brand-red text-white font-serif font-bold text-lg px-2.5 py-1 leading-tight tracking-wider">
-              SUN
-            </div>
-            <div className="leading-tight">
-              <div className="font-serif font-bold text-lg text-brand-dark tracking-tight">START-UP NEWS</div>
-              <div className="text-[8px] tracking-[0.35em] uppercase text-gray-400">Bangladesh Business</div>
-            </div>
+            <SiteLogo />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-7">

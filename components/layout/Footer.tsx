@@ -1,5 +1,8 @@
+"use client";
 import Link from "next/link";
 import { Twitter, Linkedin, Facebook, Instagram, Youtube } from "lucide-react";
+import SiteLogo from "@/components/SiteLogo";
+import { useFooterLogo } from "@/lib/FooterLogoContext";
 
 const footerLinks = {
   Explore: [
@@ -31,6 +34,7 @@ const socials = [
 ];
 
 export default function Footer() {
+  const { footerLogoUrl } = useFooterLogo();
   return (
     <footer className="bg-brand-dark text-white">
       {/* Newsletter */}
@@ -58,11 +62,16 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-5">
-              <div className="bg-brand-red text-white font-serif font-bold text-lg px-2.5 py-1">SUN</div>
-              <div>
-                <div className="font-serif font-bold text-base text-white tracking-tight">START-UP NEWS</div>
-                <div className="text-[8px] tracking-[0.3em] uppercase text-gray-500">Bangladesh Business</div>
-              </div>
+              {footerLogoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={footerLogoUrl} alt="Site Logo" className="h-10 w-auto object-contain" />
+              ) : (
+                <SiteLogo
+                  badgeClass="bg-brand-red text-white font-serif font-bold text-lg px-2.5 py-1"
+                  nameClass="font-serif font-bold text-base text-white tracking-tight"
+                  subtitleClass="text-[8px] tracking-[0.3em] uppercase text-gray-500"
+                />
+              )}
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed mb-5">
               The definitive voice of Bangladeshi entrepreneurship, innovation, and startup news.

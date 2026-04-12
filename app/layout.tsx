@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import TopBanner from "@/components/sections/TopBanner";
+import SiteLayout from "@/components/layout/SiteLayout";
+import { SiteLogoProvider } from "@/lib/SiteLogoContext";
+import { FooterLogoProvider } from "@/lib/FooterLogoContext";
 
 export const metadata: Metadata = {
   title: "Start-Up News — Bangladesh's Premier Business Magazine",
@@ -20,10 +20,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <Navbar />
-        <TopBanner />
-        <main>{children}</main>
-        <Footer />
+        <SiteLogoProvider>
+          <FooterLogoProvider>
+            <SiteLayout>{children}</SiteLayout>
+          </FooterLogoProvider>
+        </SiteLogoProvider>
       </body>
     </html>
   );
