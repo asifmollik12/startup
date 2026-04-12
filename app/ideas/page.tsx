@@ -1,0 +1,125 @@
+"use client";
+import { useState } from "react";
+import { ideas } from "@/lib/data";
+import { Lightbulb, ThumbsUp, Trophy, Send, Sparkles } from "lucide-react";
+
+export default function IdeasPage() {
+  const [votes, setVotes] = useState<Record<string, number>>({});
+  const [voted, setVoted] = useState<Set<string>>(new Set());
+  const [showForm, setShowForm] = useState(false);
+
+  const handleVote = (id: string, baseVotes: number) => {
+    if (voted.has(id)) return;
+    setVotes((prev) => ({ ...prev, [id]: (prev[id] ?? baseVotes) + 1 }));
+    setVoted((prev) => new Set(prev).add(id));
+  };
+
+  const winner = ideas.find((i) => i.winner);
+  const runners = ideas.filter((i) => !i.winner);
+
+  return (
+    <div className="section-pad">
+      <div className="container-wide">
+        <div className="text-center mb-14">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Sparkles size={16} className="text-brand-gold" />
+            <span className="section-label">Community Driven</span>
+          </div>
+          <h1 className="font-serif text-4xl lg:text-6xl font-bold text-brand-dark mb-4">Best Idea of the Month</h1>
+          <div className="w-12 h-0.5 bg-brand-red mx-auto mb-4" />
+          <p className="text-gray-500 max-w-xl mx-auto">Submit your startup idea, vote for your favorites, and help shape Bangladesh&apos;s next big innovation.</p>
+          <button onClick={() => setShowForm(!showForm)} className="btn-primary mt-6">
+            <Lightbulb size={15} /> Submit Your Idea
+          </button>
+        </div>
+
+        {showForm && (
+          <div className="bg-white border border-brand-border p-8 mb-12 max-w-2xl mx-auto">
+            <h3 className="font-serif text-2xl font-bold text-brand-dark mb-6">Submit Your Idea</h3>
+            <form className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Idea Title *</label>
+                <input type="text" placeholder="Give your idea a compelling title"
+                  className="w-full bg-white border border-brand-border text-gray-900 placeholder-gray-400 px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition-colors" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Description *</label>
+                <textarea rows={4} placeholder="Describe your idea — the problem it solves, how it works, and why Bangladesh needs it."
+                  className="w-full bg-white border border-brand-border text-gray-900 placeholder-gray-400 px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition-colors resize-none" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Your Name *</label>
+                  <input type="text" placeholder="Full name"
+                    className="w-full bg-white border border-brand-border text-gray-900 placeholder-gray-400 px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition-colors" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Category *</label>
+                  <select className="w-full bg-white border border-brand-border text-gray-900 px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition-colors">
+                    {["Fintech","Agritech","Healthtech","Edtech","ClimaTech","Future of Work","Other"].map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+              <button type="submit" className="btn-primary w-full justify-center"><Send size={14} /> Submit Idea</button>
+            </form>
+          </div>
+        )}
+
+        {winner && (
+          <div className="mb-10">
+            <div className="flex items-center gap-2 mb-5">
+              <Trophy size={18} className="text-brand-gold" />
+              <h2 className="font-serif text-2xl font-bold text-brand-dark">This Month&apos;s Winner</h2>
+            </div>
+            <div className="bg-brand-dark text-white p-8 lg:p-12 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-72 h-72 bg-brand-red/10 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+              <div className="relative max-w-2xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="badge bg-brand-gold/20 text-brand-gold border border-brand-gold/30 text-[9px]">{winner.category}</span>
+                  <span className="text-gray-400 text-xs">{winner.month}</span>
+                </div>
+                <h3 className="font-serif text-3xl font-bold mb-4">{winner.title}</h3>
+                <p className="text-gray-300 text-lg leading-relaxed mb-8">{winner.description}</p>
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div>
+                    <p className="text-gray-400 text-xs uppercase tracking-wider">Submitted by</p>
+                    <p className="font-bold text-lg">{winner.submittedBy}</p>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white/10 px-6 py-3">
+                    <ThumbsUp size={18} className="text-brand-gold" />
+                    <div>
+                      <p className="font-bold text-2xl text-brand-gold">{(votes[winner.id] ?? winner.votes).toLocaleString()}</p>
+                      <p className="text-gray-400 text-xs">community votes</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div>
+          <h2 className="font-serif text-2xl font-bold text-brand-dark mb-5">Other Top Ideas</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {runners.map((idea) => (
+              <div key={idea.id} className="bg-white border border-brand-border p-6 hover:border-brand-red transition-colors">
+                <div className="flex items-start justify-between mb-3">
+                  <span className="badge-gray text-[9px]">{idea.category}</span>
+                  <button onClick={() => handleVote(idea.id, idea.votes)}
+                    className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold border transition-colors ${
+                      voted.has(idea.id) ? "bg-brand-red text-white border-brand-red" : "border-brand-border text-gray-600 hover:border-brand-red hover:text-brand-red"
+                    }`}>
+                    <ThumbsUp size={12} />{(votes[idea.id] ?? idea.votes).toLocaleString()}
+                  </button>
+                </div>
+                <h3 className="font-serif font-bold text-xl text-brand-dark mb-2">{idea.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed mb-3">{idea.description}</p>
+                <p className="text-xs text-gray-400">by {idea.submittedBy}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

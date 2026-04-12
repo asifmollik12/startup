@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    @apply bg-white text-gray-900 font-sans antialiased;
+  }
+  ::selection { background: #C8102E; color: white; }
+}
+
+@layer components {
+  .container-wide {
+    @apply w-full px-8 sm:px-10 lg:px-12;
+  }
+  .section-pad {
+    @apply py-16 lg:py-24;
+  }
+  .badge {
+    @apply inline-block text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-none;
+  }
+  .badge-red {
+    @apply badge bg-brand-red text-white;
+  }
+  .badge-gold {
+    @apply badge bg-brand-gold text-white;
+  }
+  .badge-gray {
+    @apply badge bg-gray-100 text-gray-600 border border-gray-200;
+  }
+  .btn-primary {
+    @apply inline-flex items-center gap-2 bg-brand-red text-white font-semibold px-6 py-3 hover:bg-red-800 transition-all duration-200;
+  }
+  .btn-outline {
+    @apply inline-flex items-center gap-2 border-2 border-brand-dark text-brand-dark font-semibold px-6 py-3 hover:bg-brand-dark hover:text-white transition-all duration-200;
+  }
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl;
+  }
+  .divider-red {
+    @apply w-10 h-0.5 bg-brand-red;
+  }
+  .dark-card {
+    @apply bg-white border border-brand-border;
+  }
+  .section-label {
+    @apply text-[10px] font-bold uppercase tracking-[0.25em] text-brand-red;
+  }
+}

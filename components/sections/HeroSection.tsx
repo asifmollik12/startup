@@ -1,0 +1,112 @@
+import Image from "next/image";
+import Link from "next/link";
+import { articles } from "@/lib/data";
+import { formatDate } from "@/lib/utils";
+import { Clock } from "lucide-react";
+
+export default function HeroSection() {
+  const featured = articles.filter((a) => a.featured);
+  const main = featured[0];
+  const secondary = featured[1];
+  const rest = articles.slice(2, 6);
+
+  return (
+    <section className="container-wide py-8 lg:py-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        {/* Left — main article + ad */}
+        <div className="lg:col-span-2 flex flex-col gap-4">
+
+          {/* Main article image — grows to fill */}
+          <Link href={`/articles/${main.slug}`} className="group block relative overflow-hidden flex-1 min-h-[320px]">
+            <Image src={main.coverImage} alt={main.title} fill
+              className="object-cover group-hover:scale-105 transition-transform duration-700" priority />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
+              <span className="badge-red mb-3 text-[10px]">{main.category}</span>
+              <h1 className="font-serif text-2xl lg:text-3xl font-bold text-white leading-tight mb-3 max-w-xl">{main.title}</h1>
+              <p className="text-gray-300 text-sm line-clamp-2 mb-4 max-w-lg">{main.excerpt}</p>
+              <div className="flex items-center gap-3 text-gray-400 text-xs">
+                <span className="text-white font-medium">{main.author}</span>
+                <span>·</span>
+                <span>{formatDate(main.publishedAt)}</span>
+                <span>·</span>
+                <span className="flex items-center gap-1"><Clock size={10} />{main.readTime} min</span>
+              </div>
+            </div>
+          </Link>
+
+          {/* Ad banner — fixed at bottom */}
+          <div>
+            <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-1.5 text-center">Advertisement</p>
+            <a href="/advertise"
+              className="group relative flex items-center justify-between overflow-hidden bg-brand-dark border border-white/10 px-6 py-4 hover:border-brand-red transition-colors cursor-pointer">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,_rgba(200,16,46,0.12)_0%,_transparent_60%)] pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
+              <div className="relative flex items-center gap-4">
+                <div className="w-9 h-9 bg-brand-red flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-serif font-bold text-sm">SUN</span>
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm leading-tight">Advertise with Start-Up News</p>
+                  <p className="text-gray-500 text-xs mt-0.5">Reach 2M+ Bangladeshi entrepreneurs & investors</p>
+                </div>
+              </div>
+              <div className="relative hidden sm:flex items-center gap-5">
+                <div className="text-center">
+                  <p className="text-white font-bold text-sm">2M+</p>
+                  <p className="text-gray-600 text-[10px] uppercase tracking-wider">Readers</p>
+                </div>
+                <div className="w-px h-7 bg-white/10" />
+                <div className="text-center">
+                  <p className="text-white font-bold text-sm">500+</p>
+                  <p className="text-gray-600 text-[10px] uppercase tracking-wider">Founders</p>
+                </div>
+                <div className="w-px h-7 bg-white/10" />
+                <span className="bg-brand-red text-white text-xs font-bold uppercase tracking-wider px-4 py-2 group-hover:bg-red-700 transition-colors whitespace-nowrap">
+                  Get Started →
+                </span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        {/* Right column — secondary article + list */}
+        <div className="flex flex-col gap-0 border border-brand-border bg-white overflow-hidden">
+
+          {/* Secondary featured */}
+          <Link href={`/articles/${secondary.slug}`} className="group block relative overflow-hidden flex-shrink-0" style={{aspectRatio:"16/9"}}>
+            <Image src={secondary.coverImage} alt={secondary.title} fill
+              className="object-cover group-hover:scale-105 transition-transform duration-700" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              <span className="badge-red mb-2 text-[9px]">{secondary.category}</span>
+              <h2 className="font-serif text-sm font-bold text-white leading-snug">{secondary.title}</h2>
+            </div>
+          </Link>
+
+          {/* Article list — grows to fill remaining height */}
+          <div className="flex flex-col divide-y divide-brand-border flex-1">
+            {rest.map((article) => (
+              <Link key={article.id} href={`/articles/${article.slug}`}
+                className="group flex gap-3 p-3 hover:bg-brand-gray transition-colors flex-1 items-center">
+                <div className="relative w-16 h-14 flex-shrink-0 overflow-hidden">
+                  <Image src={article.coverImage} alt={article.title} fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-brand-red">{article.category}</span>
+                  <h3 className="text-xs font-semibold text-gray-800 leading-snug line-clamp-2 group-hover:text-brand-red transition-colors">
+                    {article.title}
+                  </h3>
+                  <span className="text-[10px] text-gray-400">{formatDate(article.publishedAt)}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
+}
