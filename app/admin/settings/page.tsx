@@ -63,22 +63,41 @@ export default function AdminSettings() {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-white">Settings</h1>
         <p className="text-gray-500 text-sm mt-0.5">Manage site configuration</p>
       </div>
 
       <form onSubmit={handleSave} className="space-y-5">
-        {/* Site Info */}
-        <Section icon={Globe} title="Site Information">
-          <Field label="Site Name">
-            <input value={site.name} onChange={(e) => setSite({ ...site, name: e.target.value })} className={inp} />
-          </Field>
-          <Field label="Tagline">
-            <input value={site.tagline} onChange={(e) => setSite({ ...site, tagline: e.target.value })} className={inp} />
-          </Field>
-        </Section>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Site Info */}
+          <Section icon={Globe} title="Site Information">
+            <Field label="Site Name">
+              <input value={site.name} onChange={(e) => setSite({ ...site, name: e.target.value })} className={inp} />
+            </Field>
+            <Field label="Tagline">
+              <input value={site.tagline} onChange={(e) => setSite({ ...site, tagline: e.target.value })} className={inp} />
+            </Field>
+          </Section>
+
+          {/* Contact */}
+          <Section icon={Mail} title="Contact & Social">
+            <Field label="Admin Email">
+              <input type="email" value={site.email} onChange={(e) => setSite({ ...site, email: e.target.value })} className={inp} />
+            </Field>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Twitter Handle">
+                <input value={site.twitter} onChange={(e) => setSite({ ...site, twitter: e.target.value })} className={inp} />
+              </Field>
+              <Field label="LinkedIn">
+                <input value={site.linkedin} onChange={(e) => setSite({ ...site, linkedin: e.target.value })} className={inp} />
+              </Field>
+            </div>
+          </Section>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         {/* Site Logo */}
         <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
@@ -212,21 +231,9 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        {/* Contact */}
-        <Section icon={Mail} title="Contact & Social">
-          <Field label="Admin Email">
-            <input type="email" value={site.email} onChange={(e) => setSite({ ...site, email: e.target.value })} className={inp} />
-          </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Twitter Handle">
-              <input value={site.twitter} onChange={(e) => setSite({ ...site, twitter: e.target.value })} className={inp} />
-            </Field>
-            <Field label="LinkedIn">
-              <input value={site.linkedin} onChange={(e) => setSite({ ...site, linkedin: e.target.value })} className={inp} />
-            </Field>
-          </div>
-        </Section>
+        </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Notifications */}
         <Section icon={Bell} title="Notifications">
           {[
@@ -255,6 +262,7 @@ export default function AdminSettings() {
             <input type="password" placeholder="••••••••" className={inp} />
           </Field>
         </Section>
+        </div>
 
         <button
           type="submit"
