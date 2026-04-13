@@ -16,12 +16,12 @@ export default function StartupsPage() {
   return (
     <div className="section-pad">
       <div className="container-wide">
-        <div className="border-b border-brand-border pb-8 mb-10">
+        <div className="border-b border-brand-border pb-5 mb-6">
           <span className="section-label">Directory</span>
           <h1 className="font-serif text-4xl lg:text-5xl font-bold text-brand-dark mt-2 mb-4">Startup Directory</h1>
           <p className="text-gray-500 max-w-xl">Discover Bangladesh&apos;s most innovative startups across every industry and stage.</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4 mb-10">
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex gap-2 flex-wrap">
             {industries.map((ind) => (
               <button key={ind} className={`px-3 py-1.5 text-xs font-semibold uppercase tracking-wider border transition-colors ${

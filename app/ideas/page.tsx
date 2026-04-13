@@ -20,7 +20,7 @@ export default function IdeasPage() {
   return (
     <div className="section-pad">
       <div className="container-wide">
-        <div className="text-center mb-14">
+        <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-3">
             <Sparkles size={16} className="text-brand-gold" />
             <span className="section-label">Community Driven</span>
