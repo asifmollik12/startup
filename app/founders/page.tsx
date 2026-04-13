@@ -7,7 +7,7 @@ const industries = ["All", "Fintech", "Mobility", "E-commerce", "Super App", "Ag
 
 export default function FoundersPage() {
   return (
-    <div className="pt-4 pb-8">
+    <div className="pt-4 pb-6">
       <div className="container-wide">
         <div className="border-b border-brand-border pb-4 mb-5">
           <span className="section-label">Profiles</span>
