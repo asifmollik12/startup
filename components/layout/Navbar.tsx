@@ -7,7 +7,7 @@ import { articles, founders, startups } from "@/lib/data";
 import SiteLogo from "@/components/SiteLogo";
 
 const navLinks = [
-  { label: "Articles", href: "/articles" },
+  { label: "Features", href: "/articles" },
   { label: "Founders", href: "/founders" },
   { label: "Startups", href: "/startups" },
   { label: "Rankings", href: "/rankings" },

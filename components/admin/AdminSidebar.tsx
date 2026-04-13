@@ -11,7 +11,7 @@ const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Header", href: "/admin/header", icon: PanelTop },
   { label: "Footer", href: "/admin/footer", icon: PanelBottom },
-  { label: "Articles", href: "/admin/articles", icon: FileText },
+  { label: "Features", href: "/admin/articles", icon: FileText },
   { label: "Founders", href: "/admin/founders", icon: Users },
   { label: "Startups", href: "/admin/startups", icon: Rocket },
   { label: "Ideas", href: "/admin/ideas", icon: Lightbulb },
