@@ -6,7 +6,6 @@ import {
   Trophy, Settings, ExternalLink, ChevronRight, PanelTop, PanelBottom,
 } from "lucide-react";
 import { useSiteLogo } from "@/lib/SiteLogoContext";
-import { useDashboardLogo } from "@/lib/DashboardLogoContext";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -23,17 +22,15 @@ const navItems = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const { logoUrl } = useSiteLogo();
-  const { dashboardLogoUrl } = useDashboardLogo();
-  const activeLogo = dashboardLogoUrl || logoUrl;
 
   return (
     <aside className="w-60 bg-gray-900 border-r border-gray-800 flex flex-col flex-shrink-0">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-gray-800">
-        {activeLogo ? (
+        {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <div className="flex items-center gap-3">
-            <img src={activeLogo} alt="Site Logo" className="h-8 w-auto object-contain" />
+            <img src={logoUrl} alt="Site Logo" className="h-8 w-auto object-contain" />
           </div>
         ) : (
           <div className="flex items-center gap-3">

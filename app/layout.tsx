@@ -3,7 +3,6 @@ import "./globals.css";
 import SiteLayout from "@/components/layout/SiteLayout";
 import { SiteLogoProvider } from "@/lib/SiteLogoContext";
 import { FooterLogoProvider } from "@/lib/FooterLogoContext";
-import { DashboardLogoProvider } from "@/lib/DashboardLogoContext";
 
 export const metadata: Metadata = {
   title: "Start-Up News — Bangladesh's Premier Business Magazine",
@@ -23,9 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SiteLogoProvider>
           <FooterLogoProvider>
-            <DashboardLogoProvider>
-              <SiteLayout>{children}</SiteLayout>
-            </DashboardLogoProvider>
+            <SiteLayout>{children}</SiteLayout>
           </FooterLogoProvider>
         </SiteLogoProvider>
       </body>
