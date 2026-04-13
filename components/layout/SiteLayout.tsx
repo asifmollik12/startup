@@ -13,7 +13,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
   return (
     <>
       <Navbar />
-      {pathname === "/" && <TopBanner />}
+      {pathname === "/" && null}
       <main>{children}</main>
       <Footer />
     </>
