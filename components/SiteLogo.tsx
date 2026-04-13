@@ -18,7 +18,12 @@ export default function SiteLogo({
   name = "START-UP NEWS",
   subtitle = "Bangladesh Business",
 }: SiteLogoProps) {
-  const { logoUrl } = useSiteLogo();
+  const { logoUrl, loaded } = useSiteLogo();
+
+  if (!loaded) {
+    // Render placeholder same size to avoid layout shift
+    return <div className="h-10 w-32" />;
+  }
 
   if (logoUrl) {
     return (

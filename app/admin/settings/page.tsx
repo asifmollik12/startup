@@ -6,6 +6,7 @@ import Toast from "@/components/admin/Toast";
 
 export default function AdminSettings() {
   const [saved, setSaved] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [showToast, setShowToast] = useState(false);
 
@@ -56,18 +57,25 @@ export default function AdminSettings() {
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const [site, setSite] = useState({
+  const [site, setSiteState] = useState({
     name: "Start-Up News",
     tagline: "Bangladesh's Premier Business Magazine",
     email: "admin@startupnews.bd",
     twitter: "@startupnewsbd",
     linkedin: "startupnewsbd",
   });
-  const [notifs, setNotifs] = useState({ newArticle: true, newFounder: false, newIdea: true });
+  const setSite = (val: typeof site) => { setSiteState(val); setDirty(true); };
+
+  const [notifs, setNotifsState] = useState({ newArticle: true, newFounder: false, newIdea: true });
+  const setNotifs = (val: typeof notifs | ((prev: typeof notifs) => typeof notifs)) => {
+    setNotifsState(val as any);
+    setDirty(true);
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     setSaved(true);
+    setDirty(false);
     toast("Settings saved successfully");
     setTimeout(() => setSaved(false), 2000);
   };
@@ -278,10 +286,10 @@ export default function AdminSettings() {
         <button
           type="submit"
           className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-            saved ? "bg-green-600 text-white" : "bg-brand-red text-white hover:bg-red-700"
+            saved ? "bg-green-600 text-white" : dirty ? "bg-brand-red text-white animate-pulse" : "bg-gray-700 text-gray-300 hover:bg-brand-red hover:text-white"
           }`}
         >
-          <Save size={15} /> {saved ? "Saved!" : "Save Settings"}
+          <Save size={15} /> {saved ? "✓ Saved!" : dirty ? "Save Changes" : "Save Settings"}
         </button>
       </form>
     </div>
