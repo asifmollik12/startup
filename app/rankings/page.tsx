@@ -11,8 +11,13 @@ export default function RankingsPage() {
   const podiumRanks = [2, 1, 3];
   const podiumHeights = ["h-28", "h-36", "h-24"];
   const podiumIcons = [Medal, Crown, Award];
-  const podiumColors = ["text-gray-400", "text-brand-gold", "text-amber-600"];
-  const podiumBg = ["bg-gray-100", "bg-brand-gold/10 border-brand-gold/30", "bg-amber-50 border-amber-200"];
+  const podiumColors = ["text-gray-400", "text-brand-gold", "text-brand-red"];
+  const podiumBg = [
+    "bg-gray-900 border-gray-700",
+    "bg-gray-900 border-brand-red/50",
+    "bg-gray-900 border-gray-700",
+  ];
+  const podiumBase = ["bg-gray-700", "bg-brand-red", "bg-gray-600"];
 
   return (
     <div className="min-h-screen bg-white">
@@ -45,9 +50,9 @@ export default function RankingsPage() {
         </div>
       </div>
 
-      <div className="container-wide py-14 px-4">
+      <div className="container-wide py-14 px-4 bg-gray-950">
         {/* Podium */}
-        <div className="flex items-end justify-center gap-4 mb-14">
+        <div className="flex items-end justify-center gap-4 mb-14 py-10">
           {podiumOrder.map((founder, i) => {
             const rank = podiumRanks[i];
             const Icon = podiumIcons[i];
@@ -56,25 +61,25 @@ export default function RankingsPage() {
               <Link key={founder.id} href={`/founders/${founder.slug}`}
                 className={`group flex flex-col items-center w-full max-w-[220px] ${isFirst ? "z-10" : ""}`}>
                 {/* Card */}
-                <div className={`w-full border-2 ${podiumBg[i]} rounded-2xl p-5 text-center transition-all duration-200 hover:shadow-xl hover:-translate-y-1 ${isFirst ? "shadow-lg" : ""}`}>
+                <div className={`w-full border-2 ${podiumBg[i]} rounded-2xl p-5 text-center transition-all duration-200 hover:shadow-xl hover:shadow-brand-red/10 hover:-translate-y-1 ${isFirst ? "shadow-lg shadow-brand-red/20" : ""}`}>
                   <Icon size={20} className={`${podiumColors[i]} mx-auto mb-3`} />
-                  <div className={`relative mx-auto mb-3 rounded-full overflow-hidden border-4 ${isFirst ? "w-20 h-20 border-brand-gold/40" : "w-16 h-16 border-gray-200"}`}>
+                  <div className={`relative mx-auto mb-3 rounded-full overflow-hidden border-4 ${isFirst ? "w-20 h-20 border-brand-red/40" : "w-16 h-16 border-gray-700"}`}>
                     <Image src={founder.avatar} alt={founder.name} fill className="object-cover" />
                   </div>
                   <span className="text-[9px] font-bold uppercase tracking-widest text-brand-red">{founder.industry}</span>
-                  <h2 className={`font-serif font-bold text-brand-dark mt-1 group-hover:text-brand-red transition-colors ${isFirst ? "text-lg" : "text-base"}`}>{founder.name}</h2>
-                  <p className="text-gray-500 text-xs mt-0.5">{founder.company}</p>
+                  <h2 className={`font-serif font-bold text-white mt-1 group-hover:text-brand-red transition-colors ${isFirst ? "text-lg" : "text-base"}`}>{founder.name}</h2>
+                  <p className="text-gray-400 text-xs mt-0.5">{founder.company}</p>
                   {founder.netWorth && <p className={`font-bold text-brand-gold mt-2 ${isFirst ? "text-base" : "text-sm"}`}>{founder.netWorth}</p>}
                   {isFirst && (
                     <div className="mt-3 flex flex-wrap gap-1 justify-center">
                       {founder.achievements.slice(0, 2).map((a) => (
-                        <span key={a} className="text-[8px] bg-white border border-gray-200 px-2 py-0.5 text-gray-500 rounded">{a}</span>
+                        <span key={a} className="text-[8px] bg-gray-800 border border-gray-700 px-2 py-0.5 text-gray-400 rounded">{a}</span>
                       ))}
                     </div>
                   )}
                 </div>
                 {/* Podium base */}
-                <div className={`w-full ${podiumHeights[i]} ${isFirst ? "bg-brand-gold" : rank === 2 ? "bg-gray-300" : "bg-amber-600/60"} rounded-b-lg flex items-center justify-center`}>
+                <div className={`w-full ${podiumHeights[i]} ${podiumBase[i]} rounded-b-lg flex items-center justify-center`}>
                   <span className={`font-serif font-black text-white ${isFirst ? "text-4xl" : "text-3xl"}`}>#{rank}</span>
                 </div>
               </Link>
@@ -83,29 +88,29 @@ export default function RankingsPage() {
         </div>
 
         {/* Full Rankings */}
-        <div className="border border-brand-border rounded-2xl overflow-hidden shadow-sm">
-          <div className="bg-brand-dark px-6 py-4 flex items-center gap-3">
-            <TrendingUp size={14} className="text-brand-gold" />
+        <div className="border border-gray-800 rounded-2xl overflow-hidden shadow-sm">
+          <div className="bg-black px-6 py-4 flex items-center gap-3">
+            <TrendingUp size={14} className="text-brand-red" />
             <span className="font-bold uppercase tracking-wider text-xs text-white">Full Rankings — #4 to #{founders.length}</span>
           </div>
           {rest.map((founder, i) => (
             <Link key={founder.id} href={`/founders/${founder.slug}`}
-              className="group flex items-center gap-5 px-6 py-4 border-b border-brand-border hover:bg-brand-gray transition-colors last:border-0">
+              className="group flex items-center gap-5 px-6 py-4 border-b border-gray-800 bg-gray-900 hover:bg-gray-800 transition-colors last:border-0">
               <div className="w-8 flex-shrink-0 text-center">
-                <span className="text-xl font-serif font-bold text-gray-200">#{i + 4}</span>
+                <span className="text-xl font-serif font-bold text-gray-700">#{i + 4}</span>
               </div>
               <div className="relative w-11 h-11 flex-shrink-0">
                 <Image src={founder.avatar} alt={founder.name} fill className="rounded-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-serif font-bold text-brand-dark group-hover:text-brand-red transition-colors text-sm">{founder.name}</h3>
-                <p className="text-gray-400 text-xs mt-0.5">{founder.title} · {founder.company}</p>
+                <h3 className="font-serif font-bold text-white group-hover:text-brand-red transition-colors text-sm">{founder.name}</h3>
+                <p className="text-gray-500 text-xs mt-0.5">{founder.title} · {founder.company}</p>
               </div>
               <div className="hidden sm:flex items-center gap-3">
-                <span className="text-[9px] font-semibold uppercase tracking-wider bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full">{founder.industry}</span>
+                <span className="text-[9px] font-semibold uppercase tracking-wider bg-gray-800 text-gray-400 px-2.5 py-1 rounded-full border border-gray-700">{founder.industry}</span>
                 {founder.netWorth && <span className="text-brand-gold font-bold text-sm">{founder.netWorth}</span>}
               </div>
-              <ArrowUpRight size={15} className="text-gray-300 group-hover:text-brand-red transition-colors flex-shrink-0" />
+              <ArrowUpRight size={15} className="text-gray-600 group-hover:text-brand-red transition-colors flex-shrink-0" />
             </Link>
           ))}
         </div>
