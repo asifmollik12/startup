@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Founder } from "@/lib/types";
 import { X, Upload, ImageIcon } from "lucide-react";
 
@@ -18,8 +18,13 @@ const empty: Omit<Founder, "id"> = {
 export default function FounderModal({ founder, onSave, onClose }: Props) {
   const [form, setForm] = useState<Omit<Founder, "id">>(founder ? { ...founder } : empty);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [industryOptions, setIndustryOptions] = useState<string[]>([]);
   const avatarRef = useRef<HTMLInputElement>(null);
   const coverRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/categories").then(r => r.json()).then(data => setIndustryOptions(data.map((c: any) => c.name))).catch(() => {});
+  }, []);
 
   const set = (key: keyof typeof form, value: unknown) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -67,7 +72,13 @@ export default function FounderModal({ founder, onSave, onClose }: Props) {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Industry">
-              <input value={form.industry} onChange={(e) => set("industry", e.target.value)} className={inp} placeholder="Fintech" />
+              <select value={form.industry} onChange={(e) => set("industry", e.target.value)} className={inp}>
+                <option value="">Select industry...</option>
+                {industryOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                {form.industry && !industryOptions.includes(form.industry) && (
+                  <option value={form.industry}>{form.industry}</option>
+                )}
+              </select>
             </Field>
             <Field label="Location">
               <input value={form.location} onChange={(e) => set("location", e.target.value)} className={inp} placeholder="Dhaka" />

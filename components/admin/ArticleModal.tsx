@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Article } from "@/lib/types";
 import { X, Upload, ImageIcon } from "lucide-react";
 
@@ -18,8 +18,13 @@ const empty: Omit<Article, "id"> = {
 export default function ArticleModal({ article, onSave, onClose }: Props) {
   const [form, setForm] = useState<Omit<Article, "id">>(article ? { ...article } : empty);
   const [uploading, setUploading] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState<string[]>([]);
   const coverRef = useRef<HTMLInputElement>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/categories").then(r => r.json()).then(data => setCategoryOptions(data.map((c: any) => c.name))).catch(() => {});
+  }, []);
 
   const set = (key: keyof typeof form, value: unknown) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -59,7 +64,13 @@ export default function ArticleModal({ article, onSave, onClose }: Props) {
               <input value={form.slug} onChange={(e) => set("slug", e.target.value)} required className={inp} placeholder="article-slug" />
             </Field>
             <Field label="Category" required>
-              <input value={form.category} onChange={(e) => set("category", e.target.value)} required className={inp} placeholder="Fintech" />
+              <select value={form.category} onChange={(e) => set("category", e.target.value)} required className={inp}>
+                <option value="">Select category...</option>
+                {categoryOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                {form.category && !categoryOptions.includes(form.category) && (
+                  <option value={form.category}>{form.category}</option>
+                )}
+              </select>
             </Field>
           </div>
           <div className="grid grid-cols-2 gap-4">
