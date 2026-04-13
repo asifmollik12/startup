@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, FileText, Users, Rocket, Lightbulb,
-  Trophy, Settings, ExternalLink, ChevronRight, PanelTop, PanelBottom,
+  Trophy, Settings, ExternalLink, ChevronRight, PanelTop, PanelBottom, Megaphone,
 } from "lucide-react";
 import { useSiteLogo } from "@/lib/SiteLogoContext";
 
@@ -16,6 +16,7 @@ const navItems = [
   { label: "Startups", href: "/admin/startups", icon: Rocket },
   { label: "Ideas", href: "/admin/ideas", icon: Lightbulb },
   { label: "Rankings", href: "/admin/rankings", icon: Trophy },
+  { label: "Advertising", href: "/admin/advertising", icon: Megaphone },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
