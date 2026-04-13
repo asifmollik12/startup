@@ -97,7 +97,7 @@ export default function ArticlesClient({ articles }: { articles: any[] }) {
             )}
 
             {/* Regular grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {(active === "All" && search === "" ? filtered.filter(a => !a.featured) : filtered).map((article: any) => (
                 <Link key={article.id} href={`/articles/${article.slug}`}
                   className="group bg-white border border-brand-border card-hover block overflow-hidden">
@@ -107,14 +107,11 @@ export default function ArticlesClient({ articles }: { articles: any[] }) {
                         className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
                     )}
                   </div>
-                  <div className="p-5">
-                    <span className="section-label text-[9px]">{article.category}</span>
-                    <h3 className="font-serif font-bold text-base text-brand-dark mt-1 mb-2 leading-snug group-hover:text-brand-red transition-colors line-clamp-2">{article.title}</h3>
-                    <p className="text-gray-500 text-sm line-clamp-2 mb-4">{article.excerpt}</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-400 border-t border-brand-border pt-3">
-                      {article.authorAvatar && <Image src={article.authorAvatar} alt={article.author} width={18} height={18} className="rounded-full" unoptimized />}
-                      <span className="text-gray-600">{article.author}</span>
-                      <span>·</span><span>{formatDate(article.publishedAt)}</span>
+                  <div className="p-3">
+                    <span className="section-label text-[8px]">{article.category}</span>
+                    <h3 className="font-serif font-bold text-sm text-brand-dark mt-1 mb-1 leading-snug group-hover:text-brand-red transition-colors line-clamp-3">{article.title}</h3>
+                    <div className="flex items-center gap-1.5 text-[10px] text-gray-400 border-t border-brand-border pt-2 mt-2">
+                      <span>{formatDate(article.publishedAt)}</span>
                       <span>·</span><span className="flex items-center gap-1"><Clock size={9} />{article.readTime}m</span>
                     </div>
                   </div>
