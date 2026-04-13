@@ -26,7 +26,7 @@ export default async function LatestArticles() {
             <div className="divider-red mt-3" />
           </div>
           <Link href="/articles" className="hidden sm:flex items-center gap-2 text-xs text-gray-500 hover:text-brand-red transition-colors uppercase tracking-wider">
-            All Articles <ArrowRight size={13} />
+            All Features <ArrowRight size={13} />
           </Link>
         </div>
         {articles.length === 0 ? (

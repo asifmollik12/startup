@@ -40,7 +40,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 container-wide pb-8">
           <Link href="/articles" className="inline-flex items-center gap-2 text-gray-300 hover:text-white text-sm mb-4 transition-colors">
-            <ArrowLeft size={13} /> Back to Articles
+            <ArrowLeft size={13} /> Back to Features
           </Link>
           <span className="badge-red mb-3 text-[9px]">{article.category}</span>
           <h1 className="font-serif text-3xl lg:text-5xl font-bold text-white max-w-3xl leading-tight">{article.title}</h1>

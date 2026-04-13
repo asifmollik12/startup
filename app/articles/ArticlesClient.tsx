@@ -22,7 +22,7 @@ export default function ArticlesClient({ articles }: { articles: any[] }) {
       <div className="border-b border-brand-border bg-white">
         <div className="container-wide py-4">
           <span className="section-label">Start-Up News</span>
-          <h1 className="font-serif text-4xl lg:text-5xl font-bold text-brand-dark mt-2 mb-3">Articles & Stories</h1>
+          <h1 className="font-serif text-4xl lg:text-5xl font-bold text-brand-dark mt-2 mb-3">Features & Stories</h1>
           <p className="text-gray-500 max-w-xl text-sm">In-depth reporting on Bangladesh's most inspiring entrepreneurs, groundbreaking startups, and transformative ideas.</p>
         </div>
       </div>

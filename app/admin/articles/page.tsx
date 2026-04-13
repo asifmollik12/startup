@@ -97,7 +97,7 @@ export default function AdminArticles() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">News Management</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Manage articles and categories</p>
+          <p className="text-gray-500 text-sm mt-0.5">Manage features and categories</p>
         </div>
         {tab === "articles" && (
           <button onClick={() => setCreating(true)} className="flex items-center gap-2 bg-brand-red text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors">
