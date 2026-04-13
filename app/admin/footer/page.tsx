@@ -6,6 +6,7 @@ import {
   ImageIcon, Upload, X,
 } from "lucide-react";
 import { useFooterLogo } from "@/lib/FooterLogoContext";
+import Toast from "@/components/admin/Toast";
 
 type NavLink = { label: string; href: string };
 type LinkGroup = { title: string; links: NavLink[] };
@@ -55,6 +56,10 @@ const defaultSocials: Social[] = [
 
 export default function AdminFooter() {
   const [saved, setSaved] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const toast = (msg: string) => { setToastMsg(msg); setShowToast(false); setTimeout(() => setShowToast(true), 10); };
   const { footerLogoUrl, setFooterLogoUrl } = useFooterLogo();
   const [logoName, setLogoName] = useState<string | null>(null);
   const logoRef = useRef<HTMLInputElement>(null);
@@ -68,7 +73,7 @@ export default function AdminFooter() {
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     if (!res.ok) { alert("Upload failed. Check Cloudinary env vars."); return; }
     const data = await res.json();
-    if (data.url) setFooterLogoUrl(data.url);
+    if (data.url) { setFooterLogoUrl(data.url); toast("Footer logo uploaded successfully"); }
   };
 
   const removeLogo = () => {
@@ -78,20 +83,22 @@ export default function AdminFooter() {
   };
 
   // Newsletter
-  const [newsletter, setNewsletter] = useState({
+  const [newsletter, setNewsletterState] = useState({
     label: "Newsletter",
     heading: "Stay Ahead of the Curve",
     subtext: "Weekly insights on Bangladesh's top entrepreneurs and startups.",
     buttonText: "Subscribe",
   });
+  const setNewsletter = (val: typeof newsletter) => { setNewsletterState(val); setDirty(true); };
 
   // Branding
-  const [branding, setBranding] = useState({
+  const [branding, setBrandingState] = useState({
     badge: "SUN",
     name: "START-UP NEWS",
     subtitle: "Bangladesh Business",
     description: "The definitive voice of Bangladeshi entrepreneurship, innovation, and startup news.",
   });
+  const setBranding = (val: typeof branding) => { setBrandingState(val); setDirty(true); };
 
   // Link groups
   const [groups, setGroups] = useState<LinkGroup[]>(defaultGroups);
@@ -109,7 +116,7 @@ export default function AdminFooter() {
   const [dragging, setDragging] = useState<{ g: number; i: number } | null>(null);
   const [dragOver, setDragOver] = useState<{ g: number; i: number } | null>(null);
 
-  const save = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
+  const save = () => { setSaved(true); setDirty(false); toast("Footer settings saved"); setTimeout(() => setSaved(false), 2000); };
 
   // Group helpers
   const updateGroupTitle = (g: number, val: string) => {
@@ -158,7 +165,8 @@ export default function AdminFooter() {
   const addSocial = () => setSocials([...socials, { platform: "Website", href: "#" }]);
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
+      <Toast message={toastMsg} show={showToast} />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Footer</h1>
@@ -166,13 +174,13 @@ export default function AdminFooter() {
         </div>
         <button
           onClick={save}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${saved ? "bg-green-600 text-white" : "bg-brand-red text-white hover:bg-red-700"}`}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all ${saved ? "bg-green-600 text-white" : dirty ? "bg-brand-red text-white animate-pulse" : "bg-brand-red text-white hover:bg-red-700"}`}
         >
-          <Save size={15} /> {saved ? "Saved!" : "Save Changes"}
+          <Save size={15} /> {saved ? "✓ Saved!" : "Save Changes"}
         </button>
       </div>
 
-      {/* Footer Logo */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Section icon={<ImageIcon size={14} className="text-brand-red" />} title="Footer Logo">
         <div className="flex items-start gap-5">
           <div className="flex-shrink-0 w-24 h-24 bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-center overflow-hidden p-2">
@@ -382,6 +390,7 @@ export default function AdminFooter() {
           <span className="text-xs text-gray-500">{bottomBar.tagline}</span>
         </div>
       </Section>
+      </div>
     </div>
   );
 }
