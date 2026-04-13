@@ -23,7 +23,7 @@ export default async function HeroSection() {
   const rest = articles.slice(2, 6);
 
   return (
-    <section className="container-wide py-8 lg:py-12">
+    <section className="container-wide py-4 lg:py-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 flex flex-col gap-4">
           <Link href={`/articles/${main.slug}`} className="group block relative overflow-hidden flex-1 min-h-[320px]">
