@@ -2,9 +2,18 @@
 import { useState, useRef } from "react";
 import { Save, Globe, Mail, Bell, Shield, ImageIcon, Upload, X } from "lucide-react";
 import { useSiteLogo } from "@/lib/SiteLogoContext";
+import Toast from "@/components/admin/Toast";
 
 export default function AdminSettings() {
   const [saved, setSaved] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+  const [showToast, setShowToast] = useState(false);
+
+  const toast = (msg: string) => {
+    setToastMsg(msg);
+    setShowToast(false);
+    setTimeout(() => setShowToast(true), 10);
+  };
   const { logoUrl, setLogoUrl } = useSiteLogo();
   const [logoName, setLogoName] = useState<string | null>(null);
   const logoRef = useRef<HTMLInputElement>(null);
@@ -18,7 +27,7 @@ export default function AdminSettings() {
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     if (!res.ok) { alert("Upload failed. Check Cloudinary env vars."); return; }
     const data = await res.json();
-    if (data.url) setLogoUrl(data.url);
+    if (data.url) { setLogoUrl(data.url); toast("Logo uploaded successfully"); }
   };
 
   const removeLogo = () => {
@@ -59,11 +68,13 @@ export default function AdminSettings() {
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     setSaved(true);
+    toast("Settings saved successfully");
     setTimeout(() => setSaved(false), 2000);
   };
 
   return (
     <div className="space-y-6">
+      <Toast message={toastMsg} show={showToast} />
       <div>
         <h1 className="text-2xl font-bold text-white">Settings</h1>
         <p className="text-gray-500 text-sm mt-0.5">Manage site configuration</p>

@@ -24,6 +24,15 @@ const config: Config = {
         serif: ["Georgia", "Times New Roman", "serif"],
         sans: ["Inter", "system-ui", "sans-serif"],
       },
+      keyframes: {
+        shrink: {
+          "0%": { width: "100%" },
+          "100%": { width: "0%" },
+        },
+      },
+      animation: {
+        shrink: "shrink 3s linear forwards",
+      },
     },
   },
   plugins: [],
