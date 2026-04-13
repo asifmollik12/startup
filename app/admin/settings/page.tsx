@@ -90,12 +90,13 @@ export default function AdminSettings() {
           <div className="p-5">
             <div className="flex items-start gap-5">
               {/* Preview */}
-              <div className="flex-shrink-0 w-24 h-24 bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-center overflow-hidden p-2">
+              <div className="flex-shrink-0 w-24 h-24 border border-gray-700 rounded-xl flex items-center justify-center overflow-hidden p-2"
+                style={{ background: "repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 0 0 / 16px 16px" }}>
                 {logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={logoUrl} alt="Logo preview" className="w-full h-full object-contain" />
                 ) : (
-                  <ImageIcon size={28} className="text-gray-600" />
+                  <ImageIcon size={28} className="text-gray-400" />
                 )}
               </div>
 

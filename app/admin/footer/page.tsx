@@ -175,12 +175,13 @@ export default function AdminFooter() {
       {/* Footer Logo */}
       <Section icon={<ImageIcon size={14} className="text-brand-red" />} title="Footer Logo">
         <div className="flex items-start gap-5">
-          <div className="flex-shrink-0 w-24 h-24 bg-gray-800 border border-gray-700 rounded-xl flex items-center justify-center overflow-hidden p-2">
+          <div className="flex-shrink-0 w-24 h-24 border border-gray-700 rounded-xl flex items-center justify-center overflow-hidden p-2"
+            style={{ background: "repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 0 0 / 16px 16px" }}>
             {footerLogoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={footerLogoUrl} alt="Footer logo" className="w-full h-full object-contain" />
             ) : (
-              <ImageIcon size={28} className="text-gray-600" />
+              <ImageIcon size={28} className="text-gray-400" />
             )}
           </div>
           <div className="flex-1 space-y-3">
