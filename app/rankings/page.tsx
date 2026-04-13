@@ -22,7 +22,7 @@ export default function RankingsPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero */}
-      <div className="bg-brand-dark text-white py-16 px-4">
+      <div className="bg-brand-dark text-white py-10 px-4">
         <div className="container-wide text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Trophy size={14} className="text-brand-gold" />
@@ -50,7 +50,7 @@ export default function RankingsPage() {
         </div>
       </div>
 
-      <div className="container-wide py-14 px-4 bg-gray-950">
+      <div className="container-wide py-8 px-4 bg-gray-950">
         {/* Podium */}
         <div className="flex items-end justify-center gap-4 mb-14 py-10">
           {podiumOrder.map((founder, i) => {
