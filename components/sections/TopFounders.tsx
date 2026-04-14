@@ -32,9 +32,15 @@ export default async function TopFounders() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {top.map((founder, i) => (
-            <Link key={founder.id} href={`/founders/${founder.slug}`} className="group relative overflow-hidden aspect-[3/4] block">
-              <Image src={founder.avatar} alt={founder.name} fill
-                className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500" />
+            <Link key={founder.id} href={`/founders/${founder.slug}`} className="group relative overflow-hidden aspect-[3/4] block bg-gray-800">
+              {founder.avatar ? (
+                <Image src={founder.avatar} alt={founder.name} fill sizes="(max-width: 640px) 50vw, 20vw"
+                  className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500" />
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
+                  <span className="text-4xl font-serif font-bold text-gray-600">{founder.name.charAt(0)}</span>
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
               <div className="absolute inset-0 border border-transparent group-hover:border-brand-red transition-colors duration-300" />
               <div className="absolute top-0 left-0 bg-brand-red px-2 py-1">

@@ -75,8 +75,14 @@ export default async function RankingsPage() {
                 {/* Card */}
                 <div className={`w-full border-2 ${podiumBg[i]} rounded-2xl p-5 text-center transition-all duration-200 hover:shadow-xl hover:shadow-brand-red/10 hover:-translate-y-1 ${isFirst ? "shadow-lg shadow-brand-red/20" : ""}`}>
                   <Icon size={20} className={`${podiumColors[i]} mx-auto mb-3`} />
-                  <div className={`relative mx-auto mb-3 rounded-full overflow-hidden border-4 ${isFirst ? "w-20 h-20 border-brand-red/40" : "w-16 h-16 border-gray-700"}`}>
-                    <Image src={founder.avatar} alt={founder.name} fill className="object-cover" />
+                  <div className={`relative mx-auto mb-3 rounded-full overflow-hidden border-4 ${isFirst ? "w-20 h-20 border-brand-red/40" : "w-16 h-16 border-gray-700"} bg-gray-800`}>
+                    {founder.avatar ? (
+                      <Image src={founder.avatar} alt={founder.name} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-white font-bold text-lg">{founder.name.charAt(0)}</span>
+                      </div>
+                    )}
                   </div>
                   <span className="text-[9px] font-bold uppercase tracking-widest text-brand-red">{founder.industry}</span>
                   <h2 className={`font-serif font-bold text-white mt-1 group-hover:text-brand-red transition-colors ${isFirst ? "text-lg" : "text-base"}`}>{founder.name}</h2>
@@ -111,8 +117,14 @@ export default async function RankingsPage() {
               <div className="w-8 flex-shrink-0 text-center">
                 <span className="text-xl font-serif font-bold text-gray-700">#{i + 4}</span>
               </div>
-              <div className="relative w-11 h-11 flex-shrink-0">
-                <Image src={founder.avatar} alt={founder.name} fill className="rounded-full object-cover" />
+              <div className="relative w-11 h-11 flex-shrink-0 rounded-full overflow-hidden bg-gray-800">
+                {founder.avatar ? (
+                  <Image src={founder.avatar} alt={founder.name} fill className="rounded-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">{founder.name.charAt(0)}</span>
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-serif font-bold text-white group-hover:text-brand-red transition-colors text-sm">{founder.name}</h3>
