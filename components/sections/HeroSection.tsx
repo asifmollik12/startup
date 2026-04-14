@@ -27,8 +27,8 @@ export default async function HeroSection() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 flex flex-col gap-4">
           <Link href={`/articles/${main.slug}`} className="group block flex-1">
-            {/* Image */}
-            <div className="relative overflow-hidden min-h-[220px] lg:min-h-[320px]">
+            {/* Image with overlay — desktop */}
+            <div className="relative overflow-hidden min-h-[220px] lg:h-[420px]">
               {main.coverImage && (
                 <Image src={main.coverImage} alt={main.title} fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700" priority />
@@ -84,7 +84,7 @@ export default async function HeroSection() {
         </div>
 
         {secondary && (
-          <div className="flex flex-col gap-0 border border-brand-border bg-white overflow-hidden">
+          <div className="hidden lg:flex flex-col gap-0 border border-brand-border bg-white overflow-hidden">
             <Link href={`/articles/${secondary.slug}`} className="group block relative overflow-hidden flex-shrink-0" style={{ aspectRatio: "16/9" }}>
               {secondary.coverImage && (
                 <Image src={secondary.coverImage} alt={secondary.title} fill
