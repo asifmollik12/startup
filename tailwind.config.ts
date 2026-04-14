@@ -29,9 +29,15 @@ const config: Config = {
           "0%": { width: "100%" },
           "100%": { width: "0%" },
         },
+        uploadProgress: {
+          "0%": { transform: "translateX(-100%)" },
+          "50%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
       },
       animation: {
         shrink: "shrink 3s linear forwards",
+        uploadProgress: "uploadProgress 1.5s ease-in-out infinite",
       },
     },
   },

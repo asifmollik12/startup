@@ -48,9 +48,18 @@ export default function FounderModal({ founder, onSave, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-gray-900 border border-gray-700 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        {/* Upload progress bar */}
+        {uploading && (
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gray-800 rounded-t-xl overflow-hidden z-20">
+            <div className="h-full w-1/2 bg-brand-red animate-[uploadProgress_1.5s_ease-in-out_infinite]" />
+          </div>
+        )}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800 sticky top-0 bg-gray-900 z-10">
-          <h2 className="text-lg font-bold text-white">{founder ? "Edit Founder" : "Add Founder"}</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-bold text-white">{founder ? "Edit Founder" : "Add Founder"}</h2>
+            {uploading && <span className="text-xs text-brand-red animate-pulse">Uploading...</span>}
+          </div>
           <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"><X size={18} /></button>
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
