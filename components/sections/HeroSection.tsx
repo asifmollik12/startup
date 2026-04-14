@@ -26,20 +26,20 @@ export default async function HeroSection() {
     <section className="container-wide py-4 lg:py-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <Link href={`/articles/${main.slug}`} className="group block relative overflow-hidden flex-1 min-h-[320px]">
+          <Link href={`/articles/${main.slug}`} className="group block relative overflow-hidden flex-1 min-h-[420px] sm:min-h-[320px]">
             {main.coverImage && (
               <Image src={main.coverImage} alt={main.title} fill
                 className="object-cover group-hover:scale-105 transition-transform duration-700" priority />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-5 lg:p-8">
               <span className="badge-red mb-3 text-[10px]">{main.category}</span>
-              <h1 className="font-serif text-2xl lg:text-3xl font-bold text-white leading-tight mb-3 max-w-xl">{main.title}</h1>
-              <p className="text-gray-300 text-sm line-clamp-2 mb-4 max-w-lg">{main.excerpt}</p>
-              <div className="flex items-center gap-3 text-gray-400 text-xs">
-                <span className="text-white font-medium">{main.author}</span>
+              <h1 className="font-serif text-3xl lg:text-3xl font-bold text-white leading-tight mb-3 max-w-xl">{main.title}</h1>
+              <p className="text-gray-200 text-base line-clamp-2 mb-4 max-w-lg">{main.excerpt}</p>
+              <div className="flex items-center gap-3 text-gray-300 text-sm">
+                <span className="text-white font-bold">{main.author}</span>
                 <span>·</span><span>{formatDate(main.publishedAt)}</span>
-                <span>·</span><span className="flex items-center gap-1"><Clock size={10} />{main.readTime} min</span>
+                <span>·</span><span className="flex items-center gap-1"><Clock size={11} />{main.readTime} min</span>
               </div>
             </div>
           </Link>
