@@ -99,12 +99,12 @@ export default function FounderModal({ founder, onSave, onClose }: Props) {
           {/* Avatar Upload */}
           <Field label="Avatar Photo">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-800 border border-gray-700 flex items-center justify-center flex-shrink-0">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-800 border border-gray-700 flex items-center justify-center flex-shrink-0">
                 {form.avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={form.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                  <img src={form.avatar} alt="Avatar" className="w-full h-full object-cover" style={{ imageRendering: "auto" }} />
                 ) : (
-                  <ImageIcon size={20} className="text-gray-600" />
+                  <ImageIcon size={24} className="text-gray-600" />
                 )}
               </div>
               <div className="flex items-center gap-2">
