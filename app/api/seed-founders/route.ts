@@ -128,8 +128,24 @@ const founders = [
 export async function GET() {
   try {
     await connectDB();
-    await FounderModel.deleteMany({});
-    await FounderModel.insertMany(founders);
+    for (const f of founders) {
+      const existing = await FounderModel.findOne({ slug: f.slug });
+      await FounderModel.findOneAndUpdate(
+        { slug: f.slug },
+        {
+          $set: {
+            name: f.name, title: f.title, company: f.company,
+            industry: f.industry, bio: f.bio, netWorth: f.netWorth,
+            founded: f.founded, location: f.location,
+            achievements: f.achievements, socialLinks: f.socialLinks, rank: f.rank,
+            // only set avatar/coverImage if not already set
+            ...(existing?.avatar ? {} : { avatar: f.avatar }),
+            ...(existing?.coverImage ? {} : { coverImage: f.coverImage }),
+          }
+        },
+        { upsert: true }
+      );
+    }
     return NextResponse.json({ success: true, count: founders.length });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
