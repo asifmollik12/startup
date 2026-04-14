@@ -33,6 +33,8 @@ export default async function HeroSection() {
             <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-100">
               {main.coverImage && (
                 <Image src={main.coverImage} alt={main.title} fill
+                  sizes="(max-width: 1024px) 100vw, 66vw"
+                  quality={95}
                   className="object-cover group-hover:scale-105 transition-transform duration-700" priority />
               )}
             </div>
@@ -80,6 +82,8 @@ export default async function HeroSection() {
             <Link href={`/articles/${secondary.slug}`} className="group block relative overflow-hidden flex-shrink-0" style={{ aspectRatio: "16/9" }}>
               {secondary.coverImage && (
                 <Image src={secondary.coverImage} alt={secondary.title} fill
+                  sizes="33vw"
+                  quality={90}
                   className="object-cover group-hover:scale-105 transition-transform duration-700" />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
@@ -95,6 +99,8 @@ export default async function HeroSection() {
                   <div className="relative w-16 h-14 flex-shrink-0 overflow-hidden bg-gray-100">
                     {article.coverImage && (
                       <Image src={article.coverImage} alt={article.title} fill
+                        sizes="64px"
+                        quality={85}
                         className="object-cover group-hover:scale-105 transition-transform duration-300" />
                     )}
                   </div>

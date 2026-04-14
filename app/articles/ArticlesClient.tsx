@@ -77,6 +77,8 @@ export default function ArticlesClient({ articles }: { articles: any[] }) {
                   <div className="relative overflow-hidden aspect-video bg-gray-100">
                     {article.coverImage && (
                       <Image src={article.coverImage} alt={article.title} fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                        quality={90}
                         className="object-cover group-hover:scale-105 transition-transform duration-500" />
                     )}
                   </div>

@@ -39,6 +39,8 @@ export default async function LatestArticles() {
                 <div className="relative overflow-hidden aspect-video bg-gray-100">
                   {article.coverImage && (
                     <Image src={article.coverImage} alt={article.title} fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      quality={90}
                       className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   )}
                 </div>
