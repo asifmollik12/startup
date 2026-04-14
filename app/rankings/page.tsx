@@ -84,7 +84,7 @@ export default async function RankingsPage() {
                   {founder.netWorth && <p className={`font-bold text-brand-gold mt-2 ${isFirst ? "text-base" : "text-sm"}`}>{founder.netWorth}</p>}
                   {isFirst && (
                     <div className="mt-3 flex flex-wrap gap-1 justify-center">
-                      {founder.achievements.slice(0, 2).map((a) => (
+                      {founder.achievements.slice(0, 2).map((a: string) => (
                         <span key={a} className="text-[8px] bg-gray-800 border border-gray-700 px-2 py-0.5 text-gray-400 rounded">{a}</span>
                       ))}
                     </div>
