@@ -18,6 +18,10 @@ export default function AdminFounders() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Bulk select
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false);
+
   // Industries (reuse categories API)
   const [industries, setIndustries] = useState<Industry[]>([]);
   const [indForm, setIndForm] = useState({ name: "", slug: "", color: "#8B5CF6", description: "" });
@@ -40,6 +44,21 @@ export default function AdminFounders() {
     f.industry.toLowerCase().includes(search.toLowerCase())
   );
 
+  const allSelected = filtered.length > 0 && filtered.every(f => selected.has(f.id));
+  const someSelected = filtered.some(f => selected.has(f.id));
+
+  const toggleAll = () => {
+    if (allSelected) {
+      setSelected(prev => { const s = new Set(prev); filtered.forEach(f => s.delete(f.id)); return s; });
+    } else {
+      setSelected(prev => { const s = new Set(prev); filtered.forEach(f => s.add(f.id)); return s; });
+    }
+  };
+
+  const toggleOne = (id: string) => {
+    setSelected(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+  };
+
   const handleSave = async (data: Founder) => {
     if (creating) {
       const res = await fetch("/api/founders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
@@ -59,6 +78,14 @@ export default function AdminFounders() {
     await fetch(`/api/founders/${id}`, { method: "DELETE" });
     setFounders(prev => prev.filter(f => f.id !== id));
     setDeleteId(null); toast("Founder deleted");
+  };
+
+  const handleBulkDelete = async () => {
+    await Promise.all([...selected].map(id => fetch(`/api/founders/${id}`, { method: "DELETE" })));
+    setFounders(prev => prev.filter(f => !selected.has(f.id)));
+    toast(`${selected.size} founder${selected.size > 1 ? "s" : ""} deleted`);
+    setSelected(new Set());
+    setBulkDeleteConfirm(false);
   };
 
   // Industry handlers
@@ -116,10 +143,18 @@ export default function AdminFounders() {
 
       {tab === "founders" && (
         <>
-          <div className="relative w-full max-w-sm">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-            <input type="search" placeholder="Search founders..." value={search} onChange={e => setSearch(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-700 text-sm text-gray-300 placeholder-gray-500 pl-9 pr-4 py-2.5 rounded-lg focus:outline-none focus:border-brand-red transition-colors" />
+          <div className="flex items-center gap-3">
+            <div className="relative w-full max-w-sm">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input type="search" placeholder="Search founders..." value={search} onChange={e => setSearch(e.target.value)}
+                className="w-full bg-gray-900 border border-gray-700 text-sm text-gray-300 placeholder-gray-500 pl-9 pr-4 py-2.5 rounded-lg focus:outline-none focus:border-brand-red transition-colors" />
+            </div>
+            {selected.size > 0 && (
+              <button onClick={() => setBulkDeleteConfirm(true)}
+                className="flex items-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors whitespace-nowrap">
+                <Trash2 size={14} /> Delete ({selected.size})
+              </button>
+            )}
           </div>
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
@@ -127,6 +162,11 @@ export default function AdminFounders() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-800 text-left">
+                    <th className="px-4 py-3.5">
+                      <input type="checkbox" checked={allSelected} ref={el => { if (el) el.indeterminate = someSelected && !allSelected; }}
+                        onChange={toggleAll}
+                        className="w-4 h-4 rounded border-gray-600 bg-gray-800 accent-brand-red cursor-pointer" />
+                    </th>
                     <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Founder</th>
                     <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden md:table-cell">Company</th>
                     <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider hidden lg:table-cell">Industry</th>
@@ -136,9 +176,13 @@ export default function AdminFounders() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-800">
-                  {loading && <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">Loading...</td></tr>}
+                  {loading && <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-500">Loading...</td></tr>}
                   {!loading && filtered.map(founder => (
-                    <tr key={founder.id} className="hover:bg-gray-800/40 transition-colors">
+                    <tr key={founder.id} className={`hover:bg-gray-800/40 transition-colors ${selected.has(founder.id) ? "bg-red-500/5" : ""}`}>
+                      <td className="px-4 py-4">
+                        <input type="checkbox" checked={selected.has(founder.id)} onChange={() => toggleOne(founder.id)}
+                          className="w-4 h-4 rounded border-gray-600 bg-gray-800 accent-brand-red cursor-pointer" />
+                      </td>
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           {(founder as any).avatar && (
@@ -171,7 +215,7 @@ export default function AdminFounders() {
                       </td>
                     </tr>
                   ))}
-                  {!loading && filtered.length === 0 && <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">No founders found.</td></tr>}
+                  {!loading && filtered.length === 0 && <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-500">No founders found.</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -267,6 +311,19 @@ export default function AdminFounders() {
             <div className="flex gap-3">
               <button onClick={() => setDeleteIndId(null)} className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-800 transition-colors">Cancel</button>
               <button onClick={() => handleIndDelete(deleteIndId)} className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {bulkDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-sm">
+            <h3 className="text-lg font-bold text-white mb-2">Delete {selected.size} Founder{selected.size > 1 ? "s" : ""}?</h3>
+            <p className="text-gray-400 text-sm mb-5">This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setBulkDeleteConfirm(false)} className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-800 transition-colors">Cancel</button>
+              <button onClick={handleBulkDelete} className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors">Delete All</button>
             </div>
           </div>
         </div>
