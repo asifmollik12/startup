@@ -26,20 +26,35 @@ export default async function HeroSection() {
     <section className="container-wide py-4 lg:py-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 flex flex-col gap-4">
-          <Link href={`/articles/${main.slug}`} className="group block relative overflow-hidden flex-1 min-h-[420px] sm:min-h-[320px]">
-            {main.coverImage && (
-              <Image src={main.coverImage} alt={main.title} fill
-                className="object-cover group-hover:scale-105 transition-transform duration-700" priority />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-5 lg:p-8">
-              <span className="badge-red mb-3 text-[10px]">{main.category}</span>
-              <h1 className="font-serif text-3xl lg:text-3xl font-bold text-white leading-tight mb-3 max-w-xl">{main.title}</h1>
-              <p className="text-gray-200 text-base line-clamp-2 mb-4 max-w-lg">{main.excerpt}</p>
-              <div className="flex items-center gap-3 text-gray-300 text-sm">
-                <span className="text-white font-bold">{main.author}</span>
+          <Link href={`/articles/${main.slug}`} className="group block flex-1">
+            {/* Image */}
+            <div className="relative overflow-hidden min-h-[220px] lg:min-h-[320px]">
+              {main.coverImage && (
+                <Image src={main.coverImage} alt={main.title} fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700" priority />
+              )}
+              {/* Overlay text — hidden on mobile, shown on lg */}
+              <div className="hidden lg:block absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+              <div className="hidden lg:block absolute bottom-0 left-0 right-0 p-8">
+                <span className="badge-red mb-3 text-[10px]">{main.category}</span>
+                <h1 className="font-serif text-3xl font-bold text-white leading-tight mb-3 max-w-xl">{main.title}</h1>
+                <p className="text-gray-300 text-sm line-clamp-2 mb-4 max-w-lg">{main.excerpt}</p>
+                <div className="flex items-center gap-3 text-gray-400 text-xs">
+                  <span className="text-white font-medium">{main.author}</span>
+                  <span>·</span><span>{formatDate(main.publishedAt)}</span>
+                  <span>·</span><span className="flex items-center gap-1"><Clock size={10} />{main.readTime} min</span>
+                </div>
+              </div>
+            </div>
+            {/* Text below image — mobile only */}
+            <div className="lg:hidden bg-white px-4 pt-3 pb-4">
+              <span className="badge-red mb-2 text-[10px]">{main.category}</span>
+              <h1 className="font-serif text-xl font-bold text-gray-900 leading-tight mt-2 mb-2">{main.title}</h1>
+              <p className="text-gray-500 text-sm line-clamp-2 mb-3">{main.excerpt}</p>
+              <div className="flex items-center gap-3 text-gray-400 text-xs">
+                <span className="text-gray-700 font-semibold">{main.author}</span>
                 <span>·</span><span>{formatDate(main.publishedAt)}</span>
-                <span>·</span><span className="flex items-center gap-1"><Clock size={11} />{main.readTime} min</span>
+                <span>·</span><span className="flex items-center gap-1"><Clock size={10} />{main.readTime} min</span>
               </div>
             </div>
           </Link>
