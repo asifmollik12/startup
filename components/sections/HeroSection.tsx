@@ -24,34 +24,24 @@ export default async function HeroSection() {
 
   return (
     <section className="container-wide py-4 lg:py-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 flex flex-col gap-4">
-          <Link href={`/articles/${main.slug}`} className="group block flex-1">
-            {/* Image with overlay — desktop */}
-            <div className="relative overflow-hidden min-h-[220px] lg:h-[420px]">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:gap-6">
+
+        {/* Main featured article */}
+        <div className="lg:col-span-2">
+          <Link href={`/articles/${main.slug}`} className="group block">
+            {/* Image */}
+            <div className="relative w-full aspect-[16/9] overflow-hidden bg-gray-100">
               {main.coverImage && (
                 <Image src={main.coverImage} alt={main.title} fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700" priority />
               )}
-              {/* Overlay text — hidden on mobile, shown on lg */}
-              <div className="hidden lg:block absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-              <div className="hidden lg:block absolute bottom-0 left-0 right-0 p-8">
-                <span className="badge-red mb-3 text-[10px]">{main.category}</span>
-                <h1 className="font-serif text-3xl font-bold text-white leading-tight mb-3 max-w-xl">{main.title}</h1>
-                <p className="text-gray-300 text-sm line-clamp-2 mb-4 max-w-lg">{main.excerpt}</p>
-                <div className="flex items-center gap-3 text-gray-400 text-xs">
-                  <span className="text-white font-medium">{main.author}</span>
-                  <span>·</span><span>{formatDate(main.publishedAt)}</span>
-                  <span>·</span><span className="flex items-center gap-1"><Clock size={10} />{main.readTime} min</span>
-                </div>
-              </div>
             </div>
-            {/* Text below image — mobile only */}
-            <div className="lg:hidden bg-white px-4 pt-3 pb-4">
-              <span className="badge-red mb-2 text-[10px]">{main.category}</span>
-              <h1 className="font-serif text-xl font-bold text-gray-900 leading-tight mt-2 mb-2">{main.title}</h1>
-              <p className="text-gray-500 text-sm line-clamp-2 mb-3">{main.excerpt}</p>
-              <div className="flex items-center gap-3 text-gray-400 text-xs">
+            {/* Text below image */}
+            <div className="bg-white px-0 lg:px-0 pt-4 pb-2">
+              <span className="badge-red text-[10px]">{main.category}</span>
+              <h1 className="font-serif text-2xl lg:text-4xl font-bold text-gray-900 leading-tight mt-2 mb-3">{main.title}</h1>
+              <p className="text-gray-500 text-sm lg:text-base line-clamp-2 mb-3 leading-relaxed">{main.excerpt}</p>
+              <div className="flex items-center gap-3 text-gray-400 text-xs border-t border-brand-border pt-3">
                 <span className="text-gray-700 font-semibold">{main.author}</span>
                 <span>·</span><span>{formatDate(main.publishedAt)}</span>
                 <span>·</span><span className="flex items-center gap-1"><Clock size={10} />{main.readTime} min</span>
@@ -59,7 +49,8 @@ export default async function HeroSection() {
             </div>
           </Link>
 
-          <div>
+          {/* Ad banner */}
+          <div className="mt-4">
             <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-1.5 text-center">Advertisement</p>
             <a href="/advertise" className="group relative flex items-center justify-between overflow-hidden bg-brand-dark border border-white/10 px-6 py-4 hover:border-brand-red transition-colors cursor-pointer">
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,_rgba(200,16,46,0.12)_0%,_transparent_60%)] pointer-events-none" />
@@ -83,6 +74,7 @@ export default async function HeroSection() {
           </div>
         </div>
 
+        {/* Right sidebar — desktop only */}
         {secondary && (
           <div className="hidden lg:flex flex-col gap-0 border border-brand-border bg-white overflow-hidden">
             <Link href={`/articles/${secondary.slug}`} className="group block relative overflow-hidden flex-shrink-0" style={{ aspectRatio: "16/9" }}>
