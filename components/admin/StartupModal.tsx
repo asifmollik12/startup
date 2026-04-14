@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Startup } from "@/lib/types";
-import { X } from "lucide-react";
+import { X, Upload, ImageIcon } from "lucide-react";
 
 interface Props {
   startup: Startup | null;
@@ -19,9 +19,23 @@ const empty: Omit<Startup, "id"> = {
 
 export default function StartupModal({ startup, onSave, onClose }: Props) {
   const [form, setForm] = useState<Omit<Startup, "id">>(startup ? { ...startup } : empty);
+  const [uploading, setUploading] = useState(false);
+  const logoRef = useRef<HTMLInputElement>(null);
 
   const set = (key: keyof typeof form, value: unknown) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    if (data.url) set("logo", data.url);
+    setUploading(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,8 +100,26 @@ export default function StartupModal({ startup, onSave, onClose }: Props) {
               placeholder="Arif Hossain, Priya Das"
             />
           </Field>
-          <Field label="Logo URL">
-            <input value={form.logo} onChange={(e) => set("logo", e.target.value)} className={inp} placeholder="https://..." />
+          <Field label="Logo">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 border border-gray-700 bg-gray-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                {form.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={form.logo} alt="Logo" className="w-full h-full object-contain p-1" />
+                ) : (
+                  <ImageIcon size={20} className="text-gray-600" />
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="flex items-center gap-2 px-3 py-2 bg-gray-800 border border-gray-700 text-gray-300 text-xs rounded-lg cursor-pointer hover:border-brand-red transition-colors">
+                  <Upload size={13} /> {uploading ? "Uploading..." : "Upload Logo"}
+                  <input ref={logoRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                </label>
+                {form.logo && (
+                  <button type="button" onClick={() => set("logo", "")} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"><X size={13} /></button>
+                )}
+              </div>
+            </div>
           </Field>
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-800 transition-colors">Cancel</button>
