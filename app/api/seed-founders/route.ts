@@ -87,6 +87,42 @@ const founders = [
     bio: "Aziz Arman founded Jatri, a mobility tech startup improving urban transportation experiences in Bangladesh.",
     netWorth: "Not public", founded: "2019", location: "Dhaka", achievements: [], socialLinks: {}, rank: 14,
   },
+  {
+    name: "Rubaiyat Farhan", slug: "rubaiyat-farhan", title: "Co-founder",
+    company: "Markopolo.ai", industry: "AI / Marketing Tech", avatar: "", coverImage: "",
+    bio: "Rubaiyat Farhan co-founded Markopolo.ai, an AI-powered marketing automation platform helping businesses grow across Bangladesh and beyond.",
+    netWorth: "Not public", founded: "2020", location: "Dhaka", achievements: [], socialLinks: {}, rank: 15,
+  },
+  {
+    name: "Tasfia Tasbin", slug: "tasfia-tasbin", title: "Co-founder",
+    company: "Markopolo.ai", industry: "AI / Marketing Tech", avatar: "", coverImage: "",
+    bio: "Tasfia Tasbin co-founded Markopolo.ai, driving AI-driven marketing solutions for businesses in emerging markets.",
+    netWorth: "Not public", founded: "2020", location: "Dhaka", achievements: [], socialLinks: {}, rank: 16,
+  },
+  {
+    name: "Arefin Zaman", slug: "arefin-zaman", title: "Co-founder",
+    company: "MedEasy", industry: "Healthcare Tech", avatar: "", coverImage: "",
+    bio: "Arefin Zaman co-founded MedEasy, a healthcare tech platform making medicine delivery and health services accessible across Bangladesh.",
+    netWorth: "Not public", founded: "2020", location: "Dhaka", achievements: [], socialLinks: {}, rank: 17,
+  },
+  {
+    name: "Sakib Hossain", slug: "sakib-hossain", title: "Founder",
+    company: "Fashol", industry: "Agritech", avatar: "", coverImage: "",
+    bio: "Sakib Hossain founded Fashol, an agritech startup connecting farmers directly to consumers and reducing food supply chain waste.",
+    netWorth: "Not public", founded: "2021", location: "Dhaka", achievements: [], socialLinks: {}, rank: 18,
+  },
+  {
+    name: "Sayed Zubaer Hasan", slug: "sayed-zubaer-hasan", title: "Co-founder",
+    company: "Krishi Shwapno", industry: "Agritech", avatar: "", coverImage: "",
+    bio: "Sayed Zubaer Hasan co-founded Krishi Shwapno, an agritech and social impact startup empowering Bangladeshi farmers.",
+    netWorth: "Not public", founded: "2019", location: "Dhaka", achievements: [], socialLinks: {}, rank: 19,
+  },
+  {
+    name: "Mahmudul Hasan Sohag", slug: "mahmudul-hasan-sohag", title: "Founder",
+    company: "Rokomari", industry: "E-commerce", avatar: "", coverImage: "",
+    bio: "Mahmudul Hasan Sohag founded Rokomari, Bangladesh's largest online bookstore and e-commerce publishing platform.",
+    netWorth: "Not public", founded: "2012", location: "Dhaka", achievements: [], socialLinks: {}, rank: 20,
+  },
 ];
 
 export async function GET() {
