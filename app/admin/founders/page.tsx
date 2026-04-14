@@ -81,7 +81,7 @@ export default function AdminFounders() {
   };
 
   const handleBulkDelete = async () => {
-    await Promise.all([...selected].map(id => fetch(`/api/founders/${id}`, { method: "DELETE" })));
+    await Promise.all(Array.from(selected).map(id => fetch(`/api/founders/${id}`, { method: "DELETE" })));
     setFounders(prev => prev.filter(f => !selected.has(f.id)));
     toast(`${selected.size} founder${selected.size > 1 ? "s" : ""} deleted`);
     setSelected(new Set());
