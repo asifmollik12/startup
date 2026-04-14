@@ -1,10 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
-import { founders } from "@/lib/data";
 import { ArrowRight, Trophy } from "lucide-react";
+import { connectDB } from "@/lib/mongodb";
+import { Founder as FounderModel } from "@/lib/models/Founder";
 
-export default function TopFounders() {
-  const top = founders.slice(0, 5);
+async function getTopFounders() {
+  try {
+    await connectDB();
+    const data = await FounderModel.find().sort({ rank: 1 }).limit(5).lean();
+    return data.map((f: any) => ({ ...f, id: f._id.toString() }));
+  } catch { return []; }
+}
+
+export default async function TopFounders() {
+  const top = await getTopFounders();
   return (
     <section className="bg-brand-dark section-pad">
       <div className="container-wide">

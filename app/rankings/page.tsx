@@ -1,9 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
-import { founders } from "@/lib/data";
+import { connectDB } from "@/lib/mongodb";
+import { Founder as FounderModel } from "@/lib/models/Founder";
 import { Trophy, TrendingUp, ArrowUpRight, Crown, Medal, Award } from "lucide-react";
 
-export default function RankingsPage() {
+export const revalidate = 60;
+
+async function getFounders() {
+  try {
+    await connectDB();
+    const data = await FounderModel.find().sort({ rank: 1 }).lean();
+    return data.map((f: any) => ({ ...f, id: f._id.toString(), achievements: f.achievements ?? [] }));
+  } catch { return []; }
+}
+
+export default async function RankingsPage() {
+  const founders = await getFounders();
   const top3 = founders.slice(0, 3);
   const rest = founders.slice(3);
 
