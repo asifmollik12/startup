@@ -44,9 +44,14 @@ export default function FoundersClient({ founders }: { founders: any[] }) {
               <Link key={founder.id} href={`/founders/${founder.slug}`}
                 className="group bg-white border border-brand-border card-hover block overflow-hidden">
                 <div className="relative h-52 overflow-hidden bg-gray-100">
-                  {founder.coverImage && (
-                    <Image src={founder.coverImage} alt={founder.name} fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {(founder.coverImage || founder.avatar) ? (
+                    <Image src={founder.coverImage || founder.avatar} alt={founder.name} fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover object-top group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                      <span className="font-serif font-bold text-4xl text-gray-400">{founder.name?.charAt(0)}</span>
+                    </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                   {founder.rank && (

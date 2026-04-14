@@ -49,9 +49,14 @@ export default async function FoundersPage() {
               <Link key={founder.id} href={`/founders/${founder.slug}`}
                 className="group bg-white border border-brand-border card-hover block overflow-hidden">
                 <div className="relative aspect-video bg-gray-100 overflow-hidden">
-                  {founder.coverImage && (
-                    <Image src={founder.coverImage} alt={founder.name} fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {(founder.coverImage || founder.avatar) ? (
+                    <Image src={founder.coverImage || founder.avatar} alt={founder.name} fill
+                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                      className="object-cover object-top group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                      <span className="font-serif font-bold text-3xl text-gray-400">{founder.name?.charAt(0)}</span>
+                    </div>
                   )}
                   {founder.rank && (
                     <div className="absolute top-0 left-0 bg-brand-red px-2 py-1">
