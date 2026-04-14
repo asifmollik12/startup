@@ -46,7 +46,7 @@ export default function FoundersClient({ founders }: { founders: any[] }) {
                 <div className="relative h-52 overflow-hidden bg-gray-100">
                   {founder.coverImage && (
                     <Image src={founder.coverImage} alt={founder.name} fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
+                      className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                   {founder.rank && (
@@ -59,7 +59,7 @@ export default function FoundersClient({ founders }: { founders: any[] }) {
                   <div className="flex items-start gap-3">
                     <div className="w-12 h-12 rounded-full border-2 border-white shadow -mt-8 relative z-10 flex-shrink-0 overflow-hidden bg-gray-200">
                       {founder.avatar && (
-                        <Image src={founder.avatar} alt={founder.name} width={48} height={48} className="object-cover w-full h-full" unoptimized />
+                        <Image src={founder.avatar} alt={founder.name} width={48} height={48} className="object-cover w-full h-full" />
                       )}
                     </div>
                     <div className="pt-1">

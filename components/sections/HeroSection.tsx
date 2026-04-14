@@ -29,7 +29,7 @@ export default async function HeroSection() {
           <Link href={`/articles/${main.slug}`} className="group block relative overflow-hidden flex-1 min-h-[320px]">
             {main.coverImage && (
               <Image src={main.coverImage} alt={main.title} fill
-                className="object-cover group-hover:scale-105 transition-transform duration-700" priority unoptimized />
+                className="object-cover group-hover:scale-105 transition-transform duration-700" priority />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
@@ -73,7 +73,7 @@ export default async function HeroSection() {
             <Link href={`/articles/${secondary.slug}`} className="group block relative overflow-hidden flex-shrink-0" style={{ aspectRatio: "16/9" }}>
               {secondary.coverImage && (
                 <Image src={secondary.coverImage} alt={secondary.title} fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700" unoptimized />
+                  className="object-cover group-hover:scale-105 transition-transform duration-700" />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4">
@@ -88,7 +88,7 @@ export default async function HeroSection() {
                   <div className="relative w-16 h-14 flex-shrink-0 overflow-hidden bg-gray-100">
                     {article.coverImage && (
                       <Image src={article.coverImage} alt={article.title} fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
+                        className="object-cover group-hover:scale-105 transition-transform duration-300" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

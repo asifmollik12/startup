@@ -39,7 +39,7 @@ export default async function LatestArticles() {
                 <div className="relative overflow-hidden aspect-video bg-gray-100">
                   {article.coverImage && (
                     <Image src={article.coverImage} alt={article.title} fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
+                      className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   )}
                 </div>
                 <div className="p-5">
@@ -47,7 +47,7 @@ export default async function LatestArticles() {
                   <h3 className="font-serif font-bold text-base text-brand-dark mt-1 mb-2 leading-snug group-hover:text-brand-red transition-colors line-clamp-2">{article.title}</h3>
                   <p className="text-gray-500 text-sm line-clamp-2 mb-4">{article.excerpt}</p>
                   <div className="flex items-center gap-2 text-xs text-gray-400 border-t border-brand-border pt-3">
-                    {article.authorAvatar && <Image src={article.authorAvatar} alt={article.author} width={18} height={18} className="rounded-full" unoptimized />}
+                    {article.authorAvatar && <Image src={article.authorAvatar} alt={article.author} width={18} height={18} className="rounded-full" />}
                     <span className="text-gray-600">{article.author}</span>
                     <span>·</span><span>{formatDate(article.publishedAt)}</span>
                     <span>·</span><span className="flex items-center gap-1"><Clock size={9} />{article.readTime}m</span>

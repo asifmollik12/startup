@@ -51,7 +51,7 @@ export default async function FoundersPage() {
                 <div className="relative aspect-video bg-gray-100 overflow-hidden">
                   {founder.coverImage && (
                     <Image src={founder.coverImage} alt={founder.name} fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
+                      className="object-cover group-hover:scale-105 transition-transform duration-500" />
                   )}
                   {founder.rank && (
                     <div className="absolute top-0 left-0 bg-brand-red px-2 py-1">

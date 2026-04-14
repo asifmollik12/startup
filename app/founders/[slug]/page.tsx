@@ -76,7 +76,7 @@ export default async function FounderPage({ params }: { params: { slug: string }
           <div className="lg:col-span-1 space-y-5">
             <div className="bg-white border border-brand-border overflow-hidden">
               <div className="relative w-full aspect-square overflow-hidden bg-gray-100">
-                {founder.avatar && <Image src={founder.avatar} alt={founder.name} fill className="object-cover object-top" priority unoptimized />}
+                {founder.avatar && <Image src={founder.avatar} alt={founder.name} fill className="object-cover object-top" priority />}
                 {founder.rank && (
                   <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-brand-dark/80 px-3 py-1.5">
                     <Award size={12} className="text-brand-gold" />
@@ -151,7 +151,7 @@ export default async function FounderPage({ params }: { params: { slug: string }
                   {others.map((f: any) => (
                     <Link key={f.id} href={`/founders/${f.slug}`} className="flex items-center gap-3 group">
                       <div className="w-9 h-9 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
-                        {f.avatar && <Image src={f.avatar} alt={f.name} width={36} height={36} className="object-cover w-full h-full" unoptimized />}
+                        {f.avatar && <Image src={f.avatar} alt={f.name} width={36} height={36} className="object-cover w-full h-full" />}
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-brand-dark group-hover:text-brand-red transition-colors truncate">{f.name}</p>
@@ -168,7 +168,7 @@ export default async function FounderPage({ params }: { params: { slug: string }
           {/* Main content */}
           <div className="lg:col-span-2 space-y-6">
             <div className="relative h-64 lg:h-80 overflow-hidden bg-gray-100">
-              {founder.coverImage && <Image src={founder.coverImage} alt={founder.name} fill className="object-cover" priority unoptimized />}
+              {founder.coverImage && <Image src={founder.coverImage} alt={founder.name} fill className="object-cover" priority />}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-5 left-6 right-6">
                 <div className="flex items-center gap-2">
@@ -202,7 +202,7 @@ export default async function FounderPage({ params }: { params: { slug: string }
                   {relatedArticles.map((article: any) => (
                     <Link key={article.id} href={`/articles/${article.slug}`} className="group flex gap-3 border border-gray-100 hover:border-brand-red p-3 transition-colors">
                       <div className="relative w-20 h-16 flex-shrink-0 overflow-hidden bg-gray-100">
-                        {article.coverImage && <Image src={article.coverImage} alt={article.title} fill className="object-cover" unoptimized />}
+                        {article.coverImage && <Image src={article.coverImage} alt={article.title} fill className="object-cover" />}
                       </div>
                       <div className="min-w-0">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-brand-red">{article.category}</span>

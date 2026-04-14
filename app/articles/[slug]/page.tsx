@@ -35,7 +35,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
       {/* Hero */}
       <div className="relative h-[45vh] lg:h-[55vh] overflow-hidden bg-gray-900">
         {article.coverImage && (
-          <Image src={article.coverImage} alt={article.title} fill className="object-cover" priority unoptimized />
+          <Image src={article.coverImage} alt={article.title} fill className="object-cover" priority />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 container-wide pb-8">
@@ -52,7 +52,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         <div className="container-wide py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {article.authorAvatar && (
-              <Image src={article.authorAvatar} alt={article.author} width={32} height={32} className="rounded-full" unoptimized />
+              <Image src={article.authorAvatar} alt={article.author} width={32} height={32} className="rounded-full" />
             )}
             <div>
               <p className="font-semibold text-sm text-brand-dark">{article.author}</p>
@@ -124,7 +124,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               {related.map((r: any) => (
                 <Link key={r.id} href={`/articles/${r.slug}`} className="group bg-white border border-brand-border block overflow-hidden card-hover">
                   <div className="relative aspect-video overflow-hidden bg-gray-100">
-                    {r.coverImage && <Image src={r.coverImage} alt={r.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />}
+                    {r.coverImage && <Image src={r.coverImage} alt={r.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />}
                   </div>
                   <div className="p-4">
                     <span className="section-label text-[9px]">{r.category}</span>
