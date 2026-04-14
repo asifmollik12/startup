@@ -3,7 +3,7 @@ import Link from "next/link";
 import { connectDB } from "@/lib/mongodb";
 import { Founder as FounderModel } from "@/lib/models/Founder";
 
-export const revalidate = 60;
+export const revalidate = 0;
 
 async function getFounders() {
   try {
