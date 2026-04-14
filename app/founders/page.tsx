@@ -48,7 +48,7 @@ export default async function FoundersPage() {
             {founders.map((founder: any) => (
               <Link key={founder.id} href={`/founders/${founder.slug}`}
                 className="group bg-white border border-brand-border card-hover block overflow-hidden">
-                <div className="relative aspect-video bg-gray-100 overflow-hidden">
+                <div className="relative aspect-square bg-gray-100 overflow-hidden">
                   {founder.avatar ? (
                     <Image src={founder.avatar} alt={founder.name} fill
                       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
