@@ -31,9 +31,14 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const favicon = await getFavicon();
   return (
     <html lang="en">
+      <head>
+        {favicon && <link rel="icon" href={favicon} />}
+        {favicon && <link rel="shortcut icon" href={favicon} />}
+      </head>
       <body>
         <SiteLogoProvider>
           <FooterLogoProvider>
