@@ -75,7 +75,7 @@ export default async function FounderPage({ params }: { params: { slug: string }
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-5">
             <div className="bg-white border border-brand-border overflow-hidden">
-              <div className="relative w-full aspect-[3/4] overflow-hidden bg-gray-100">
+              <div className="relative w-full aspect-square overflow-hidden bg-gray-100">
                 {founder.avatar && <Image src={founder.avatar} alt={founder.name} fill
                   sizes="(max-width: 1024px) 100vw, 33vw"
                   quality={95}
