@@ -41,6 +41,33 @@ export default function AdminSettings() {
   const [faviconUploading, setFaviconUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // Mobile sidebar logo
+  const [mobileLogo, setMobileLogo] = useState<string | null>(null);
+  const [mobileLogoUploading, setMobileLogoUploading] = useState(false);
+  const mobileLogoRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/settings?key=mobileSidebarLogo").then(r => r.json()).then(url => {
+      if (url) setMobileLogo(url);
+    }).catch(() => {});
+  }, []);
+
+  const handleMobileLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setMobileLogoUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    if (data.url) {
+      setMobileLogo(data.url);
+      await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "mobileSidebarLogo", value: data.url }) });
+      toast("Mobile sidebar logo saved");
+    }
+    setMobileLogoUploading(false);
+  };
+
   // Load saved favicon on mount
   useEffect(() => {
     fetch("/api/settings?key=favicon").then(r => r.json()).then(url => {
@@ -313,6 +340,48 @@ export default function AdminSettings() {
           </div>
         </div>
 
+        </div>
+
+        {/* Mobile Sidebar Logo */}
+        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <div className="flex items-center gap-2.5 px-5 py-4 border-b border-gray-800">
+            <ImageIcon size={15} className="text-brand-red" />
+            <h2 className="font-semibold text-white text-sm">Mobile Sidebar Logo</h2>
+            <span className="ml-auto text-[10px] text-gray-500 bg-gray-800 px-2 py-0.5 rounded">Dark background</span>
+          </div>
+          <div className="p-5">
+            <div className="flex items-start gap-5">
+              <div className="flex-shrink-0 w-20 h-20 bg-brand-dark border border-gray-700 rounded-xl flex items-center justify-center overflow-hidden p-2">
+                {mobileLogo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={mobileLogo} alt="Mobile logo" className="w-full h-full object-contain" />
+                ) : (
+                  <ImageIcon size={24} className="text-gray-600" />
+                )}
+              </div>
+              <div className="flex-1 space-y-3">
+                <div>
+                  <p className="text-sm text-gray-300 font-medium">{mobileLogo ? "Custom mobile logo active" : "No mobile logo uploaded"}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Shown in the dark mobile drawer. Use a light/white version of your logo.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => mobileLogoRef.current?.click()} disabled={mobileLogoUploading}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-800 border border-gray-700 text-gray-300 text-xs font-medium rounded-lg hover:border-brand-red hover:text-white transition-colors disabled:opacity-50">
+                    <Upload size={13} /> {mobileLogoUploading ? "Uploading..." : "Upload Logo"}
+                  </button>
+                  {mobileLogo && (
+                    <button type="button" onClick={async () => {
+                      setMobileLogo(null);
+                      await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "mobileSidebarLogo", value: "" }) });
+                    }} className="flex items-center gap-1.5 px-3 py-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors">
+                      <X size={13} /> Remove
+                    </button>
+                  )}
+                </div>
+                <input ref={mobileLogoRef} type="file" accept=".png,.svg,.webp,.jpg,.jpeg" onChange={handleMobileLogoUpload} className="hidden" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* SEO */}

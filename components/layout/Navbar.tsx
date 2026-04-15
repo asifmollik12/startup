@@ -265,7 +265,7 @@ export default function Navbar() {
         <div className={`absolute top-0 right-0 h-full w-[80vw] max-w-sm bg-brand-dark shadow-2xl flex flex-col transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}>
           {/* Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-            <SiteLogo />
+            <MobileSidebarLogo />
             <button onClick={() => setOpen(false)} className="p-2 text-gray-400 hover:text-white transition-colors">
               <X size={20} />
             </button>
@@ -282,7 +282,7 @@ export default function Navbar() {
               </Link>
             ))}
             <Link href="/subscribe" onClick={() => setOpen(false)}
-              className="flex items-center justify-between px-6 py-4 text-sm font-bold uppercase tracking-widest text-brand-red hover:text-white hover:bg-white/5 border-b border-white/10 transition-colors">
+              className="flex items-center justify-between px-6 py-4 text-sm font-bold uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/5 border-b border-white/10 transition-colors">
               Materials
               <span className="text-gray-600 text-lg">›</span>
             </Link>
@@ -300,6 +300,18 @@ export default function Navbar() {
       </div>
     </header>
   );
+}
+
+function MobileSidebarLogo() {
+  const [logo, setLogo] = useState<string | null>(null);
+  useEffect(() => {
+    fetch("/api/settings?key=mobileSidebarLogo").then(r => r.json()).then(url => { if (url) setLogo(url); }).catch(() => {});
+  }, []);
+  if (logo) return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={logo} alt="Logo" className="h-8 w-auto object-contain" />
+  );
+  return <SiteLogo />;
 }
 
 function MobileUserSection({ onClose }: { onClose: () => void }) {
