@@ -2,8 +2,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 import SiteLogo from "@/components/SiteLogo";
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,51 +27,48 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-brand-gray flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+      <div className="w-full max-w-sm">
         <div className="flex justify-center mb-8">
           <Link href="/"><SiteLogo /></Link>
         </div>
 
-        <div className="bg-white border border-brand-border p-8">
-          <h1 className="font-serif text-2xl font-bold text-brand-dark mb-1">Welcome back</h1>
-          <p className="text-gray-400 text-sm mb-6">Sign in to your Start-Up News account</p>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8">
+          <h1 className="text-xl font-bold text-white mb-1">Sign in</h1>
+          <p className="text-gray-500 text-sm mb-6">Access your Start-Up News account</p>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 mb-5">{error}</div>
+            <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg mb-4">{error}</p>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Email</label>
-              <div className="relative">
-                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input type="email" required placeholder="your@email.com"
-                  value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
-                  className="w-full border border-brand-border pl-9 pr-4 py-3 text-sm focus:outline-none focus:border-brand-red transition-colors" />
-              </div>
+              <label className="block text-xs font-medium text-gray-400 mb-1.5">Email</label>
+              <input type="email" required autoFocus placeholder="your@email.com"
+                value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+                className="w-full bg-gray-800 border border-gray-700 text-sm text-gray-200 placeholder-gray-500 px-3 py-2.5 rounded-lg focus:outline-none focus:border-brand-red transition-colors" />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Password</label>
+              <label className="block text-xs font-medium text-gray-400 mb-1.5">Password</label>
               <div className="relative">
-                <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input type={show ? "text" : "password"} required placeholder="Your password"
+                <input type={show ? "text" : "password"} required placeholder="••••••••"
                   value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
-                  className="w-full border border-brand-border pl-9 pr-10 py-3 text-sm focus:outline-none focus:border-brand-red transition-colors" />
-                <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  {show ? <EyeOff size={14} /> : <Eye size={14} />}
+                  className="w-full bg-gray-800 border border-gray-700 text-sm text-gray-200 placeholder-gray-500 px-3 py-2.5 pr-10 rounded-lg focus:outline-none focus:border-brand-red transition-colors" />
+                <button type="button" onClick={() => setShow(!show)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
+                  {show ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
             </div>
             <button type="submit" disabled={loading}
-              className="w-full bg-brand-red text-white py-3 text-sm font-bold uppercase tracking-wider hover:bg-red-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
-              {loading ? "Signing in..." : <><span>Sign In</span><ArrowRight size={14} /></>}
+              className="w-full flex items-center justify-center gap-2 bg-brand-red text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-60 mt-2">
+              {loading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><LogIn size={15} /> Sign In</>}
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-400 mt-6">
+          <p className="text-center text-sm text-gray-500 mt-5">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-brand-red font-semibold hover:underline">Create one</Link>
+            <Link href="/signup" className="text-brand-red hover:underline font-medium">Create one</Link>
           </p>
         </div>
       </div>
