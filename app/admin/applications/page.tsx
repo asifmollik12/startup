@@ -56,19 +56,9 @@ export default function AdminApplications() {
   const handleAction = async (status: "approved" | "rejected") => {
     if (!selected) return;
     setProcessing(true);
-    // Use current email fields (admin may have edited them), but if they haven't changed from
-    // the approval template and we're rejecting, auto-switch to rejection template
-    const approvalSubject = getTemplate("approved", selected).subject;
-    let subject = emailSubject;
-    let body = emailBody;
-    if (status === "rejected" && emailSubject === approvalSubject) {
-      const t = getTemplate("rejected", selected);
-      subject = t.subject;
-      body = t.body;
-    }
     const res = await fetch(`/api/applications/${selected._id}`, {
       method: "PUT", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, emailSubject: subject, emailBody: body }),
+      body: JSON.stringify({ status, emailSubject, emailBody }),
     });
     const updated = await res.json();
     setApps(prev => prev.map(a => a._id === selected._id ? { ...a, status } : a));
