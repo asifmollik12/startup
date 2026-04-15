@@ -27,7 +27,22 @@ export default function ProfilePage() {
   // Founder form
   const [founderForm, setFounderForm] = useState({ fullName: "", title: "", company: "", industry: "", founded: "", location: "", bio: "", netWorth: "", linkedin: "", website: "" });
   // Startup form
-  const [startupForm, setStartupForm] = useState({ name: "", tagline: "", description: "", industry: "", stage: "Seed", founded: "", location: "", funding: "", website: "", founders: "" });
+  const [startupForm, setStartupForm] = useState({
+    name: "", tagline: "", description: "", industry: "", stage: "Seed",
+    founded: "", location: "", funding: "", website: "", founders: "",
+    problem: "", solution: "", mvpUrl: "", marketOpportunity: "",
+    businessModel: "", traction: "", competition: "", teamSize: "",
+    achievements: "",
+  });
+  const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string }[]>([]);
+  const [pitchDeckFile, setPitchDeckFile] = useState<File | null>(null);
+  const [pitchDeckUploading, setPitchDeckUploading] = useState(false);
+  const pitchDeckRef = useRef<HTMLInputElement>(null);
+
+  const addSocialLink = () => setSocialLinks(prev => [...prev, { platform: "", url: "" }]);
+  const removeSocialLink = (i: number) => setSocialLinks(prev => prev.filter((_, idx) => idx !== i));
+  const updateSocialLink = (i: number, field: "platform" | "url", val: string) =>
+    setSocialLinks(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: val } : s));
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
@@ -73,7 +88,18 @@ export default function ProfilePage() {
   const submitApplication = async (type: "founder" | "startup") => {
     if (!user) return;
     setAppSubmitting(true);
-    const data = type === "founder" ? founderForm : startupForm;
+    let data: any = type === "founder" ? founderForm : { ...startupForm, socialLinks };
+
+    if (type === "startup" && pitchDeckFile) {
+      setPitchDeckUploading(true);
+      const fd = new FormData();
+      fd.append("file", pitchDeckFile);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const uploaded = await res.json();
+      if (uploaded.url) data.pitchDeck = uploaded.url;
+      setPitchDeckUploading(false);
+    }
+
     const res = await fetch("/api/applications", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type, userId: user.id, userName: user.name, userEmail: user.email, data }),
@@ -332,7 +358,10 @@ export default function ProfilePage() {
                     <h2 className="font-serif text-xl font-bold text-brand-dark">List Your Startup</h2>
                   </div>
                   <p className="text-gray-400 text-sm mb-6">Get your startup featured in Bangladesh's most comprehensive startup directory.</p>
-                  <div className="space-y-4">
+                  <div className="space-y-5">
+
+                    {/* Basic Info */}
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand-red">Basic Info</p>
                     <div className="grid grid-cols-2 gap-4">
                       <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Startup Name *</label>
                         <input value={startupForm.name} onChange={e => setStartupForm({...startupForm, name: e.target.value})} className={inp} placeholder="Your startup name" /></div>
@@ -356,14 +385,86 @@ export default function ProfilePage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Funding Raised</label>
                         <input value={startupForm.funding} onChange={e => setStartupForm({...startupForm, funding: e.target.value})} className={inp} placeholder="$500K" /></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Team Size</label>
+                        <input value={startupForm.teamSize} onChange={e => setStartupForm({...startupForm, teamSize: e.target.value})} className={inp} placeholder="e.g. 5-10" /></div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                       <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Website</label>
                         <input value={startupForm.website} onChange={e => setStartupForm({...startupForm, website: e.target.value})} className={inp} placeholder="https://..." /></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Product / MVP URL</label>
+                        <input value={startupForm.mvpUrl} onChange={e => setStartupForm({...startupForm, mvpUrl: e.target.value})} className={inp} placeholder="https://app.yourstartup.com" /></div>
                     </div>
                     <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Founders (comma separated)</label>
                       <input value={startupForm.founders} onChange={e => setStartupForm({...startupForm, founders: e.target.value})} className={inp} placeholder="Arif Hossain, Priya Das" /></div>
+
+                    {/* Problem & Solution */}
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand-red pt-2">Problem & Solution</p>
+                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Problem</label>
+                      <textarea value={startupForm.problem} onChange={e => setStartupForm({...startupForm, problem: e.target.value})} rows={2} className={inp + " resize-none"} placeholder="What problem are you solving?" /></div>
+                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Solution</label>
+                      <textarea value={startupForm.solution} onChange={e => setStartupForm({...startupForm, solution: e.target.value})} rows={2} className={inp + " resize-none"} placeholder="How does your product solve it?" /></div>
+
+                    {/* Business */}
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand-red pt-2">Business</p>
+                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Market Opportunity</label>
+                      <input value={startupForm.marketOpportunity} onChange={e => setStartupForm({...startupForm, marketOpportunity: e.target.value})} className={inp} placeholder="e.g. $2B TAM in Bangladesh" /></div>
+                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Business Model</label>
+                      <input value={startupForm.businessModel} onChange={e => setStartupForm({...startupForm, businessModel: e.target.value})} className={inp} placeholder="e.g. SaaS, Marketplace, B2B" /></div>
+                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Traction</label>
+                      <input value={startupForm.traction} onChange={e => setStartupForm({...startupForm, traction: e.target.value})} className={inp} placeholder="e.g. 10K users, $50K MRR" /></div>
+                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Competition</label>
+                      <input value={startupForm.competition} onChange={e => setStartupForm({...startupForm, competition: e.target.value})} className={inp} placeholder="Who are your main competitors?" /></div>
+                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Achievements</label>
+                      <textarea value={startupForm.achievements} onChange={e => setStartupForm({...startupForm, achievements: e.target.value})} rows={2} className={inp + " resize-none"} placeholder="Awards, accelerators, press mentions..." /></div>
+
+                    {/* Social Media */}
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand-red pt-2">Social Media</p>
+                    <div className="space-y-2">
+                      {socialLinks.map((s, i) => (
+                        <div key={i} className="flex gap-2 items-center">
+                          <select value={s.platform} onChange={e => updateSocialLink(i, "platform", e.target.value)}
+                            className="border border-brand-border px-3 py-2.5 text-sm focus:outline-none focus:border-brand-red bg-white w-36 flex-shrink-0">
+                            <option value="">Platform</option>
+                            {["LinkedIn","Twitter/X","Facebook","Instagram","YouTube","TikTok","GitHub","Other"].map(p => <option key={p}>{p}</option>)}
+                          </select>
+                          <input value={s.url} onChange={e => updateSocialLink(i, "url", e.target.value)}
+                            className={inp + " flex-1"} placeholder="https://..." />
+                          <button type="button" onClick={() => removeSocialLink(i)}
+                            className="p-2 text-red-400 hover:bg-red-50 transition-colors flex-shrink-0"><X size={14} /></button>
+                        </div>
+                      ))}
+                      <button type="button" onClick={addSocialLink}
+                        className="flex items-center gap-2 text-xs text-brand-red font-semibold hover:underline">
+                        + Add Social Media Link
+                      </button>
+                    </div>
+
+                    {/* Pitch Deck */}
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand-red pt-2">Pitch Deck</p>
+                    {pitchDeckFile ? (
+                      <div className="flex items-center gap-3 border border-brand-border px-4 py-3 bg-brand-gray">
+                        <Upload size={14} className="text-brand-red flex-shrink-0" />
+                        <span className="text-sm text-gray-700 flex-1 truncate">{pitchDeckFile.name}</span>
+                        <span className="text-xs text-gray-400">{(pitchDeckFile.size / 1024 / 1024).toFixed(1)} MB</span>
+                        <button type="button" onClick={() => { setPitchDeckFile(null); if (pitchDeckRef.current) pitchDeckRef.current.value = ""; }}
+                          className="text-gray-400 hover:text-red-500 transition-colors"><X size={14} /></button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center gap-2 h-20 border-2 border-dashed border-brand-border cursor-pointer hover:border-brand-red transition-colors bg-brand-gray">
+                        <Upload size={16} className="text-gray-400" />
+                        <span className="text-xs text-gray-500">Upload PDF or PPT (max 20MB)</span>
+                        <input ref={pitchDeckRef} type="file" accept=".pdf,.ppt,.pptx"
+                          onChange={e => {
+                            const f = e.target.files?.[0];
+                            if (f && f.size > 20 * 1024 * 1024) { alert("File too large. Max 20MB."); return; }
+                            if (f) setPitchDeckFile(f);
+                          }} className="hidden" />
+                      </label>
+                    )}
+
                     <button onClick={() => submitApplication("startup")} disabled={appSubmitting || !startupForm.name || !startupForm.description}
                       className="w-full bg-brand-red text-white py-3 text-sm font-bold uppercase tracking-wider hover:bg-red-700 transition-colors disabled:opacity-50">
-                      {appSubmitting ? "Submitting..." : "Submit Startup Application"}
+                      {appSubmitting || pitchDeckUploading ? "Submitting..." : "Submit Startup Application"}
                     </button>
                   </div>
                 </div>
