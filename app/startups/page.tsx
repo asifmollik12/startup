@@ -1,18 +1,32 @@
 import Image from "next/image";
 import Link from "next/link";
-import { startups } from "@/lib/data";
+import { connectDB } from "@/lib/mongodb";
+import { Startup as StartupModel } from "@/lib/models/Startup";
 import { MapPin, Calendar, Users } from "lucide-react";
 
-const industries = ["All", "Fintech", "Agritech", "Healthtech", "Edtech", "Logistics", "Cleantech"];
-const stages = ["All Stages", "Pre-seed", "Seed", "Series A", "Series B"];
+export const revalidate = 0;
+
 const stageColors: Record<string, string> = {
   "Pre-seed": "bg-gray-100 text-gray-600",
   "Seed": "bg-green-100 text-green-700",
   "Series A": "bg-blue-100 text-blue-700",
   "Series B": "bg-purple-100 text-purple-700",
+  "Series C": "bg-orange-100 text-orange-700",
+  "Growth": "bg-brand-red/10 text-brand-red",
 };
 
-export default function StartupsPage() {
+async function getStartups() {
+  try {
+    await connectDB();
+    const data = await StartupModel.find().sort({ createdAt: -1 }).lean();
+    return data.map((s: any) => ({ ...s, id: s._id.toString() }));
+  } catch { return []; }
+}
+
+export default async function StartupsPage() {
+  const startups = await getStartups();
+  const industries = ["All", ...Array.from(new Set(startups.map((s: any) => s.industry).filter(Boolean)))];
+  const stages = ["All Stages", "Pre-seed", "Seed", "Series A", "Series B", "Series C", "Growth"];
   return (
     <div className="section-pad">
       <div className="container-wide">
@@ -37,9 +51,16 @@ export default function StartupsPage() {
           {startups.map((startup) => (
             <Link key={startup.id} href={`/startups/${startup.slug}`}
               className="group bg-white border border-brand-border card-hover block overflow-hidden">
-              <div className="relative h-40 overflow-hidden">
-                <Image src={startup.logo} alt={startup.name} fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="relative h-40 overflow-hidden bg-gray-100">
+                {startup.logo ? (
+                  <Image src={startup.logo} alt={startup.name} fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                    <span className="font-serif font-bold text-4xl text-gray-400">{startup.name?.charAt(0)}</span>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute top-3 right-3">
                   <span className={`badge text-[9px] ${stageColors[startup.stage] || ""}`}>{startup.stage}</span>
