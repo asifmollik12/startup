@@ -21,6 +21,10 @@ export default function AdminApplications() {
   const [processing, setProcessing] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState<App | null>(null);
+  const [rejectSubject, setRejectSubject] = useState("");
+  const [rejectBody, setRejectBody] = useState("");
+  const [rejecting, setRejecting] = useState(false);
   const toast = (msg: string) => { setToastMsg(msg); setShowToast(false); setTimeout(() => setShowToast(true), 10); };
 
   useEffect(() => {
@@ -77,6 +81,26 @@ export default function AdminApplications() {
     await fetch(`/api/applications/${id}`, { method: "DELETE" });
     setApps(prev => prev.filter(a => a._id !== id));
     toast("Application deleted");
+  };
+
+  const openReject = (app: App) => {
+    setRejectTarget(app);
+    const t = getTemplate("rejected", app);
+    setRejectSubject(t.subject);
+    setRejectBody(t.body);
+  };
+
+  const handleReject = async () => {
+    if (!rejectTarget) return;
+    setRejecting(true);
+    await fetch(`/api/applications/${rejectTarget._id}`, {
+      method: "PUT", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: "rejected", emailSubject: rejectSubject, emailBody: rejectBody }),
+    });
+    setApps(prev => prev.map(a => a._id === rejectTarget._id ? { ...a, status: "rejected" } : a));
+    toast("Application rejected. Email sent.");
+    setRejectTarget(null);
+    setRejecting(false);
   };
 
   const filtered = filter === "all" ? apps : apps.filter(a => a.status === filter || a.type === filter);
@@ -145,6 +169,9 @@ export default function AdminApplications() {
                 <td className="px-5 py-4">
                   <div className="flex items-center justify-end gap-2">
                     <button onClick={() => openApp(app)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"><Eye size={14} /></button>
+                    {app.status !== "rejected" && (
+                      <button onClick={() => openReject(app)} className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors" title="Reject"><XCircle size={14} /></button>
+                    )}
                     <button onClick={() => handleDelete(app._id)} className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"><Trash2 size={14} /></button>
                   </div>
                 </td>
@@ -216,6 +243,45 @@ export default function AdminApplications() {
                 <button onClick={() => handleAction("approved")} disabled={processing}
                   className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
                   <CheckCircle size={14} /> {processing ? "Processing..." : "Approve & List"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rejection popup */}
+      {rejectTarget && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-red-500/30 rounded-xl w-full max-w-lg">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+              <div className="flex items-center gap-2">
+                <XCircle size={16} className="text-red-400" />
+                <h2 className="text-base font-bold text-white">Reject Application</h2>
+              </div>
+              <button onClick={() => setRejectTarget(null)} className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg"><X size={16} /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="bg-gray-800 rounded-lg px-4 py-3 text-sm">
+                <span className="text-gray-400">Applicant: </span>
+                <span className="text-white font-medium">{rejectTarget.userName}</span>
+                <span className="text-gray-500 ml-2">({rejectTarget.userEmail})</span>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">Email Subject</label>
+                <input value={rejectSubject} onChange={e => setRejectSubject(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 text-sm text-gray-200 px-3 py-2.5 rounded-lg focus:outline-none focus:border-red-500 transition-colors" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-400 mb-1.5">Rejection Message</label>
+                <textarea value={rejectBody} onChange={e => setRejectBody(e.target.value)} rows={7}
+                  className="w-full bg-gray-800 border border-gray-700 text-sm text-gray-200 px-3 py-2.5 rounded-lg focus:outline-none focus:border-red-500 transition-colors resize-none" />
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button onClick={() => setRejectTarget(null)} className="flex-1 px-4 py-2.5 border border-gray-700 text-gray-300 rounded-lg text-sm hover:bg-gray-800 transition-colors">Cancel</button>
+                <button onClick={handleReject} disabled={rejecting}
+                  className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                  <XCircle size={14} /> {rejecting ? "Sending..." : "Send & Reject"}
                 </button>
               </div>
             </div>
