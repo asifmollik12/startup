@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Menu, X, Search, User, LogOut, ChevronDown, Lightbulb, BookOpen } from "lucide-react";
 import { articles, founders, startups } from "@/lib/data";
 import SiteLogo from "@/components/SiteLogo";
+import VoiceAI from "@/components/VoiceAI";
 
 function UserMenu() {
   const [user, setUser] = useState<{ id: string; name: string; email: string; avatar?: string } | null>(null);
@@ -201,6 +202,7 @@ export default function Navbar() {
             <button onClick={handleOpen} className="p-2 text-gray-500 hover:text-brand-red transition-colors" aria-label="Search">
               <Search size={17} />
             </button>
+            <VoiceAI />
             <UserMenu />
             <button className="lg:hidden p-2 text-gray-600" onClick={() => setOpen(!open)} aria-label="Toggle menu">
               {open ? <X size={20} /> : <Menu size={20} />}
