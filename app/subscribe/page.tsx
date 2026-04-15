@@ -29,6 +29,7 @@ const plans = [
       "Everything in Free",
       "Exclusive in-depth reports",
       "Early access to startup materials & resources",
+      "Access Business Materials",
       "Founder interviews & podcasts",
       "Investment deal flow alerts",
       "Priority support",
