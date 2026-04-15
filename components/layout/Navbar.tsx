@@ -50,8 +50,8 @@ function UserMenu() {
   return (
     <div className="relative hidden sm:block" ref={ref}>
       <button onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-        <div className="w-8 h-8 bg-brand-red flex items-center justify-center overflow-hidden flex-shrink-0">
+        className="flex items-center gap-2 px-3 py-1.5 border border-brand-border hover:border-brand-red transition-colors">
+        <div className="w-7 h-7 bg-brand-red flex items-center justify-center overflow-hidden flex-shrink-0">
           {user.avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
@@ -59,7 +59,8 @@ function UserMenu() {
             <span className="text-white text-xs font-bold">{user.name.charAt(0).toUpperCase()}</span>
           )}
         </div>
-        <ChevronDown size={12} className="text-gray-400" />
+        <span className="text-sm font-semibold text-gray-700 max-w-[100px] truncate">{user.name}</span>
+        <ChevronDown size={13} className="text-gray-400" />
       </button>
       {open && (
         <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-brand-border shadow-xl z-50">
