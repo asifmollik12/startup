@@ -264,7 +264,7 @@ export default function Navbar() {
         {/* Drawer */}
         <div className={`absolute top-0 right-0 h-full w-[80vw] max-w-sm bg-brand-dark shadow-2xl flex flex-col transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}>
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-gray-800">
             <MobileSidebarLogo />
             <button onClick={() => setOpen(false)} className="p-2 text-gray-400 hover:text-white transition-colors">
               <X size={20} />
