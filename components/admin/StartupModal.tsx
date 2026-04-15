@@ -19,22 +19,23 @@ const empty: Omit<Startup, "id"> = {
 
 export default function StartupModal({ startup, onSave, onClose }: Props) {
   const [form, setForm] = useState<Omit<Startup, "id">>(startup ? { ...startup } : empty);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState<string | null>(null);
   const logoRef = useRef<HTMLInputElement>(null);
+  const coverRef = useRef<HTMLInputElement>(null);
 
   const set = (key: keyof typeof form, value: unknown) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: "logo" | "coverImage") => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
+    setUploading(field);
     const fd = new FormData();
     fd.append("file", file);
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     const data = await res.json();
-    if (data.url) set("logo", data.url);
-    setUploading(false);
+    if (data.url) set(field as keyof typeof form, data.url);
+    setUploading(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -112,13 +113,34 @@ export default function StartupModal({ startup, onSave, onClose }: Props) {
               </div>
               <div className="flex items-center gap-2">
                 <label className="flex items-center gap-2 px-3 py-2 bg-gray-800 border border-gray-700 text-gray-300 text-xs rounded-lg cursor-pointer hover:border-brand-red transition-colors">
-                  <Upload size={13} /> {uploading ? "Uploading..." : "Upload Logo"}
-                  <input ref={logoRef} type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                  <Upload size={13} /> {uploading === "logo" ? "Uploading..." : "Upload Logo"}
+                  <input ref={logoRef} type="file" accept="image/*" onChange={(e) => handleUpload(e, "logo")} className="hidden" />
                 </label>
                 {form.logo && (
                   <button type="button" onClick={() => set("logo", "")} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"><X size={13} /></button>
                 )}
               </div>
+            </div>
+          </Field>
+
+          <Field label="Cover Image">
+            <div className="space-y-2">
+              {(form as any).coverImage ? (
+                <div className="relative rounded-lg overflow-hidden border border-gray-700">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={(form as any).coverImage} alt="Cover" className="w-full h-32 object-cover" />
+                  <button type="button" onClick={() => set("coverImage" as keyof typeof form, "")}
+                    className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-lg hover:bg-red-600 transition-colors">
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center gap-2 h-24 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-brand-red transition-colors">
+                  <ImageIcon size={20} className="text-gray-600" />
+                  <span className="text-xs text-gray-500">{uploading === "coverImage" ? "Uploading..." : "Click to upload cover image"}</span>
+                  <input ref={coverRef} type="file" accept="image/*" onChange={(e) => handleUpload(e, "coverImage")} className="hidden" />
+                </label>
+              )}
             </div>
           </Field>
           <div className="flex gap-3 pt-2">

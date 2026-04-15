@@ -6,6 +6,7 @@ const StartupSchema = new Schema({
   tagline: String,
   description: String,
   logo: String,
+  coverImage: String,
   industry: String,
   stage: String,
   founded: String,

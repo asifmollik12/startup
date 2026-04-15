@@ -52,8 +52,8 @@ export default async function StartupsPage() {
             <Link key={startup.id} href={`/startups/${startup.slug}`}
               className="group bg-white border border-brand-border card-hover block overflow-hidden">
               <div className="relative h-40 overflow-hidden bg-gray-100">
-                {startup.logo ? (
-                  <Image src={startup.logo} alt={startup.name} fill
+                {(startup.coverImage || startup.logo) ? (
+                  <Image src={startup.coverImage || startup.logo} alt={startup.name} fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-500" />
                 ) : (
