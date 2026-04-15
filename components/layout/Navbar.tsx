@@ -257,20 +257,86 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* Mobile menu */}
-      {open && (
-        <div className="lg:hidden bg-white border-t border-brand-border">
-          <nav className="container-wide py-4 flex flex-col">
-            {navLinks.map((link) => (
+      {/* Mobile menu — full screen overlay with smooth animation */}
+      <div className={`lg:hidden fixed inset-0 z-[60] transition-all duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
+        {/* Drawer */}
+        <div className={`absolute top-0 right-0 h-full w-[80vw] max-w-sm bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}>
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 py-4 border-b border-brand-border">
+            <SiteLogo />
+            <button onClick={() => setOpen(false)} className="p-2 text-gray-500 hover:text-brand-red transition-colors">
+              <X size={20} />
+            </button>
+          </div>
+
+          {/* Nav links */}
+          <nav className="flex-1 overflow-y-auto py-2">
+            {navLinks.map((link, i) => (
               <Link key={link.href} href={link.href} onClick={() => setOpen(false)}
-                className="py-3 px-2 text-xs font-semibold uppercase tracking-widest text-gray-600 hover:text-brand-red border-b border-brand-border transition-colors">
+                style={{ transitionDelay: open ? `${i * 40}ms` : "0ms" }}
+                className={`flex items-center justify-between px-6 py-4 text-sm font-bold uppercase tracking-widest text-gray-700 hover:text-brand-red hover:bg-brand-gray border-b border-brand-border transition-all duration-200 ${open ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0"}`}>
                 {link.label}
+                <span className="text-gray-300 text-lg">›</span>
               </Link>
             ))}
-            <Link href="/subscribe" className="mt-4 btn-primary text-center justify-center text-xs">Subscribe Now</Link>
           </nav>
+
+          {/* Auth + Subscribe */}
+          <div className="px-5 py-5 border-t border-brand-border space-y-3">
+            <MobileUserSection onClose={() => setOpen(false)} />
+            <Link href="/subscribe" onClick={() => setOpen(false)}
+              className="block w-full bg-brand-red text-white text-center py-3 text-sm font-bold uppercase tracking-wider hover:bg-red-700 transition-colors">
+              Subscribe Now
+            </Link>
+          </div>
         </div>
-      )}
+      </div>
     </header>
+  );
+}
+
+function MobileUserSection({ onClose }: { onClose: () => void }) {
+  const [user, setUser] = useState<{ name: string } | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const s = localStorage.getItem("user");
+    if (s) setUser(JSON.parse(s));
+  }, []);
+
+  const logout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    onClose();
+    router.push("/");
+    router.refresh();
+  };
+
+  if (user) return (
+    <div className="space-y-2">
+      <Link href="/profile" onClick={onClose}
+        className="flex items-center gap-3 px-4 py-2.5 border border-brand-border text-sm font-semibold text-brand-dark hover:border-brand-red transition-colors">
+        <div className="w-7 h-7 bg-brand-red flex items-center justify-center">
+          <span className="text-white text-xs font-bold">{user.name.charAt(0).toUpperCase()}</span>
+        </div>
+        {user.name}
+      </Link>
+      <button onClick={logout} className="w-full text-left px-4 py-2 text-xs text-gray-400 hover:text-red-500 transition-colors">Sign Out</button>
+    </div>
+  );
+
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <Link href="/login" onClick={onClose}
+        className="text-center py-2.5 border border-brand-border text-sm font-semibold text-gray-700 hover:border-brand-red hover:text-brand-red transition-colors">
+        Sign In
+      </Link>
+      <Link href="/signup" onClick={onClose}
+        className="text-center py-2.5 bg-brand-dark text-white text-sm font-semibold hover:bg-gray-800 transition-colors">
+        Join Free
+      </Link>
+    </div>
   );
 }
