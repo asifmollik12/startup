@@ -1,17 +1,25 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ideas } from "@/lib/data";
-import { Lightbulb, ThumbsUp, Trophy, Send, Sparkles } from "lucide-react";
+import { Lightbulb, ThumbsUp, Trophy, Send, Sparkles, Upload, FileText, X } from "lucide-react";
 
 export default function IdeasPage() {
   const [votes, setVotes] = useState<Record<string, number>>({});
   const [voted, setVoted] = useState<Set<string>>(new Set());
   const [showForm, setShowForm] = useState(false);
+  const [pitchDeck, setPitchDeck] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const handleVote = (id: string, baseVotes: number) => {
     if (voted.has(id)) return;
     setVotes((prev) => ({ ...prev, [id]: (prev[id] ?? baseVotes) + 1 }));
     setVoted((prev) => new Set(prev).add(id));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) setPitchDeck(file);
   };
 
   const winner = ideas.find((i) => i.winner);
@@ -59,6 +67,25 @@ export default function IdeasPage() {
                     {["Fintech","Agritech","Healthtech","Edtech","ClimaTech","Future of Work","Other"].map(c => <option key={c}>{c}</option>)}
                   </select>
                 </div>
+              </div>
+              {/* Pitch Deck Upload */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Pitch Deck <span className="text-gray-400 normal-case font-normal">(PDF or PPT, optional)</span></label>
+                {pitchDeck ? (
+                  <div className="flex items-center gap-3 border border-brand-border px-4 py-3 bg-brand-gray">
+                    <FileText size={16} className="text-brand-red flex-shrink-0" />
+                    <span className="text-sm text-gray-700 flex-1 truncate">{pitchDeck.name}</span>
+                    <span className="text-xs text-gray-400">{(pitchDeck.size / 1024 / 1024).toFixed(1)} MB</span>
+                    <button type="button" onClick={() => { setPitchDeck(null); if (fileRef.current) fileRef.current.value = ""; }}
+                      className="text-gray-400 hover:text-red-500 transition-colors"><X size={14} /></button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center gap-2 h-24 border-2 border-dashed border-brand-border cursor-pointer hover:border-brand-red transition-colors bg-brand-gray">
+                    <Upload size={18} className="text-gray-400" />
+                    <span className="text-xs text-gray-500">Click to upload PDF or PPT</span>
+                    <input ref={fileRef} type="file" accept=".pdf,.ppt,.pptx" onChange={handleFileChange} className="hidden" />
+                  </label>
+                )}
               </div>
               <button type="submit" className="btn-primary w-full justify-center"><Send size={14} /> Submit Idea</button>
             </form>

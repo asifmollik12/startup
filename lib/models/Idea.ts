@@ -8,6 +8,7 @@ const IdeaSchema = new Schema({
   month: String,
   winner: { type: Boolean, default: false },
   category: String,
+  pitchDeck: String,
 }, { timestamps: true });
 
 export const Idea = models.Idea || mongoose.model("Idea", IdeaSchema);
