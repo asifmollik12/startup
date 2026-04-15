@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { ideas } from "@/lib/data";
 import { Lightbulb, ThumbsUp, Trophy, Send, Sparkles, Upload, FileText, X } from "lucide-react";
 
@@ -10,6 +11,7 @@ export default function IdeasPage() {
   const [pitchDeck, setPitchDeck] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const handleVote = (id: string, baseVotes: number) => {
     if (voted.has(id)) return;
@@ -20,6 +22,37 @@ export default function IdeasPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) setPitchDeck(file);
+  };
+
+  const handleIdeaSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const stored = localStorage.getItem("user");
+    if (!stored) { router.push("/login"); return; }
+    const user = JSON.parse(stored);
+    const fd = new FormData(e.currentTarget);
+    const body: any = {
+      title: fd.get("title"), description: fd.get("description"),
+      category: fd.get("category"), targetMarket: fd.get("targetMarket"),
+      problem: fd.get("problem"), uvp: fd.get("uvp"),
+      stage: fd.get("stage"), marketSize: fd.get("marketSize"),
+      prototypeUrl: fd.get("prototypeUrl"), role: fd.get("role"),
+      location: fd.get("location"), linkedin: fd.get("linkedin"),
+      submittedBy: user.name, userId: user.id, userEmail: user.email,
+      month: new Date().toLocaleString("default", { month: "long", year: "numeric" }),
+    };
+    if (pitchDeck) {
+      setUploading(true);
+      const uploadFd = new FormData();
+      uploadFd.append("file", pitchDeck);
+      const res = await fetch("/api/upload", { method: "POST", body: uploadFd });
+      const data = await res.json();
+      if (data.url) body.pitchDeck = data.url;
+      setUploading(false);
+    }
+    await fetch("/api/ideas", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    setShowForm(false);
+    setPitchDeck(null);
+    alert("Idea submitted successfully!");
   };
 
   const winner = ideas.find((i) => i.winner);
@@ -36,7 +69,11 @@ export default function IdeasPage() {
           <h1 className="font-serif text-4xl lg:text-6xl font-bold text-brand-dark mb-4">Best Idea of the Month</h1>
           <div className="w-12 h-0.5 bg-brand-red mx-auto mb-4" />
           <p className="text-gray-500 max-w-xl mx-auto">Submit your startup idea, vote for your favorites, and help shape Bangladesh&apos;s next big innovation.</p>
-          <button onClick={() => setShowForm(!showForm)} className="btn-primary mt-6">
+          <button onClick={() => {
+            const stored = localStorage.getItem("user");
+            if (!stored) { router.push("/login"); return; }
+            setShowForm(!showForm);
+          }} className="btn-primary mt-6">
             <Lightbulb size={15} /> Submit Your Idea
           </button>
         </div>
@@ -45,19 +82,19 @@ export default function IdeasPage() {
           <div className="bg-white border border-brand-border p-8 mb-12 max-w-2xl mx-auto">
             <h3 className="font-serif text-2xl font-bold text-brand-dark mb-1">Submit Your Idea</h3>
             <p className="text-gray-400 text-sm mb-6">Fill in the details below. The more you share, the better your chances of winning.</p>
-            <form className="space-y-5">
+            <form onSubmit={handleIdeaSubmit} className="space-y-5">
 
               {/* Idea basics */}
               <div className="border-b border-brand-border pb-5 space-y-4">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-brand-red">The Idea</p>
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Idea Title *</label>
-                  <input type="text" placeholder="Give your idea a compelling title"
+                  <input type="text" name="title" placeholder="Give your idea a compelling title"
                     className="w-full bg-white border border-brand-border text-gray-900 placeholder-gray-400 px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition-colors" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Description *</label>
-                  <textarea rows={4} placeholder="Describe your idea — the problem it solves, how it works, and why Bangladesh needs it."
+                  <textarea rows={4} name="description" placeholder="Describe your idea — the problem it solves, how it works, and why Bangladesh needs it."
                     className="w-full bg-white border border-brand-border text-gray-900 placeholder-gray-400 px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition-colors resize-none" />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -160,7 +197,7 @@ export default function IdeasPage() {
                 </div>
               </div>
 
-              <button type="submit" className="btn-primary w-full justify-center text-sm"><Send size={14} /> Submit Idea</button>
+              <button type="submit" disabled={uploading} className="btn-primary w-full justify-center text-sm"><Send size={14} /> {uploading ? "Uploading..." : "Submit Idea"}</button>
             </form>
           </div>
         )}

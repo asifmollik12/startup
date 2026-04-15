@@ -2,12 +2,12 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, X, Search, User, LogOut, ChevronDown } from "lucide-react";
+import { Menu, X, Search, User, LogOut, ChevronDown, Lightbulb, BookOpen } from "lucide-react";
 import { articles, founders, startups } from "@/lib/data";
 import SiteLogo from "@/components/SiteLogo";
 
 function UserMenu() {
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ id: string; name: string; email: string; avatar?: string } | null>(null);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -15,6 +15,13 @@ function UserMenu() {
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) setUser(JSON.parse(stored));
+    // Listen for storage changes (login/logout in other tabs)
+    const handler = () => {
+      const s = localStorage.getItem("user");
+      setUser(s ? JSON.parse(s) : null);
+    };
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
   }, []);
 
   useEffect(() => {
@@ -43,27 +50,45 @@ function UserMenu() {
   return (
     <div className="relative hidden sm:block" ref={ref}>
       <button onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-1.5 border border-brand-border hover:border-brand-red transition-colors">
-        <div className="w-6 h-6 bg-brand-red flex items-center justify-center">
-          <span className="text-white text-[10px] font-bold">{user.name.charAt(0).toUpperCase()}</span>
+        className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <div className="w-8 h-8 bg-brand-red flex items-center justify-center overflow-hidden flex-shrink-0">
+          {user.avatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-white text-xs font-bold">{user.name.charAt(0).toUpperCase()}</span>
+          )}
         </div>
-        <span className="text-xs font-semibold text-gray-700 max-w-[80px] truncate">{user.name}</span>
         <ChevronDown size={12} className="text-gray-400" />
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-brand-border shadow-lg z-50">
-          <div className="px-4 py-3 border-b border-brand-border">
-            <p className="text-sm font-semibold text-brand-dark truncate">{user.name}</p>
+        <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-brand-border shadow-xl z-50">
+          {/* User info */}
+          <div className="px-4 py-3 border-b border-brand-border bg-brand-gray">
+            <p className="text-sm font-bold text-brand-dark truncate">{user.name}</p>
             <p className="text-xs text-gray-400 truncate">{user.email}</p>
           </div>
-          <Link href="/profile" onClick={() => setOpen(false)}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-brand-red hover:bg-brand-gray transition-colors">
-            <User size={13} /> My Profile
-          </Link>
-          <button onClick={logout}
-            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-red-500 hover:bg-red-50 transition-colors">
-            <LogOut size={13} /> Sign Out
-          </button>
+          {/* Menu items */}
+          <div className="py-1">
+            <Link href="/profile" onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-brand-red hover:bg-brand-gray transition-colors">
+              <User size={13} className="flex-shrink-0" /> My Profile
+            </Link>
+            <Link href="/profile?tab=ideas" onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-brand-red hover:bg-brand-gray transition-colors">
+              <Lightbulb size={13} className="flex-shrink-0" /> My Ideas
+            </Link>
+            <Link href="/profile?tab=reading" onClick={() => setOpen(false)}
+              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-brand-red hover:bg-brand-gray transition-colors">
+              <BookOpen size={13} className="flex-shrink-0" /> Reading List
+            </Link>
+          </div>
+          <div className="border-t border-brand-border py-1">
+            <button onClick={logout}
+              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-500 hover:text-red-500 hover:bg-red-50 transition-colors">
+              <LogOut size={13} className="flex-shrink-0" /> Sign Out
+            </button>
+          </div>
         </div>
       )}
     </div>
