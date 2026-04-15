@@ -49,6 +49,17 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
   }
 
+  // If rejected, remove the listing if it was previously approved
+  if (status === "rejected") {
+    if (app.type === "startup" && app.data?.name) {
+      const slug = app.data.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+      await Startup.findOneAndDelete({ slug });
+    } else if (app.type === "founder" && app.data?.fullName) {
+      const slug = app.data.fullName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+      await Founder.findOneAndDelete({ slug });
+    }
+  }
+
   // Send email
   if (app.userEmail && emailSubject && emailBody) {
     try {
