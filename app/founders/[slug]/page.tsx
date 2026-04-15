@@ -76,7 +76,7 @@ export default async function FounderPage({ params }: { params: { slug: string }
           <div className="lg:col-span-1 space-y-5">
             <div className="bg-white border border-brand-border overflow-hidden">
               <div className="flex justify-center pt-6 pb-2">
-                <div className="relative w-40 h-40 overflow-hidden rounded-full border-4 border-brand-border bg-gray-100">
+                <div className="relative w-40 h-40 overflow-hidden bg-gray-100">
                   {founder.avatar && <Image src={founder.avatar} alt={founder.name} fill
                     sizes="160px" quality={95}
                     className="object-cover object-top" priority />}
