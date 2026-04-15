@@ -96,6 +96,11 @@ export default function IdeasPage() {
                       className="w-full bg-white border border-brand-border text-gray-900 placeholder-gray-400 px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition-colors" />
                   </div>
                 </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Prototype / Website Link <span className="text-gray-400 normal-case font-normal">(if available)</span></label>
+                  <input type="text" placeholder="https://yourprototype.com or demo link"
+                    className="w-full bg-white border border-brand-border text-gray-900 placeholder-gray-400 px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition-colors" />
+                </div>
               </div>
 
               {/* Founder info */}
@@ -126,7 +131,7 @@ export default function IdeasPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">LinkedIn / Website</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Personal LinkedIn / Website</label>
                   <input type="text" placeholder="https://linkedin.com/in/yourname"
                     className="w-full bg-white border border-brand-border text-gray-900 placeholder-gray-400 px-4 py-3 text-sm focus:outline-none focus:border-brand-red transition-colors" />
                 </div>
