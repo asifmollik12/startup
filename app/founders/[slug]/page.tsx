@@ -75,26 +75,31 @@ export default async function FounderPage({ params }: { params: { slug: string }
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-5">
             <div className="bg-white border border-brand-border overflow-hidden">
-              <div className="relative w-full" style={{ aspectRatio: "4/5" }}>
-                {founder.avatar && <Image src={founder.avatar} alt={founder.name} fill
-                  sizes="(max-width: 1024px) 100vw, 33vw"
-                  quality={95}
-                  className="object-cover object-top" priority />}
+              <div className="flex justify-center pt-6 pb-2">
+                <div className="relative w-40 h-40 overflow-hidden rounded-full border-4 border-brand-border bg-gray-100">
+                  {founder.avatar && <Image src={founder.avatar} alt={founder.name} fill
+                    sizes="160px" quality={95}
+                    className="object-cover object-top" priority />}
+                </div>
+              </div>
+              {/* Badges row */}
+              <div className="flex items-center justify-center gap-2 pb-3">
                 {founder.rank && (
-                  <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-brand-dark/80 px-3 py-1.5">
-                    <Award size={12} className="text-brand-gold" />
-                    <span className="text-white text-xs font-bold">#{founder.rank} Bangladesh</span>
+                  <div className="flex items-center gap-1 bg-brand-dark px-2.5 py-1">
+                    <Award size={11} className="text-brand-gold" />
+                    <span className="text-white text-[10px] font-bold">#{founder.rank} Bangladesh</span>
                   </div>
                 )}
-                <div className="absolute top-4 right-4 bg-green-500 px-2 py-1 flex items-center gap-1">
+                <div className="flex items-center gap-1 bg-green-500 px-2.5 py-1">
                   <CheckCircle size={11} className="text-white" />
                   <span className="text-white text-[10px] font-bold uppercase tracking-wider">Verified</span>
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-5">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-brand-red bg-white/10 px-2 py-0.5">{founder.industry}</span>
-                  <h1 className="font-serif text-2xl font-bold text-white mt-1 leading-tight">{founder.name}</h1>
-                  <p className="text-gray-300 text-sm">{founder.title}</p>
-                </div>
+              </div>
+              {/* Name block */}
+              <div className="text-center px-6 pb-4 border-b border-brand-border">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-brand-red">{founder.industry}</span>
+                <h1 className="font-serif text-xl font-bold text-brand-dark mt-1 leading-tight">{founder.name}</h1>
+                <p className="text-gray-500 text-sm">{founder.title}</p>
               </div>
               <div className="px-6 pb-6 pt-5">
                 <p className="text-gray-500 text-sm mb-4 border-l-2 border-brand-red pl-3 italic">{founder.bio?.slice(0, 120)}…</p>
