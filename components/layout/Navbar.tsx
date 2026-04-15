@@ -175,7 +175,7 @@ export default function Navbar() {
           <div className="hidden sm:flex gap-5 text-[10px] tracking-widest uppercase text-gray-500">
             <Link href="/subscribe" className="hover:text-white transition-colors">Subscribe</Link>
             <span className="text-gray-700">|</span>
-            <Link href="/newsletter" className="hover:text-white transition-colors">Newsletter</Link>
+            <Link href="/subscribe" className="hover:text-white transition-colors">Materials</Link>
           </div>
         </div>
       </div>
