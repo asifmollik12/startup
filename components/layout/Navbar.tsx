@@ -2,9 +2,73 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X, Search, User, LogOut, ChevronDown } from "lucide-react";
 import { articles, founders, startups } from "@/lib/data";
 import SiteLogo from "@/components/SiteLogo";
+
+function UserMenu() {
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) setUser(JSON.parse(stored));
+  }, []);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const logout = () => {
+    localStorage.removeItem("user");
+    setUser(null);
+    setOpen(false);
+    router.push("/");
+    router.refresh();
+  };
+
+  if (!user) return (
+    <div className="hidden sm:flex items-center gap-2">
+      <Link href="/login" className="text-xs font-semibold text-gray-600 hover:text-brand-red transition-colors uppercase tracking-wider">Sign In</Link>
+      <Link href="/signup" className="btn-primary text-xs py-2 px-4">Join Free</Link>
+    </div>
+  );
+
+  return (
+    <div className="relative hidden sm:block" ref={ref}>
+      <button onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 px-3 py-1.5 border border-brand-border hover:border-brand-red transition-colors">
+        <div className="w-6 h-6 bg-brand-red flex items-center justify-center">
+          <span className="text-white text-[10px] font-bold">{user.name.charAt(0).toUpperCase()}</span>
+        </div>
+        <span className="text-xs font-semibold text-gray-700 max-w-[80px] truncate">{user.name}</span>
+        <ChevronDown size={12} className="text-gray-400" />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-brand-border shadow-lg z-50">
+          <div className="px-4 py-3 border-b border-brand-border">
+            <p className="text-sm font-semibold text-brand-dark truncate">{user.name}</p>
+            <p className="text-xs text-gray-400 truncate">{user.email}</p>
+          </div>
+          <Link href="/profile" onClick={() => setOpen(false)}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-brand-red hover:bg-brand-gray transition-colors">
+            <User size={13} /> My Profile
+          </Link>
+          <button onClick={logout}
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-red-500 hover:bg-red-50 transition-colors">
+            <LogOut size={13} /> Sign Out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const navLinks = [
   { label: "Features", href: "/articles" },
@@ -111,9 +175,7 @@ export default function Navbar() {
             <button onClick={handleOpen} className="p-2 text-gray-500 hover:text-brand-red transition-colors" aria-label="Search">
               <Search size={17} />
             </button>
-            <Link href="/subscribe" className="hidden sm:block btn-primary text-xs py-2 px-4">
-              Subscribe
-            </Link>
+            <UserMenu />
             <button className="lg:hidden p-2 text-gray-600" onClick={() => setOpen(!open)} aria-label="Toggle menu">
               {open ? <X size={20} /> : <Menu size={20} />}
             </button>
