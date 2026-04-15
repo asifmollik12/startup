@@ -33,12 +33,8 @@ export default async function StartupPage({ params }: { params: { slug: string }
     <div className="min-h-screen bg-white">
 
       {/* Hero banner */}
-      <div className="relative bg-brand-dark border-b border-white/10 overflow-hidden">
-        {startup.coverImage && (
-          <Image src={startup.coverImage} alt={startup.name} fill
-            sizes="100vw" quality={90} className="object-cover opacity-30" />
-        )}
-        <div className="relative container-wide py-10 lg:py-14">
+      <div className="bg-brand-dark border-b border-white/10">
+        <div className="container-wide py-10 lg:py-14">
           <Link href="/startups" className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-white transition-colors mb-8 uppercase tracking-wider">
             <ArrowLeft size={13} /> All Startups
           </Link>
