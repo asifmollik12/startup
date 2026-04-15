@@ -51,22 +51,22 @@ export default async function StartupsPage() {
           {startups.map((startup) => (
             <Link key={startup.id} href={`/startups/${startup.slug}`}
               className="group bg-white border border-brand-border card-hover block overflow-hidden">
-              <div className="relative h-40 overflow-hidden bg-gray-100">
-                {(startup.coverImage || startup.logo) ? (
-                  <Image src={startup.coverImage || startup.logo} alt={startup.name} fill
+              <div className="relative h-40 overflow-hidden bg-gray-50 border-b border-brand-border flex items-center justify-center p-6">
+                {startup.logo ? (
+                  <Image src={startup.logo} alt={startup.name}
+                    fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                    className="object-contain p-6 group-hover:scale-105 transition-transform duration-500" />
                 ) : (
-                  <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                    <span className="font-serif font-bold text-4xl text-gray-400">{startup.name?.charAt(0)}</span>
+                  <div className="w-16 h-16 bg-brand-red flex items-center justify-center">
+                    <span className="font-serif font-bold text-3xl text-white">{startup.name?.charAt(0)}</span>
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute top-3 right-3">
                   <span className={`badge text-[9px] ${stageColors[startup.stage] || ""}`}>{startup.stage}</span>
                 </div>
                 {startup.funding && (
-                  <div className="absolute bottom-3 left-3">
+                  <div className="absolute top-3 left-3">
                     <span className="bg-green-600 text-white text-xs font-bold px-2 py-0.5">{startup.funding} raised</span>
                   </div>
                 )}
