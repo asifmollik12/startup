@@ -28,7 +28,7 @@ const plans = [
     features: [
       "Everything in Free",
       "Exclusive in-depth reports",
-      "Early access to rankings",
+      "Early access to startup materials & resources",
       "Founder interviews & podcasts",
       "Investment deal flow alerts",
       "Priority support",
@@ -60,7 +60,7 @@ const plans = [
 
 const perks = [
   { icon: FileText, label: "Exclusive Reports", desc: "In-depth industry analysis not available to free readers" },
-  { icon: Trophy, label: "Early Rankings", desc: "Get our annual founder rankings before public release" },
+  { icon: Trophy, label: "Startup Materials", desc: "Templates, pitch decks, legal docs and resources for founders" },
   { icon: BarChart2, label: "Deal Flow Alerts", desc: "Investment opportunities and funding news first" },
   { icon: Users, label: "Founder Network", desc: "Connect with Bangladesh's top entrepreneurs" },
   { icon: Zap, label: "Weekly Briefing", desc: "Curated startup ecosystem news every Monday" },
