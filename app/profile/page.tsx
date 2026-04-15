@@ -2,19 +2,32 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { User, Mail, Edit2, Save, X, Lightbulb, BookOpen, LogOut, Upload, Trophy, Calendar } from "lucide-react";
+import { User, Mail, Edit2, Save, X, Lightbulb, BookOpen, LogOut, Upload, Trophy, Calendar, Users, Rocket, CheckCircle, Clock, XCircle } from "lucide-react";
 
 type UserData = { id: string; name: string; email: string; avatar: string; bio: string; ideas: any[] };
+type Application = { _id: string; type: string; status: string; createdAt: string; data: any };
+
+const inp = "w-full border border-brand-border px-4 py-2.5 text-sm focus:outline-none focus:border-brand-red transition-colors bg-white";
+const statusIcon = (s: string) => s === "approved" ? <CheckCircle size={13} className="text-green-500" /> : s === "rejected" ? <XCircle size={13} className="text-red-500" /> : <Clock size={13} className="text-amber-500" />;
+const statusLabel = (s: string) => s === "approved" ? "text-green-600" : s === "rejected" ? "text-red-500" : "text-amber-600";
 
 export default function ProfilePage() {
   const router = useRouter();
   const [user, setUser] = useState<UserData | null>(null);
-  const [tab, setTab] = useState<"overview" | "ideas" | "reading">("overview");
+  const [tab, setTab] = useState<"overview" | "ideas" | "reading" | "founder" | "startup">("overview");
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ name: "", bio: "" });
   const [saving, setSaving] = useState(false);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const avatarRef = useRef<HTMLInputElement>(null);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [appSubmitting, setAppSubmitting] = useState(false);
+  const [appSuccess, setAppSuccess] = useState("");
+
+  // Founder form
+  const [founderForm, setFounderForm] = useState({ fullName: "", title: "", company: "", industry: "", founded: "", location: "", bio: "", netWorth: "", linkedin: "", website: "" });
+  // Startup form
+  const [startupForm, setStartupForm] = useState({ name: "", tagline: "", description: "", industry: "", stage: "Seed", founded: "", location: "", funding: "", website: "", founders: "" });
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
@@ -24,6 +37,7 @@ export default function ProfilePage() {
       setUser(data);
       setForm({ name: data.name, bio: data.bio || "" });
     });
+    fetch(`/api/applications?userId=${local.id}`).then(r => r.json()).then(setApplications).catch(() => {});
   }, [router]);
 
   const handleSave = async () => {
@@ -49,21 +63,29 @@ export default function ProfilePage() {
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     const data = await res.json();
     if (data.url) {
-      const updated = await fetch(`/api/user/${user.id}`, {
-        method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: user.name, bio: user.bio, avatar: data.url }),
-      }).then(r => r.json());
+      await fetch(`/api/user/${user.id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: user.name, bio: user.bio, avatar: data.url }) });
       setUser({ ...user, avatar: data.url });
       localStorage.setItem("user", JSON.stringify({ ...JSON.parse(localStorage.getItem("user")!), avatar: data.url }));
     }
     setAvatarUploading(false);
   };
 
-  const logout = () => {
-    localStorage.removeItem("user");
-    router.push("/");
-    router.refresh();
+  const submitApplication = async (type: "founder" | "startup") => {
+    if (!user) return;
+    setAppSubmitting(true);
+    const data = type === "founder" ? founderForm : startupForm;
+    const res = await fetch("/api/applications", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, userId: user.id, userName: user.name, userEmail: user.email, data }),
+    });
+    const app = await res.json();
+    setApplications(prev => [app, ...prev]);
+    setAppSuccess(type === "founder" ? "Founder application submitted!" : "Startup application submitted!");
+    setTimeout(() => setAppSuccess(""), 4000);
+    setAppSubmitting(false);
   };
+
+  const logout = () => { localStorage.removeItem("user"); router.push("/"); router.refresh(); };
 
   if (!user) return (
     <div className="min-h-screen bg-brand-gray flex items-center justify-center">
@@ -154,14 +176,16 @@ export default function ProfilePage() {
       {/* Tabs */}
       <div className="bg-white border-b border-brand-border">
         <div className="container-wide">
-          <div className="flex gap-0">
+          <div className="flex gap-0 overflow-x-auto">
             {[
               { key: "overview", label: "Overview", icon: User },
               { key: "ideas", label: `My Ideas (${user.ideas?.length ?? 0})`, icon: Lightbulb },
               { key: "reading", label: "Reading List", icon: BookOpen },
+              { key: "founder", label: "Apply as Founder", icon: Users },
+              { key: "startup", label: "List Your Startup", icon: Rocket },
             ].map(({ key, label, icon: Icon }) => (
               <button key={key} onClick={() => setTab(key as any)}
-                className={`flex items-center gap-2 px-5 py-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-colors ${
+                className={`flex items-center gap-2 px-5 py-4 text-xs font-bold uppercase tracking-wider border-b-2 transition-colors whitespace-nowrap ${
                   tab === key ? "border-brand-red text-brand-red" : "border-transparent text-gray-500 hover:text-brand-dark"
                 }`}>
                 <Icon size={13} />{label}
@@ -247,6 +271,133 @@ export default function ProfilePage() {
             <BookOpen size={32} className="text-gray-300 mx-auto mb-3" />
             <p className="text-gray-400 mb-4">Your reading list is empty.</p>
             <Link href="/articles" className="btn-primary text-xs">Browse Features</Link>
+          </div>
+        )}
+
+        {(tab === "founder" || tab === "startup") && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              {appSuccess && (
+                <div className="flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 px-4 py-3 mb-5 text-sm">
+                  <CheckCircle size={15} /> {appSuccess}
+                </div>
+              )}
+
+              {tab === "founder" && (
+                <div className="bg-white border border-brand-border p-6 lg:p-8">
+                  <div className="flex items-center gap-2 mb-5">
+                    <div className="w-1 h-5 bg-brand-red" />
+                    <h2 className="font-serif text-xl font-bold text-brand-dark">Apply as a Founder</h2>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-6">Get featured on Start-Up News as a verified Bangladeshi founder.</p>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Full Name *</label>
+                        <input value={founderForm.fullName} onChange={e => setFounderForm({...founderForm, fullName: e.target.value})} className={inp} placeholder="Your full name" /></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Title *</label>
+                        <input value={founderForm.title} onChange={e => setFounderForm({...founderForm, title: e.target.value})} className={inp} placeholder="CEO & Co-Founder" /></div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Company *</label>
+                        <input value={founderForm.company} onChange={e => setFounderForm({...founderForm, company: e.target.value})} className={inp} placeholder="Company name" /></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Industry *</label>
+                        <input value={founderForm.industry} onChange={e => setFounderForm({...founderForm, industry: e.target.value})} className={inp} placeholder="e.g. Fintech, Edtech" /></div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Founded Year</label>
+                        <input value={founderForm.founded} onChange={e => setFounderForm({...founderForm, founded: e.target.value})} className={inp} placeholder="2020" /></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Location</label>
+                        <input value={founderForm.location} onChange={e => setFounderForm({...founderForm, location: e.target.value})} className={inp} placeholder="Dhaka" /></div>
+                    </div>
+                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Bio *</label>
+                      <textarea value={founderForm.bio} onChange={e => setFounderForm({...founderForm, bio: e.target.value})} rows={3} className={inp + " resize-none"} placeholder="Brief bio about yourself and your journey..." /></div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">LinkedIn</label>
+                        <input value={founderForm.linkedin} onChange={e => setFounderForm({...founderForm, linkedin: e.target.value})} className={inp} placeholder="https://linkedin.com/in/..." /></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Website</label>
+                        <input value={founderForm.website} onChange={e => setFounderForm({...founderForm, website: e.target.value})} className={inp} placeholder="https://..." /></div>
+                    </div>
+                    <button onClick={() => submitApplication("founder")} disabled={appSubmitting || !founderForm.fullName || !founderForm.company}
+                      className="w-full bg-brand-red text-white py-3 text-sm font-bold uppercase tracking-wider hover:bg-red-700 transition-colors disabled:opacity-50">
+                      {appSubmitting ? "Submitting..." : "Submit Founder Application"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {tab === "startup" && (
+                <div className="bg-white border border-brand-border p-6 lg:p-8">
+                  <div className="flex items-center gap-2 mb-5">
+                    <div className="w-1 h-5 bg-brand-red" />
+                    <h2 className="font-serif text-xl font-bold text-brand-dark">List Your Startup</h2>
+                  </div>
+                  <p className="text-gray-400 text-sm mb-6">Get your startup featured in Bangladesh's most comprehensive startup directory.</p>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Startup Name *</label>
+                        <input value={startupForm.name} onChange={e => setStartupForm({...startupForm, name: e.target.value})} className={inp} placeholder="Your startup name" /></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Industry *</label>
+                        <input value={startupForm.industry} onChange={e => setStartupForm({...startupForm, industry: e.target.value})} className={inp} placeholder="e.g. Fintech, Agritech" /></div>
+                    </div>
+                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Tagline *</label>
+                      <input value={startupForm.tagline} onChange={e => setStartupForm({...startupForm, tagline: e.target.value})} className={inp} placeholder="One-line description" /></div>
+                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Description *</label>
+                      <textarea value={startupForm.description} onChange={e => setStartupForm({...startupForm, description: e.target.value})} rows={3} className={inp + " resize-none"} placeholder="What does your startup do?" /></div>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Stage</label>
+                        <select value={startupForm.stage} onChange={e => setStartupForm({...startupForm, stage: e.target.value})} className={inp}>
+                          {["Pre-seed","Seed","Series A","Series B","Growth"].map(s => <option key={s}>{s}</option>)}
+                        </select></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Founded</label>
+                        <input value={startupForm.founded} onChange={e => setStartupForm({...startupForm, founded: e.target.value})} className={inp} placeholder="2022" /></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Location</label>
+                        <input value={startupForm.location} onChange={e => setStartupForm({...startupForm, location: e.target.value})} className={inp} placeholder="Dhaka" /></div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Funding Raised</label>
+                        <input value={startupForm.funding} onChange={e => setStartupForm({...startupForm, funding: e.target.value})} className={inp} placeholder="$500K" /></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Website</label>
+                        <input value={startupForm.website} onChange={e => setStartupForm({...startupForm, website: e.target.value})} className={inp} placeholder="https://..." /></div>
+                    </div>
+                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Founders (comma separated)</label>
+                      <input value={startupForm.founders} onChange={e => setStartupForm({...startupForm, founders: e.target.value})} className={inp} placeholder="Arif Hossain, Priya Das" /></div>
+                    <button onClick={() => submitApplication("startup")} disabled={appSubmitting || !startupForm.name || !startupForm.description}
+                      className="w-full bg-brand-red text-white py-3 text-sm font-bold uppercase tracking-wider hover:bg-red-700 transition-colors disabled:opacity-50">
+                      {appSubmitting ? "Submitting..." : "Submit Startup Application"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Applications sidebar */}
+            <div className="space-y-4">
+              <div className="bg-white border border-brand-border p-5">
+                <h3 className="font-bold text-xs uppercase tracking-wider text-gray-400 mb-4">My Applications</h3>
+                {applications.length === 0 ? (
+                  <p className="text-xs text-gray-400">No applications yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {applications.map(app => (
+                      <div key={app._id} className="border border-brand-border p-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-bold uppercase text-brand-dark">{app.type === "founder" ? "Founder" : "Startup"}</span>
+                          <div className={`flex items-center gap-1 text-xs font-semibold capitalize ${statusLabel(app.status)}`}>
+                            {statusIcon(app.status)} {app.status}
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-500">{app.data?.fullName || app.data?.name}</p>
+                        <p className="text-[10px] text-gray-400 mt-0.5">{new Date(app.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="bg-brand-dark text-white p-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Review Process</p>
+                <p className="text-xs text-gray-400 leading-relaxed">Applications are reviewed by our editorial team within 3-5 business days. You&apos;ll be notified by email.</p>
+              </div>
+            </div>
           </div>
         )}
       </div>
