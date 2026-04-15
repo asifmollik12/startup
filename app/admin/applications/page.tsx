@@ -29,23 +29,42 @@ export default function AdminApplications() {
 
   const openApp = (app: App) => {
     setSelected(app);
+    // Default to approval template — admin can edit before clicking either button
     const isStartup = app.type === "startup";
-    setEmailSubject(app.status === "approved"
-      ? `🎉 Congratulations! Your ${isStartup ? "startup" : "founder profile"} is now live on Start-Up News`
-      : `Update on your ${isStartup ? "startup" : "founder"} application`
-    );
-    setEmailBody(app.status === "approved"
-      ? `Dear ${app.userName},\n\nCongratulations! We're thrilled to inform you that your ${isStartup ? `startup "${app.data?.name}"` : `founder profile for "${app.data?.fullName}"`} has been approved and is now live on Start-Up News.\n\nYou can view your listing at start-upnews.com/${isStartup ? "startups" : "founders"}.\n\nThank you for being part of Bangladesh's premier startup community!\n\nBest regards,\nThe Start-Up News Team`
-      : `Dear ${app.userName},\n\nThank you for submitting your application to Start-Up News.\n\nAfter careful review, we were unable to approve your application at this time. We encourage you to reapply in the future.\n\nBest regards,\nThe Start-Up News Team`
-    );
+    setEmailSubject(`🎉 Congratulations! Your ${isStartup ? "startup" : "founder profile"} is now live on Start-Up News`);
+    setEmailBody(`Dear ${app.userName},\n\nCongratulations! We're thrilled to inform you that your ${isStartup ? `startup "${app.data?.name}"` : `founder profile for "${app.data?.fullName}"`} has been approved and is now live on Start-Up News.\n\nYou can view your listing at start-upnews.com/${isStartup ? "startups" : "founders"}.\n\nThank you for being part of Bangladesh's premier startup community!\n\nBest regards,\nThe Start-Up News Team`);
+  };
+
+  const getTemplate = (status: "approved" | "rejected", app: App) => {
+    const isStartup = app.type === "startup";
+    if (status === "approved") {
+      return {
+        subject: `🎉 Congratulations! Your ${isStartup ? "startup" : "founder profile"} is now live on Start-Up News`,
+        body: `Dear ${app.userName},\n\nCongratulations! We're thrilled to inform you that your ${isStartup ? `startup "${app.data?.name}"` : `founder profile for "${app.data?.fullName}"`} has been approved and is now live on Start-Up News.\n\nYou can view your listing at start-upnews.com/${isStartup ? "startups" : "founders"}.\n\nThank you for being part of Bangladesh's premier startup community!\n\nBest regards,\nThe Start-Up News Team`,
+      };
+    }
+    return {
+      subject: `Update on your ${isStartup ? "startup" : "founder"} application`,
+      body: `Dear ${app.userName},\n\nThank you for submitting your application to Start-Up News.\n\nAfter careful review, we were unable to approve your application at this time. We encourage you to reapply in the future.\n\nBest regards,\nThe Start-Up News Team`,
+    };
   };
 
   const handleAction = async (status: "approved" | "rejected") => {
     if (!selected) return;
     setProcessing(true);
+    // Use current email fields (admin may have edited them), but if they haven't changed from
+    // the approval template and we're rejecting, auto-switch to rejection template
+    const approvalSubject = getTemplate("approved", selected).subject;
+    let subject = emailSubject;
+    let body = emailBody;
+    if (status === "rejected" && emailSubject === approvalSubject) {
+      const t = getTemplate("rejected", selected);
+      subject = t.subject;
+      body = t.body;
+    }
     const res = await fetch(`/api/applications/${selected._id}`, {
       method: "PUT", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, emailSubject, emailBody }),
+      body: JSON.stringify({ status, emailSubject: subject, emailBody: body }),
     });
     const updated = await res.json();
     setApps(prev => prev.map(a => a._id === selected._id ? { ...a, status } : a));
@@ -166,7 +185,15 @@ export default function AdminApplications() {
 
               {/* Email customization */}
               <div className="space-y-3">
-                <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Notification Email</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Notification Email</p>
+                  <div className="flex gap-1">
+                    <button type="button" onClick={() => { const t = getTemplate("approved", selected); setEmailSubject(t.subject); setEmailBody(t.body); }}
+                      className="text-[10px] px-2 py-1 bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors font-semibold">Approval Template</button>
+                    <button type="button" onClick={() => { const t = getTemplate("rejected", selected); setEmailSubject(t.subject); setEmailBody(t.body); }}
+                      className="text-[10px] px-2 py-1 bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors font-semibold">Rejection Template</button>
+                  </div>
+                </div>
                 <div>
                   <label className="block text-xs text-gray-500 mb-1">Subject</label>
                   <input value={emailSubject} onChange={e => setEmailSubject(e.target.value)}
