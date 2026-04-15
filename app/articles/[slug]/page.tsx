@@ -33,19 +33,17 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   return (
     <article>
       {/* Hero */}
-      <div className="relative h-[60vh] lg:h-[75vh] overflow-hidden bg-gray-900">
+      <div className="relative h-[45vh] lg:h-[55vh] overflow-hidden bg-gray-900">
         {article.coverImage && (
-          <Image src={article.coverImage} alt={article.title} fill
-            sizes="100vw" quality={95}
-            className="object-cover" priority />
+          <Image src={article.coverImage} alt={article.title} fill className="object-cover" priority />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/10" />
-        <div className="absolute bottom-0 left-0 right-0 container-wide pb-10 lg:pb-14">
-          <Link href="/articles" className="inline-flex items-center gap-2 text-gray-400 hover:text-white text-xs mb-5 transition-colors uppercase tracking-wider">
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 container-wide pb-8">
+          <Link href="/articles" className="inline-flex items-center gap-2 text-gray-300 hover:text-white text-sm mb-4 transition-colors">
             <ArrowLeft size={13} /> Back to Features
           </Link>
-          <div className="mb-3"><span className="badge-red text-[9px]">{article.category}</span></div>
-          <h1 className="font-serif text-3xl lg:text-6xl font-bold text-white max-w-4xl leading-tight">{article.title}</h1>
+          <span className="badge-red mb-3 text-[9px]">{article.category}</span>
+          <h1 className="font-serif text-3xl lg:text-5xl font-bold text-white max-w-3xl leading-tight">{article.title}</h1>
         </div>
       </div>
 
