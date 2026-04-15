@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Save, Globe, Mail, Bell, Shield, ImageIcon, Upload, X } from "lucide-react";
 import { useSiteLogo } from "@/lib/SiteLogoContext";
 import Toast from "@/components/admin/Toast";
@@ -38,23 +38,40 @@ export default function AdminSettings() {
   };
   const [favicon, setFavicon] = useState<string | null>(null);
   const [faviconName, setFaviconName] = useState<string | null>(null);
+  const [faviconUploading, setFaviconUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFaviconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Load saved favicon on mount
+  useEffect(() => {
+    fetch("/api/settings?key=favicon").then(r => r.json()).then(url => {
+      if (url) { setFavicon(url); setFaviconName("Saved favicon"); }
+    }).catch(() => {});
+  }, []);
+
+  const handleFaviconChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const allowed = ["image/x-icon", "image/png", "image/svg+xml", "image/jpeg"];
-    if (!allowed.includes(file.type)) return;
+    setFaviconUploading(true);
     setFaviconName(file.name);
-    const reader = new FileReader();
-    reader.onload = (ev) => setFavicon(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    if (data.url) {
+      setFavicon(data.url);
+      // Save to DB immediately
+      await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "favicon", value: data.url }) });
+      toast("Favicon saved successfully");
+    }
+    setFaviconUploading(false);
   };
 
-  const removeFavicon = () => {
+  const removeFavicon = async () => {
     setFavicon(null);
     setFaviconName(null);
     if (fileRef.current) fileRef.current.value = "";
+    await fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "favicon", value: "" }) });
+    toast("Favicon removed");
   };
 
   const [site, setSiteState] = useState({
@@ -214,9 +231,10 @@ export default function AdminSettings() {
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-800 border border-gray-700 text-gray-300 text-xs font-medium rounded-lg hover:border-brand-red hover:text-white transition-colors"
+                    disabled={faviconUploading}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-800 border border-gray-700 text-gray-300 text-xs font-medium rounded-lg hover:border-brand-red hover:text-white transition-colors disabled:opacity-50"
                   >
-                    <Upload size={13} /> Upload Favicon
+                    <Upload size={13} /> {faviconUploading ? "Uploading..." : "Upload Favicon"}
                   </button>
                   {favicon && (
                     <button
