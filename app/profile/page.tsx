@@ -399,21 +399,27 @@ export default function ProfilePage() {
 
                     {/* Problem & Solution */}
                     <p className="text-[10px] font-bold uppercase tracking-widest text-brand-red pt-2">Problem & Solution</p>
-                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Problem</label>
-                      <textarea value={startupForm.problem} onChange={e => setStartupForm({...startupForm, problem: e.target.value})} rows={2} className={inp + " resize-none"} placeholder="What problem are you solving?" /></div>
-                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Solution</label>
-                      <textarea value={startupForm.solution} onChange={e => setStartupForm({...startupForm, solution: e.target.value})} rows={2} className={inp + " resize-none"} placeholder="How does your product solve it?" /></div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Problem</label>
+                        <textarea value={startupForm.problem} onChange={e => setStartupForm({...startupForm, problem: e.target.value})} rows={3} className={inp + " resize-none"} placeholder="What problem are you solving?" /></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Solution</label>
+                        <textarea value={startupForm.solution} onChange={e => setStartupForm({...startupForm, solution: e.target.value})} rows={3} className={inp + " resize-none"} placeholder="How does your product solve it?" /></div>
+                    </div>
 
                     {/* Business */}
                     <p className="text-[10px] font-bold uppercase tracking-widest text-brand-red pt-2">Business</p>
-                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Market Opportunity</label>
-                      <input value={startupForm.marketOpportunity} onChange={e => setStartupForm({...startupForm, marketOpportunity: e.target.value})} className={inp} placeholder="e.g. $2B TAM in Bangladesh" /></div>
-                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Business Model</label>
-                      <input value={startupForm.businessModel} onChange={e => setStartupForm({...startupForm, businessModel: e.target.value})} className={inp} placeholder="e.g. SaaS, Marketplace, B2B" /></div>
-                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Traction</label>
-                      <input value={startupForm.traction} onChange={e => setStartupForm({...startupForm, traction: e.target.value})} className={inp} placeholder="e.g. 10K users, $50K MRR" /></div>
-                    <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Competition</label>
-                      <input value={startupForm.competition} onChange={e => setStartupForm({...startupForm, competition: e.target.value})} className={inp} placeholder="Who are your main competitors?" /></div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Market Opportunity</label>
+                        <input value={startupForm.marketOpportunity} onChange={e => setStartupForm({...startupForm, marketOpportunity: e.target.value})} className={inp} placeholder="e.g. $2B TAM in Bangladesh" /></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Business Model</label>
+                        <input value={startupForm.businessModel} onChange={e => setStartupForm({...startupForm, businessModel: e.target.value})} className={inp} placeholder="e.g. SaaS, Marketplace, B2B" /></div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Traction</label>
+                        <input value={startupForm.traction} onChange={e => setStartupForm({...startupForm, traction: e.target.value})} className={inp} placeholder="e.g. 10K users, $50K MRR" /></div>
+                      <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Competition</label>
+                        <input value={startupForm.competition} onChange={e => setStartupForm({...startupForm, competition: e.target.value})} className={inp} placeholder="Who are your main competitors?" /></div>
+                    </div>
                     <div><label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Achievements</label>
                       <textarea value={startupForm.achievements} onChange={e => setStartupForm({...startupForm, achievements: e.target.value})} rows={2} className={inp + " resize-none"} placeholder="Awards, accelerators, press mentions..." /></div>
 
