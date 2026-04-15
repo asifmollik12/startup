@@ -83,14 +83,59 @@ export default function AdminSettings() {
   });
   const setSite = (val: typeof site) => { setSiteState(val); setDirty(true); };
 
+  // SEO state
+  const [seo, setSeoState] = useState({
+    title: "Start-Up News — Bangladesh's Premier Business Magazine",
+    description: "Discover Bangladesh's top entrepreneurs, startups, rankings, and business ideas. The definitive voice of Bangladeshi innovation.",
+    keywords: "Bangladesh entrepreneurs, startups, business, founders, rankings",
+    ogImage: "",
+  });
+  const setSeo = (val: typeof seo) => { setSeoState(val); setDirty(true); };
+  const [ogUploading, setOgUploading] = useState(false);
+  const ogRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/api/settings?key=seoTitle").then(r => r.json()),
+      fetch("/api/settings?key=seoDescription").then(r => r.json()),
+      fetch("/api/settings?key=seoKeywords").then(r => r.json()),
+      fetch("/api/settings?key=ogImage").then(r => r.json()),
+    ]).then(([title, description, keywords, ogImage]) => {
+      setSeoState(prev => ({
+        title: title || prev.title,
+        description: description || prev.description,
+        keywords: keywords || prev.keywords,
+        ogImage: ogImage || "",
+      }));
+    }).catch(() => {});
+  }, []);
+
+  const handleOgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setOgUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    if (data.url) setSeo({ ...seo, ogImage: data.url });
+    setOgUploading(false);
+  };
+
   const [notifs, setNotifsState] = useState({ newArticle: true, newFounder: false, newIdea: true });
   const setNotifs = (val: typeof notifs | ((prev: typeof notifs) => typeof notifs)) => {
     setNotifsState(val as any);
     setDirty(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    await Promise.all([
+      fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "seoTitle", value: seo.title }) }),
+      fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "seoDescription", value: seo.description }) }),
+      fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "seoKeywords", value: seo.keywords }) }),
+      fetch("/api/settings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "ogImage", value: seo.ogImage }) }),
+    ]);
     setSaved(true);
     setDirty(false);
     toast("Settings saved successfully");
@@ -270,9 +315,53 @@ export default function AdminSettings() {
 
         </div>
 
+        {/* SEO */}
+        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <div className="flex items-center gap-2.5 px-5 py-4 border-b border-gray-800">
+            <Globe size={15} className="text-brand-red" />
+            <h2 className="font-semibold text-white text-sm">SEO & Google Search</h2>
+            <span className="ml-auto text-[10px] text-gray-500 bg-gray-800 px-2 py-0.5 rounded">Controls Google search appearance</span>
+          </div>
+          <div className="p-5 space-y-4">
+            <Field label="SEO Title">
+              <input value={seo.title} onChange={e => setSeo({ ...seo, title: e.target.value })} className={inp} />
+              <p className="text-[10px] text-gray-500 mt-1">{seo.title.length}/60 chars recommended</p>
+            </Field>
+            <Field label="Meta Description">
+              <textarea value={seo.description} onChange={e => setSeo({ ...seo, description: e.target.value })} rows={2} className={inp + " resize-none"} />
+              <p className="text-[10px] text-gray-500 mt-1">{seo.description.length}/160 chars recommended</p>
+            </Field>
+            <Field label="Keywords">
+              <input value={seo.keywords} onChange={e => setSeo({ ...seo, keywords: e.target.value })} className={inp} placeholder="Bangladesh, startups, entrepreneurs, founders" />
+            </Field>
+            <Field label="OG Image (Social Share Image)">
+              {seo.ogImage ? (
+                <div className="relative border border-gray-700 rounded-lg overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={seo.ogImage} alt="OG" className="w-full h-32 object-cover" />
+                  <button type="button" onClick={() => setSeo({ ...seo, ogImage: "" })} className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded hover:bg-red-600 transition-colors"><X size={13} /></button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center gap-2 h-20 border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-brand-red transition-colors">
+                  <Upload size={16} className="text-gray-500" />
+                  <span className="text-xs text-gray-500">{ogUploading ? "Uploading..." : "Upload 1200×630px image"}</span>
+                  <input ref={ogRef} type="file" accept="image/*" onChange={handleOgUpload} className="hidden" />
+                </label>
+              )}
+              <p className="text-[10px] text-gray-500 mt-1">Shown when shared on Twitter, Facebook, WhatsApp etc.</p>
+            </Field>
+            {/* Google preview */}
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+              <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-3">Google Search Preview</p>
+              <p className="text-xs text-gray-500 mb-0.5">start-upnews.com</p>
+              <p className="text-blue-400 text-sm font-medium leading-snug mb-1 line-clamp-1">{seo.title}</p>
+              <p className="text-gray-400 text-xs line-clamp-2 leading-relaxed">{seo.description}</p>
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Notifications */}
-        <Section icon={Bell} title="Notifications">
+        {/* Notifications */}        <Section icon={Bell} title="Notifications">
           {[
             { key: "newArticle" as const, label: "New article published" },
             { key: "newFounder" as const, label: "New founder added" },

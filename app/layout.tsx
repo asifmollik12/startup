@@ -8,31 +8,49 @@ import { SiteSettings } from "@/lib/models/SiteSettings";
 
 export const revalidate = 0;
 
-async function getFavicon(): Promise<string | null> {
+async function getSetting(key: string): Promise<string | null> {
   try {
     await connectDB();
-    const s = await SiteSettings.findOne({ key: "favicon" }).lean() as any;
-    return s?.value ?? null;
+    const s = await SiteSettings.findOne({ key }).lean() as any;
+    return s?.value || null;
   } catch { return null; }
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const favicon = await getFavicon();
+  const [favicon, seoTitle, seoDesc, seoKeywords, ogImage] = await Promise.all([
+    getSetting("favicon"),
+    getSetting("seoTitle"),
+    getSetting("seoDescription"),
+    getSetting("seoKeywords"),
+    getSetting("ogImage"),
+  ]);
+
+  const title = seoTitle || "Start-Up News — Bangladesh's Premier Business Magazine";
+  const description = seoDesc || "Discover Bangladesh's top entrepreneurs, startups, rankings, and business ideas. The definitive voice of Bangladeshi innovation.";
+  const keywords = seoKeywords || "Bangladesh entrepreneurs, startups, business, founders, rankings";
+
   return {
-    title: "Start-Up News — Bangladesh's Premier Business Magazine",
-    description: "Discover Bangladesh's top entrepreneurs, startups, rankings, and business ideas. The definitive voice of Bangladeshi innovation.",
-    keywords: "Bangladesh entrepreneurs, startups, business, founders, rankings",
+    title,
+    description,
+    keywords,
     openGraph: {
-      title: "Start-Up News",
-      description: "Bangladesh's Premier Business Magazine",
+      title,
+      description,
       type: "website",
+      ...(ogImage ? { images: [{ url: ogImage, width: 1200, height: 630 }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(ogImage ? { images: [ogImage] } : {}),
     },
     ...(favicon ? { icons: { icon: favicon, shortcut: favicon } } : {}),
   };
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const favicon = await getFavicon();
+  const favicon = await getSetting("favicon");
   return (
     <html lang="en">
       <head>
