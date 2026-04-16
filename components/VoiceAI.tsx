@@ -6,20 +6,25 @@ type Message = { role: "user" | "ai"; text: string; typing?: boolean };
 
 // Parse basic markdown to JSX
 function parseMarkdown(text: string) {
-  // Remove ** bold markers and render as bold, handle * bullet points
   const lines = text.split("\n");
   return lines.map((line, i) => {
-    // Bullet point
-    const isBullet = line.trim().startsWith("* ") || line.trim().startsWith("- ");
+    const isBullet = /^[\*\-]\s/.test(line.trim());
     const content = isBullet ? line.trim().slice(2) : line;
-    // Bold: **text**
     const parts = content.split(/\*\*(.*?)\*\*/g);
-    const rendered = parts.map((p, j) => j % 2 === 1 ? <strong key={j} className="font-semibold text-brand-dark">{p}</strong> : p);
-    if (isBullet) return <li key={i} className="flex gap-2 items-start"><span className="text-brand-red mt-1 flex-shrink-0">•</span><span>{rendered}</span></li>;
-    if (!content.trim()) return <br key={i} />;
-    return <p key={i} className="mb-1">{rendered}</p>;
-  });
+    const rendered = parts.map((p, j) =>
+      j % 2 === 1 ? <strong key={j} className="font-semibold text-gray-900">{p}</strong> : p
+    );
+    if (isBullet) return (
+      <li key={i} className="flex gap-2 items-start py-0.5">
+        <span className="text-brand-red mt-1.5 flex-shrink-0 text-[10px]">●</span>
+        <span className="flex-1">{rendered}</span>
+      </li>
+    );
+    if (!content.trim()) return null;
+    return <p key={i} className="mb-1.5 leading-relaxed">{rendered}</p>;
+  }).filter(Boolean);
 }
+
 
 function TypingMessage({ text }: { text: string }) {
   const [displayed, setDisplayed] = useState("");

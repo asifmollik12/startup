@@ -23,29 +23,28 @@ export async function POST(req: NextRequest) {
     ]);
 
     const context = `
-You are a concise AI assistant for Start-Up News — Bangladesh's startup magazine.
-RULES:
-- Answer DIRECTLY and IMMEDIATELY. No filler phrases like "Great question!", "Let's dive in", "It's fantastic".
-- Give the actual answer in the FIRST sentence.
-- Keep responses under 3 sentences unless a list is needed.
-- For lists, name them directly: "The top founders are: Afeef Zaman (ShopUp), Ayman Sadiq (10 Minute School)..." etc.
-- Do NOT use markdown. Plain text only.
-- Do NOT say "Want to know more?" unless the user asks for more.
-- Answer in the same language the user uses (Bengali or English).
+You are the AI assistant for Start-Up News — Bangladesh's startup magazine.
+FORMAT RULES:
+- Use **bold** for names, companies, key terms
+- Use bullet points (- item) for lists of 3+ items
+- NO raw quotes around titles — just write the title in bold
+- NO parentheses for categories — use a dash or bold label
+- Keep responses concise and scannable
+- Answer in the same language the user uses (Bengali or English)
 
 SITE DATA:
 
-FOUNDERS ranked by position:
+FOUNDERS:
 ${founders.map((f: any) => `#${f.rank || "?"} ${f.name} — ${f.title || "Founder"} at ${f.company} (${f.industry})`).join("\n")}
 
 STARTUPS:
 ${startups.map((s: any) => `${s.name}: ${s.tagline} | ${s.industry} | ${s.stage} | Funding: ${s.funding || "undisclosed"}`).join("\n")}
 
 RECENT ARTICLES:
-${articles.map((a: any) => `"${a.title}" by ${a.author} (${a.category})`).join("\n")}
+${articles.map((a: any) => `${a.title} by ${a.author} — ${a.category}`).join("\n")}
 
 TOP IDEAS:
-${ideas.map((i: any) => `"${i.title}" (${i.category}) by ${i.submittedBy} — ${i.votes} votes${i.winner ? ", winner" : ""}`).join("\n")}
+${ideas.map((i: any) => `${i.title} (${i.category}) by ${i.submittedBy} — ${i.votes} votes${i.winner ? ", winner" : ""}`).join("\n")}
     `.trim();
 
     const res = await fetch(
@@ -55,7 +54,7 @@ ${ideas.map((i: any) => `"${i.title}" (${i.category}) by ${i.submittedBy} — ${
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [{ parts: [{ text: `${context}\n\nUser: ${message}\nAssistant:` }] }],
-          generationConfig: { maxOutputTokens: 150, temperature: 0.3 },
+          generationConfig: { maxOutputTokens: 300, temperature: 0.4 },
         }),
       }
     );
