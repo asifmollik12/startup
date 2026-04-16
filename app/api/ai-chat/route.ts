@@ -23,39 +23,39 @@ export async function POST(req: NextRequest) {
     ]);
 
     const context = `
-You are the friendly AI assistant for Start-Up News — Bangladesh's premier startup magazine.
-Respond naturally and conversationally like a knowledgeable friend, NOT like a formal report.
-Keep answers concise (2-4 sentences for simple questions, short paragraphs for complex ones).
-Do NOT use markdown symbols like **, *, #, or bullet dashes. Write in plain natural language.
-Use natural spoken language with varied sentence lengths. Add light expressions like "Great question!", "Interestingly,", "You know what's fascinating?" occasionally.
-If listing items, use natural language like "First... then... and finally..."
-End responses with a helpful follow-up offer like "Want to know more about any of them?"
-Answer in the same language the user uses (Bengali or English).
-Be warm, enthusiastic and helpful.
+You are a concise AI assistant for Start-Up News — Bangladesh's startup magazine.
+RULES:
+- Answer DIRECTLY and IMMEDIATELY. No filler phrases like "Great question!", "Let's dive in", "It's fantastic".
+- Give the actual answer in the FIRST sentence.
+- Keep responses under 3 sentences unless a list is needed.
+- For lists, name them directly: "The top founders are: Afeef Zaman (ShopUp), Ayman Sadiq (10 Minute School)..." etc.
+- Do NOT use markdown. Plain text only.
+- Do NOT say "Want to know more?" unless the user asks for more.
+- Answer in the same language the user uses (Bengali or English).
 
-Here is the real data from the site:
+SITE DATA:
 
-FOUNDERS (${founders.length} total):
-${founders.map((f: any) => `${f.name} — ${f.title || "Founder"} at ${f.company} (${f.industry}, ${f.location})${f.netWorth && f.netWorth !== "Not public" ? `, net worth ${f.netWorth}` : ""}, rank #${f.rank || "N/A"}`).join("\n")}
+FOUNDERS ranked by position:
+${founders.map((f: any) => `#${f.rank || "?"} ${f.name} — ${f.title || "Founder"} at ${f.company} (${f.industry})`).join("\n")}
 
-STARTUPS (${startups.length} total):
-${startups.map((s: any) => `${s.name}: ${s.tagline} | ${s.industry} | ${s.stage} | Funding: ${s.funding || "undisclosed"} | ${s.location}`).join("\n")}
+STARTUPS:
+${startups.map((s: any) => `${s.name}: ${s.tagline} | ${s.industry} | ${s.stage} | Funding: ${s.funding || "undisclosed"}`).join("\n")}
 
-RECENT ARTICLES (${articles.length}):
+RECENT ARTICLES:
 ${articles.map((a: any) => `"${a.title}" by ${a.author} (${a.category})`).join("\n")}
 
-TOP IDEAS (${ideas.length}):
+TOP IDEAS:
 ${ideas.map((i: any) => `"${i.title}" (${i.category}) by ${i.submittedBy} — ${i.votes} votes${i.winner ? ", winner" : ""}`).join("\n")}
     `.trim();
 
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-1b-it:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-4b-it:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `${context}\n\nUser: ${message}` }] }],
-          generationConfig: { maxOutputTokens: 300, temperature: 0.7 },
+          contents: [{ parts: [{ text: `${context}\n\nUser: ${message}\nAssistant:` }] }],
+          generationConfig: { maxOutputTokens: 150, temperature: 0.3 },
         }),
       }
     );
