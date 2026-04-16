@@ -123,60 +123,56 @@ export default function VoiceAI() {
     setLoading(false);
   };
 
-  const speak = (text: string) => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-    // Clean markdown
-    const clean = text
-      .replace(/\*\*(.*?)\*\*/g, "$1")
-      .replace(/\*/g, "")
-      .replace(/#+\s/g, "")
-      .replace(/\n+/g, ". ");
-
-    // Split into natural sentence chunks for smoother delivery
-    const sentences = clean.match(/[^.!?]+[.!?]+/g) || [clean];
-
-    let i = 0;
-    const speakNext = () => {
-      if (i >= sentences.length) { setSpeaking(false); return; }
-      const utt = new SpeechSynthesisUtterance(sentences[i].trim());
-
-      // Pick best natural voice
-      const voices = window.speechSynthesis.getVoices();
-      const preferred =
-        voices.find(v => v.name === "Google UK English Female") ||
-        voices.find(v => v.name === "Google US English") ||
-        voices.find(v => v.name.includes("Samantha")) ||
-        voices.find(v => v.name.includes("Karen")) ||
-        voices.find(v => v.name.includes("Daniel")) ||
-        voices.find(v => v.name.includes("Google") && v.lang.startsWith("en")) ||
-        voices.find(v => v.lang === "en-US" && !v.localService) ||
-        voices.find(v => v.lang.startsWith("en"));
-      if (preferred) utt.voice = preferred;
-
-      // Natural prosody — vary slightly per sentence for expression
-      const isQuestion = sentences[i].trim().endsWith("?");
-      const isExclamation = sentences[i].trim().endsWith("!");
-      utt.rate = isQuestion ? 0.88 : isExclamation ? 1.0 : 0.92;
-      utt.pitch = isQuestion ? 1.2 : isExclamation ? 1.1 : 1.0;
-      utt.volume = 1;
-
-      utt.onend = () => { i++; speakNext(); };
-      utt.onerror = () => { i++; speakNext(); };
-      window.speechSynthesis.speak(utt);
-    };
-
-    // Voices may not be loaded yet
-    if (window.speechSynthesis.getVoices().length === 0) {
-      window.speechSynthesis.onvoiceschanged = () => { setSpeaking(true); speakNext(); };
-    } else {
+  const speak = async (text: string) => {
+    try {
+      // Stop any current audio
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
       setSpeaking(true);
-      speakNext();
+
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!res.ok) {
+        // Fallback to browser TTS if ElevenLabs fails
+        speakFallback(text);
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => { setSpeaking(false); URL.revokeObjectURL(url); };
+      audio.onerror = () => { setSpeaking(false); speakFallback(text); };
+      audio.play();
+    } catch {
+      speakFallback(text);
     }
   };
 
-  const stopSpeaking = () => { window.speechSynthesis?.cancel(); setSpeaking(false); };
+  const speakFallback = (text: string) => {
+    if (!window.speechSynthesis) { setSpeaking(false); return; }
+    window.speechSynthesis.cancel();
+    const clean = text.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*/g, "").replace(/\n+/g, ". ");
+    const utt = new SpeechSynthesisUtterance(clean);
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => v.name.includes("Google") && v.lang.startsWith("en")) || voices.find(v => v.lang.startsWith("en"));
+    if (preferred) utt.voice = preferred;
+    utt.rate = 0.92; utt.pitch = 1.0;
+    utt.onend = () => setSpeaking(false);
+    window.speechSynthesis.speak(utt);
+  };
+
+  const stopSpeaking = () => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    window.speechSynthesis?.cancel();
+    setSpeaking(false);
+  };
 
   const suggestions = ["Who is the #1 founder?", "List fintech startups", "Latest articles", "Top ideas this month"];
 
