@@ -118,7 +118,7 @@ export default function VoiceAI() {
                 </div>
                 <div>
                   <p className="text-white font-bold text-sm">Start-Up News AI</p>
-                  <p className="text-gray-400 text-[10px]">Powered by Google Gemini</p>
+                  <p className="text-gray-400 text-[10px]">Powered by Alphainno</p>
                 </div>
               </div>
               <button onClick={() => { setOpen(false); stopSpeaking(); stopListening(); }}
