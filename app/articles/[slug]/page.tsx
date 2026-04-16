@@ -41,15 +41,6 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-async function getArticle(slug: string) {
-  try {
-    await connectDB();
-    const a = await ArticleModel.findOne({ slug }).lean() as any;
-    if (!a) return null;
-    return { ...a, id: a._id.toString() };
-  } catch { return null; }
-}
-
 async function getRelated(category: string, id: string) {
   try {
     await connectDB();
