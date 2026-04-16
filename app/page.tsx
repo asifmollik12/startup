@@ -6,8 +6,7 @@ import BestIdea from "@/components/sections/BestIdea";
 import LatestArticles from "@/components/sections/LatestArticles";
 import InlineAdBanner from "@/components/sections/InlineAdBanner";
 
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 export default function HomePage() {
   return (

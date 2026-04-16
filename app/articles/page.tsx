@@ -10,7 +10,7 @@ async function getArticles() {
   } catch { return []; }
 }
 
-export const revalidate = 0;
+export const revalidate = 30;
 
 export default async function ArticlesPage() {
   const articles = await getArticles();

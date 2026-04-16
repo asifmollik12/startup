@@ -5,7 +5,7 @@ import { connectDB } from "@/lib/mongodb";
 import { Startup } from "@/lib/models/Startup";
 import { ArrowLeft, MapPin, Calendar, Users, TrendingUp, Globe, Building2, ArrowUpRight } from "lucide-react";
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 async function getStartup(slug: string) {
   try {

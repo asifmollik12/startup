@@ -6,7 +6,7 @@ import { Clock, ArrowLeft, Share2, Bookmark, Twitter, Linkedin } from "lucide-re
 import { connectDB } from "@/lib/mongodb";
 import { Article as ArticleModel } from "@/lib/models/Article";
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 async function getArticle(slug: string) {
   try {

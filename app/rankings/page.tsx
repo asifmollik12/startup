@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import { Founder as FounderModel } from "@/lib/models/Founder";
 import { Trophy, TrendingUp, ArrowUpRight, Crown, Medal, Award } from "lucide-react";
 
-export const revalidate = 0;
+export const revalidate = 30;
 
 async function getFounders() {
   try {

@@ -6,7 +6,13 @@ const nextConfig = {
       { protocol: "https", hostname: "randomuser.me" },
       { protocol: "https", hostname: "res.cloudinary.com" },
     ],
+    minimumCacheTTL: 3600,
   },
+  experimental: {
+    optimizeCss: true,
+  },
+  compress: true,
+  poweredByHeader: false,
 };
 
 module.exports = nextConfig;

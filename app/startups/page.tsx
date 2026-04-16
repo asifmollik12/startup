@@ -4,7 +4,7 @@ import { connectDB } from "@/lib/mongodb";
 import { Startup as StartupModel } from "@/lib/models/Startup";
 import { MapPin, Calendar, Users } from "lucide-react";
 
-export const revalidate = 0;
+export const revalidate = 30;
 
 const stageColors: Record<string, string> = {
   "Pre-seed": "bg-gray-100 text-gray-600",

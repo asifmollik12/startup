@@ -6,7 +6,7 @@ import { connectDB } from "@/lib/mongodb";
 import { Founder as FounderModel } from "@/lib/models/Founder";
 import { Article as ArticleModel } from "@/lib/models/Article";
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 async function getFounder(slug: string) {
   try {
