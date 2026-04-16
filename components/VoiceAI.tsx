@@ -2,7 +2,48 @@
 import { useState, useRef, useEffect } from "react";
 import { Mic, MicOff, X, Loader2, Volume2, Send } from "lucide-react";
 
-type Message = { role: "user" | "ai"; text: string };
+type Message = { role: "user" | "ai"; text: string; typing?: boolean };
+
+// Parse basic markdown to JSX
+function parseMarkdown(text: string) {
+  // Remove ** bold markers and render as bold, handle * bullet points
+  const lines = text.split("\n");
+  return lines.map((line, i) => {
+    // Bullet point
+    const isBullet = line.trim().startsWith("* ") || line.trim().startsWith("- ");
+    const content = isBullet ? line.trim().slice(2) : line;
+    // Bold: **text**
+    const parts = content.split(/\*\*(.*?)\*\*/g);
+    const rendered = parts.map((p, j) => j % 2 === 1 ? <strong key={j} className="font-semibold text-brand-dark">{p}</strong> : p);
+    if (isBullet) return <li key={i} className="flex gap-2 items-start"><span className="text-brand-red mt-1 flex-shrink-0">•</span><span>{rendered}</span></li>;
+    if (!content.trim()) return <br key={i} />;
+    return <p key={i} className="mb-1">{rendered}</p>;
+  });
+}
+
+function TypingMessage({ text }: { text: string }) {
+  const [displayed, setDisplayed] = useState("");
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    setDisplayed("");
+    setDone(false);
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) { clearInterval(interval); setDone(true); }
+    }, 12);
+    return () => clearInterval(interval);
+  }, [text]);
+
+  return (
+    <ul className="space-y-0.5 list-none">
+      {parseMarkdown(displayed)}
+      {!done && <span className="inline-block w-1 h-4 bg-brand-red animate-pulse ml-0.5 align-middle" />}
+    </ul>
+  );
+}
 
 export default function VoiceAI() {
   const [open, setOpen] = useState(false);
@@ -72,7 +113,7 @@ export default function VoiceAI() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       const reply = data.reply || "I didn't get a response. Please try again.";
-      setMessages(prev => [...prev, { role: "ai", text: reply }]);
+      setMessages(prev => [...prev, { role: "ai", text: reply, typing: true }]);
       speak(reply);
     } catch (e: any) {
       const errMsg = "Sorry, something went wrong. Please try again.";
@@ -154,7 +195,10 @@ export default function VoiceAI() {
                       ? "bg-brand-red text-white rounded-2xl rounded-tr-sm"
                       : "bg-white border border-brand-border text-gray-700 rounded-2xl rounded-tl-sm shadow-sm"
                   }`}>
-                    {m.text}
+                    {m.role === "ai"
+                      ? (m.typing ? <TypingMessage text={m.text} /> : <ul className="space-y-0.5 list-none">{parseMarkdown(m.text)}</ul>)
+                      : m.text
+                    }
                   </div>
                 </div>
               ))}
