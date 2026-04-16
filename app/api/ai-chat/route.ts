@@ -48,15 +48,21 @@ export async function POST(req: NextRequest) {
       Idea.find().select("title category submittedBy votes winner").limit(10).lean(),
     ]);
 
+    // Detect if the user's message is Bengali
+    const isBengaliMessage = /[\u0980-\u09FF]/.test(message);
+    const langInstruction = isBengaliMessage
+      ? "IMPORTANT: The user wrote in Bengali. You MUST reply entirely in Bengali (বাংলা). Do NOT use English."
+      : "IMPORTANT: The user wrote in English. You MUST reply entirely in English. Do NOT use Bengali.";
+
     const context = `
 You are the AI assistant for Start-Up News — Bangladesh's startup magazine.
+${langInstruction}
 FORMAT RULES:
 - Use **bold** for names, companies, key terms
 - Use bullet points (- item) for lists of 3+ items
 - NO raw quotes around titles — just write the title in bold
 - NO parentheses for categories — use a dash or bold label
 - Keep responses concise and scannable
-- Answer in the same language the user uses (Bengali or English)
 
 SITE DATA:
 

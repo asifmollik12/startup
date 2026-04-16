@@ -56,9 +56,14 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           text: clean,
-          // eleven_multilingual_v2 supports Bengali; turbo only supports English
+          // eleven_multilingual_v2 supports Bengali naturally; turbo only supports English
           model_id: isBengali ? "eleven_multilingual_v2" : "eleven_turbo_v2_5",
-          voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.2, use_speaker_boost: true },
+          voice_settings: {
+            stability: isBengali ? 0.6 : 0.5,
+            similarity_boost: 0.8,
+            style: isBengali ? 0.1 : 0.2,
+            use_speaker_boost: true,
+          },
         }),
       }
     );

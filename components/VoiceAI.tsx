@@ -139,7 +139,9 @@ export default function VoiceAI() {
     if (!SpeechRecognition) { setError("Voice not supported. Use the text box below."); return; }
 
     const rec = new SpeechRecognition();
-    rec.lang = "bn-BD";
+    // Use 'en-US' as default — browser handles Bengali too if user speaks it
+    // We detect language from the transcript after capture
+    rec.lang = "en-US";
     rec.interimResults = true;
     rec.continuous = true; // keep listening until silence detected
     let finalText = "";
