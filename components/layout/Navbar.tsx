@@ -207,63 +207,81 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Search bar */}
-        <div ref={searchRef} className={`border-t border-brand-border overflow-hidden transition-all duration-300 ease-out ${searchOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
-          <div className="py-3 relative">
-            <div className="relative flex items-center">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              {searching && <div className="absolute right-10 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-brand-red border-t-transparent rounded-full animate-spin" />}
-              <input
-                ref={inputRef}
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Search founders, startups, articles..."
-                className="w-full bg-white border border-brand-border text-gray-900 placeholder-gray-400 pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:border-brand-red transition-colors"
-              />
-              <button onClick={handleClose} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors">
-                <X size={15} />
-              </button>
-            </div>
-
-            {query.trim() && (
-              <div className="absolute left-0 right-0 bg-white border border-gray-200 shadow-2xl mt-1 z-50 max-h-96 overflow-y-auto">
-                {!searching && results.length === 0 ? (
-                  <div className="px-4 py-6 text-center text-gray-400 text-sm">No results for &ldquo;{query}&rdquo;</div>
-                ) : (
-                  <>
-                    {results.map((r, i) => (
-                      <Link key={i} href={r.href} onClick={handleClose}
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-brand-gray border-b border-gray-100 last:border-0 transition-colors group">
-                        {/* Image */}
-                        <div className="w-10 h-10 flex-shrink-0 overflow-hidden bg-gray-100">
-                          {r.image ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={r.image} alt={r.title} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full bg-brand-red flex items-center justify-center">
-                              <span className="text-white text-xs font-bold">{r.title.charAt(0)}</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-brand-red transition-colors">{r.title}</p>
-                          <p className="text-xs text-gray-400">{r.subtitle}</p>
-                        </div>
-                        <span className={`badge text-[9px] flex-shrink-0 ${typeBadge[r.type]}`}>{typeLabel[r.type]}</span>
-                      </Link>
-                    ))}
-                    {results.length > 0 && (
-                      <button onClick={() => { router.push(`/search?q=${encodeURIComponent(query.trim())}`); handleClose(); }}
-                        className="w-full px-4 py-3 bg-brand-gray border-t border-gray-100 text-xs text-brand-red font-semibold hover:bg-brand-red hover:text-white transition-colors text-center">
-                        See all results for &ldquo;{query}&rdquo; →
-                      </button>
-                    )}
-                  </>
-                )}
+        {/* Search bar — full overlay */}
+        <div className={`fixed inset-0 z-[80] transition-all duration-200 ${searchOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
+          {/* Search panel */}
+          <div className={`absolute top-0 left-0 right-0 bg-white shadow-2xl transition-transform duration-300 ease-out ${searchOpen ? "translate-y-0" : "-translate-y-full"}`}>
+            <div ref={searchRef} className="container-wide py-4">
+              <div className="relative flex items-center gap-3">
+                <Search size={20} className="text-gray-400 flex-shrink-0" />
+                <input
+                  ref={inputRef}
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Search founders, startups, articles..."
+                  className="flex-1 text-lg text-gray-900 placeholder-gray-300 focus:outline-none bg-transparent border-0"
+                />
+                {searching && <div className="w-5 h-5 border-2 border-brand-red border-t-transparent rounded-full animate-spin flex-shrink-0" />}
+                <button onClick={handleClose} className="p-2 text-gray-400 hover:text-gray-700 transition-colors flex-shrink-0">
+                  <X size={20} />
+                </button>
               </div>
-            )}
+              <div className="h-px bg-brand-border mt-3" />
+
+              {/* Results dropdown */}
+              {query.trim() && (
+                <div className="mt-2 max-h-[60vh] overflow-y-auto">
+                  {!searching && results.length === 0 ? (
+                    <div className="py-8 text-center text-gray-400 text-sm">No results for &ldquo;{query}&rdquo;</div>
+                  ) : (
+                    <div className="divide-y divide-gray-100">
+                      {results.map((r, i) => (
+                        <Link key={i} href={r.href} onClick={handleClose}
+                          className="flex items-center gap-4 py-3 hover:bg-brand-gray transition-colors group px-1">
+                          <div className="w-12 h-12 flex-shrink-0 overflow-hidden bg-gray-100">
+                            {r.image ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={r.image} alt={r.title} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full bg-brand-red flex items-center justify-center">
+                                <span className="text-white text-sm font-bold">{r.title.charAt(0)}</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-brand-red transition-colors">{r.title}</p>
+                            <p className="text-xs text-gray-400">{r.subtitle}</p>
+                          </div>
+                          <span className={`text-[9px] font-bold uppercase px-2 py-0.5 flex-shrink-0 ${typeBadge[r.type]}`}>{typeLabel[r.type]}</span>
+                        </Link>
+                      ))}
+                      {results.length > 0 && (
+                        <button onClick={() => { router.push(`/search?q=${encodeURIComponent(query.trim())}`); handleClose(); }}
+                          className="w-full py-3 text-xs text-brand-red font-bold uppercase tracking-wider hover:bg-brand-red hover:text-white transition-colors text-center">
+                          View all results for &ldquo;{query}&rdquo; →
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {!query.trim() && (
+                <div className="py-4 flex flex-wrap gap-2">
+                  <span className="text-xs text-gray-400 mr-2">Try:</span>
+                  {["Fintech", "Founder", "Startup", "Dhaka", "EdTech"].map(s => (
+                    <button key={s} onClick={() => setQuery(s)}
+                      className="text-xs border border-brand-border px-3 py-1 text-gray-500 hover:border-brand-red hover:text-brand-red transition-colors">
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
