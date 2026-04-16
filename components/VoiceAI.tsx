@@ -100,7 +100,7 @@ export default function VoiceAI() {
     <>
       {/* Mic button */}
       <button onClick={() => setOpen(true)}
-        className="relative p-2 text-brand-red hover:text-red-700 transition-colors" aria-label="AI Assistant">
+        className="relative p-2 text-gray-500 hover:text-brand-red transition-colors" aria-label="AI Assistant">
         <Mic size={17} />
         <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-brand-red rounded-full animate-pulse" />
       </button>

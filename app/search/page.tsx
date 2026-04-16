@@ -1,154 +1,104 @@
 import Image from "next/image";
 import Link from "next/link";
-import { articles, founders, startups } from "@/lib/data";
+import { connectDB } from "@/lib/mongodb";
+import { Article as ArticleModel } from "@/lib/models/Article";
+import { Founder as FounderModel } from "@/lib/models/Founder";
+import { Startup as StartupModel } from "@/lib/models/Startup";
 import { formatDate } from "@/lib/utils";
-import { Search, Clock, MapPin, Building2, FileText, Users, Rocket } from "lucide-react";
+import { Search, Clock, MapPin, Building2, FileText, Users, Rocket, ArrowRight } from "lucide-react";
 
-interface Props {
-  searchParams: { q?: string };
-}
+export const revalidate = 0;
 
-function searchAll(query: string) {
-  const q = query.toLowerCase().trim();
-  if (!q) return { articles: [], founders: [], startups: [], total: 0 };
+interface Props { searchParams: { q?: string } }
 
-  const matchedArticles = articles.filter(
-    (a) =>
-      a.title.toLowerCase().includes(q) ||
-      a.excerpt.toLowerCase().includes(q) ||
-      a.category.toLowerCase().includes(q) ||
-      a.author.toLowerCase().includes(q) ||
-      a.tags.some((t) => t.toLowerCase().includes(q))
-  );
-
-  const matchedFounders = founders.filter(
-    (f) =>
-      f.name.toLowerCase().includes(q) ||
-      f.company.toLowerCase().includes(q) ||
-      f.industry.toLowerCase().includes(q) ||
-      f.bio.toLowerCase().includes(q) ||
-      f.location.toLowerCase().includes(q)
-  );
-
-  const matchedStartups = startups.filter(
-    (s) =>
-      s.name.toLowerCase().includes(q) ||
-      s.tagline.toLowerCase().includes(q) ||
-      s.description.toLowerCase().includes(q) ||
-      s.industry.toLowerCase().includes(q) ||
-      s.location.toLowerCase().includes(q) ||
-      s.founders.some((f) => f.toLowerCase().includes(q))
-  );
-
+async function searchAll(query: string) {
+  if (!query.trim()) return { articles: [], founders: [], startups: [], total: 0 };
+  const q = query.trim();
+  const regex = new RegExp(q, "i");
+  await connectDB();
+  const [articles, founders, startups] = await Promise.all([
+    ArticleModel.find({ $or: [{ title: regex }, { excerpt: regex }, { category: regex }, { author: regex }, { tags: regex }] }).limit(6).lean(),
+    FounderModel.find({ $or: [{ name: regex }, { company: regex }, { industry: regex }, { bio: regex }, { location: regex }] }).limit(6).lean(),
+    StartupModel.find({ $or: [{ name: regex }, { tagline: regex }, { description: regex }, { industry: regex }, { location: regex }] }).limit(6).lean(),
+  ]);
   return {
-    articles: matchedArticles,
-    founders: matchedFounders,
-    startups: matchedStartups,
-    total: matchedArticles.length + matchedFounders.length + matchedStartups.length,
+    articles: articles.map((a: any) => ({ ...a, id: a._id.toString() })),
+    founders: founders.map((f: any) => ({ ...f, id: f._id.toString() })),
+    startups: startups.map((s: any) => ({ ...s, id: s._id.toString() })),
+    total: articles.length + founders.length + startups.length,
   };
 }
 
-function highlight(text: string, query: string) {
-  if (!query.trim()) return text;
-  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi");
-  const parts = text.split(regex);
-  return parts.map((part, i) =>
-    regex.test(part) ? (
-      <mark key={i} className="bg-yellow-200 text-brand-dark rounded px-0.5">
-        {part}
-      </mark>
-    ) : (
-      part
-    )
-  );
+function Highlight({ text, query }: { text: string; query: string }) {
+  if (!query.trim() || !text) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi"));
+  return <>{parts.map((p, i) => parts.length > 1 && i % 2 === 1 ? <mark key={i} className="bg-yellow-200 text-brand-dark px-0.5 rounded">{p}</mark> : p)}</>;
 }
 
-export default function SearchPage({ searchParams }: Props) {
+export default async function SearchPage({ searchParams }: Props) {
   const query = searchParams.q || "";
-  const { articles: matchedArticles, founders: matchedFounders, startups: matchedStartups, total } = searchAll(query);
+  const { articles, founders, startups, total } = await searchAll(query);
 
   return (
-    <div className="section-pad">
-      <div className="container-wide">
-        {/* Search header */}
-        <div className="mb-10">
+    <div className="min-h-screen bg-white">
+      {/* Search hero */}
+      <div className="bg-brand-dark border-b border-white/10">
+        <div className="container-wide py-10">
           <form action="/search" method="GET">
-            <div className="relative max-w-2xl">
-              <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-muted" />
-              <input
-                type="search"
-                name="q"
-                defaultValue={query}
+            <div className="relative max-w-2xl mx-auto">
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input type="search" name="q" defaultValue={query} autoFocus
                 placeholder="Search founders, startups, articles..."
-                className="w-full bg-brand-surface border-2 border-brand-border focus:border-brand-red text-white placeholder-brand-muted pl-12 pr-4 py-4 text-base focus:outline-none transition-colors"
-                autoFocus
-              />
-              <button
-                type="submit"
-                className="absolute right-0 top-0 bottom-0 bg-brand-red text-white px-6 font-semibold hover:bg-red-800 transition-colors"
-              >
-                Search
+                className="w-full bg-white/10 border border-white/20 text-white placeholder-gray-500 pl-11 pr-32 py-4 text-base focus:outline-none focus:border-brand-red transition-colors" />
+              <button type="submit"
+                className="absolute right-0 top-0 bottom-0 bg-brand-red text-white px-6 text-sm font-bold uppercase tracking-wider hover:bg-red-700 transition-colors flex items-center gap-2">
+                Search <ArrowRight size={14} />
               </button>
             </div>
           </form>
-
           {query && (
-            <div className="mt-4 flex items-center gap-3 flex-wrap">
-              <p className="text-brand-muted text-sm">
-                {total > 0 ? (
-                  <>
-                    Found <span className="font-bold text-brand-dark">{total} result{total !== 1 ? "s" : ""}</span> for{" "}
-                    <span className="font-bold text-brand-red">&ldquo;{query}&rdquo;</span>
-                  </>
-                ) : (
-                  <>
-                    No results for <span className="font-bold text-brand-red">&ldquo;{query}&rdquo;</span>
-                  </>
-                )}
+            <div className="flex items-center gap-3 mt-4 max-w-2xl mx-auto flex-wrap">
+              <p className="text-gray-400 text-sm">
+                {total > 0 ? <><span className="text-white font-bold">{total} result{total !== 1 ? "s" : ""}</span> for <span className="text-brand-red font-bold">&ldquo;{query}&rdquo;</span></> : <>No results for <span className="text-brand-red font-bold">&ldquo;{query}&rdquo;</span></>}
               </p>
-              {total > 0 && (
-                <div className="flex gap-2 flex-wrap">
-                  {matchedArticles.length > 0 && (
-                    <a href="#articles" className="badge bg-blue-100 text-blue-700 text-[10px]">
-                      {matchedArticles.length} Article{matchedArticles.length !== 1 ? "s" : ""}
-                    </a>
-                  )}
-                  {matchedFounders.length > 0 && (
-                    <a href="#founders" className="badge bg-green-100 text-green-700 text-[10px]">
-                      {matchedFounders.length} Founder{matchedFounders.length !== 1 ? "s" : ""}
-                    </a>
-                  )}
-                  {matchedStartups.length > 0 && (
-                    <a href="#startups" className="badge bg-purple-100 text-purple-700 text-[10px]">
-                      {matchedStartups.length} Startup{matchedStartups.length !== 1 ? "s" : ""}
-                    </a>
-                  )}
-                </div>
-              )}
+              <div className="flex gap-2 ml-auto">
+                {articles.length > 0 && <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 font-bold uppercase">{articles.length} Articles</span>}
+                {founders.length > 0 && <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 font-bold uppercase">{founders.length} Founders</span>}
+                {startups.length > 0 && <span className="text-[10px] bg-purple-500/20 text-purple-400 px-2 py-0.5 font-bold uppercase">{startups.length} Startups</span>}
+              </div>
             </div>
           )}
         </div>
+      </div>
 
-        {/* No query state */}
+      <div className="container-wide py-10">
+        {/* Empty state */}
         {!query && (
           <div className="text-center py-20">
-            <Search size={48} className="text-gray-200 mx-auto mb-4" />
-            <h2 className="font-serif text-2xl font-bold text-gray-300 mb-2">Start searching</h2>
-            <p className="text-brand-muted">Type a keyword and press Enter to find articles, founders, and startups.</p>
+            <div className="w-16 h-16 bg-brand-gray border border-brand-border flex items-center justify-center mx-auto mb-4">
+              <Search size={28} className="text-gray-300" />
+            </div>
+            <h2 className="font-serif text-2xl font-bold text-brand-dark mb-2">Search Start-Up News</h2>
+            <p className="text-gray-400 mb-6">Find founders, startups and articles from Bangladesh's startup ecosystem</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {["Fintech", "Startup", "Founder", "Agritech", "Dhaka", "EdTech"].map(s => (
+                <a key={s} href={`/search?q=${s}`} className="text-xs border border-brand-border px-4 py-2 text-gray-600 hover:border-brand-red hover:text-brand-red transition-colors">{s}</a>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* No results state */}
+        {/* No results */}
         {query && total === 0 && (
           <div className="text-center py-20">
-            <Search size={48} className="text-gray-200 mx-auto mb-4" />
-            <h2 className="font-serif text-2xl font-bold text-white mb-2">No results found</h2>
-            <p className="text-gray-500 mb-6">We couldn&apos;t find anything matching &ldquo;{query}&rdquo;. Try a different keyword.</p>
+            <div className="w-16 h-16 bg-brand-gray border border-brand-border flex items-center justify-center mx-auto mb-4">
+              <Search size={28} className="text-gray-300" />
+            </div>
+            <h2 className="font-serif text-2xl font-bold text-brand-dark mb-2">No results found</h2>
+            <p className="text-gray-400 mb-6">Nothing matched &ldquo;{query}&rdquo;. Try a different keyword.</p>
             <div className="flex flex-wrap gap-2 justify-center">
-              {["fintech", "startup", "founder", "agritech", "dhaka"].map((s) => (
-                <a key={s} href={`/search?q=${s}`} className="badge-gray capitalize hover:bg-brand-red hover:text-white transition-colors cursor-pointer">
-                  {s}
-                </a>
+              {["Fintech", "Startup", "Founder", "Agritech", "Dhaka"].map(s => (
+                <a key={s} href={`/search?q=${s}`} className="text-xs border border-brand-border px-4 py-2 text-gray-600 hover:border-brand-red hover:text-brand-red transition-colors">{s}</a>
               ))}
             </div>
           </div>
@@ -156,39 +106,34 @@ export default function SearchPage({ searchParams }: Props) {
 
         {/* Results */}
         {total > 0 && (
-          <div className="space-y-14">
+          <div className="space-y-12">
 
             {/* Articles */}
-            {matchedArticles.length > 0 && (
-              <section id="articles">
-                <div className="flex items-center gap-3 mb-6 pb-3 border-b border-brand-border pb-3">
-                  <FileText size={18} className="text-brand-red" />
-                  <h2 className="font-serif text-2xl font-bold text-brand-dark">Articles</h2>
-                  <span className="badge bg-blue-100 text-blue-700 text-[10px] ml-auto">{matchedArticles.length} found</span>
+            {articles.length > 0 && (
+              <section>
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-brand-border">
+                  <FileText size={16} className="text-brand-red" />
+                  <h2 className="font-serif text-xl font-bold text-brand-dark">Articles</h2>
+                  <span className="ml-auto text-xs text-gray-400">{articles.length} found</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {matchedArticles.map((article) => (
-                    <Link key={article.id} href={`/articles/${article.slug}`} className="group block dark-card hover:border-brand-red transition-colors card-hover">
-                      <div className="relative aspect-video overflow-hidden">
-                        <Image src={article.coverImage} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <div className="absolute top-3 left-3">
-                          <span className="badge-red text-[10px]">{article.category}</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {articles.map((a: any) => (
+                    <Link key={a.id} href={`/articles/${a.slug}`} className="group bg-white border border-brand-border hover:border-brand-red transition-colors block overflow-hidden card-hover">
+                      {a.coverImage && (
+                        <div className="relative aspect-video overflow-hidden bg-gray-100">
+                          <Image src={a.coverImage} alt={a.title} fill sizes="33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
                         </div>
-                      </div>
+                      )}
                       <div className="p-4">
-                        <h3 className="font-serif font-bold text-base text-white group-hover:text-brand-red transition-colors leading-snug mb-2">
-                          {highlight(article.title, query)}
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-brand-red">{a.category}</span>
+                        <h3 className="font-serif font-bold text-sm text-brand-dark group-hover:text-brand-red transition-colors mt-1 mb-2 leading-snug line-clamp-2">
+                          <Highlight text={a.title} query={query} />
                         </h3>
-                        <p className="text-brand-muted text-sm line-clamp-2 mb-3">
-                          {highlight(article.excerpt, query)}
-                        </p>
-                        <div className="flex items-center gap-2 text-xs text-brand-muted">
-                          <Image src={article.authorAvatar} alt={article.author} width={18} height={18} className="rounded-full" />
-                          <span>{article.author}</span>
-                          <span>·</span>
-                          <span>{formatDate(article.publishedAt)}</span>
-                          <span>·</span>
-                          <span className="flex items-center gap-1"><Clock size={10} />{article.readTime}m</span>
+                        <p className="text-gray-500 text-xs line-clamp-2 mb-3"><Highlight text={a.excerpt} query={query} /></p>
+                        <div className="flex items-center gap-2 text-[10px] text-gray-400 border-t border-brand-border pt-2">
+                          <span>{a.author}</span><span>·</span>
+                          <span>{formatDate(a.publishedAt)}</span><span>·</span>
+                          <span className="flex items-center gap-1"><Clock size={9} />{a.readTime}m</span>
                         </div>
                       </div>
                     </Link>
@@ -198,36 +143,31 @@ export default function SearchPage({ searchParams }: Props) {
             )}
 
             {/* Founders */}
-            {matchedFounders.length > 0 && (
-              <section id="founders">
-                <div className="flex items-center gap-3 mb-6 pb-3 border-b border-brand-border pb-3">
-                  <Users size={18} className="text-brand-red" />
-                  <h2 className="font-serif text-2xl font-bold text-brand-dark">Founders</h2>
-                  <span className="badge bg-green-100 text-green-700 text-[10px] ml-auto">{matchedFounders.length} found</span>
+            {founders.length > 0 && (
+              <section>
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-brand-border">
+                  <Users size={16} className="text-brand-red" />
+                  <h2 className="font-serif text-xl font-bold text-brand-dark">Founders</h2>
+                  <span className="ml-auto text-xs text-gray-400">{founders.length} found</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {matchedFounders.map((founder) => (
-                    <Link key={founder.id} href={`/founders/${founder.slug}`} className="group flex gap-4 p-4 dark-card hover:border-brand-red transition-colors card-hover">
-                      <Image
-                        src={founder.avatar}
-                        alt={founder.name}
-                        width={64}
-                        height={64}
-                        className="rounded-full flex-shrink-0 object-cover"
-                      />
-                      <div className="min-w-0">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-brand-red">{founder.industry}</span>
-                        <h3 className="font-serif font-bold text-base text-white group-hover:text-brand-red transition-colors">
-                          {highlight(founder.name, query)}
-                        </h3>
-                        <p className="text-brand-muted text-sm">{highlight(founder.title, query)}</p>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-brand-muted">
-                          <span className="flex items-center gap-1"><Building2 size={10} />{highlight(founder.company, query)}</span>
-                          <span className="flex items-center gap-1"><MapPin size={10} />{founder.location}</span>
-                        </div>
-                        {founder.netWorth && (
-                          <p className="text-xs font-bold text-brand-gold mt-1">{founder.netWorth}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {founders.map((f: any) => (
+                    <Link key={f.id} href={`/founders/${f.slug}`} className="group flex gap-4 p-4 bg-white border border-brand-border hover:border-brand-red transition-colors card-hover">
+                      <div className="w-14 h-14 flex-shrink-0 overflow-hidden bg-gray-100">
+                        {f.avatar ? <Image src={f.avatar} alt={f.name} width={56} height={56} className="w-full h-full object-cover" /> : (
+                          <div className="w-full h-full bg-brand-red flex items-center justify-center">
+                            <span className="text-white font-bold">{f.name?.charAt(0)}</span>
+                          </div>
                         )}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-brand-red">{f.industry}</span>
+                        <h3 className="font-serif font-bold text-sm text-brand-dark group-hover:text-brand-red transition-colors"><Highlight text={f.name} query={query} /></h3>
+                        <p className="text-gray-500 text-xs">{f.title}</p>
+                        <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-400">
+                          <span className="flex items-center gap-1"><Building2 size={9} />{f.company}</span>
+                          <span className="flex items-center gap-1"><MapPin size={9} />{f.location}</span>
+                        </div>
                       </div>
                     </Link>
                   ))}
@@ -236,34 +176,30 @@ export default function SearchPage({ searchParams }: Props) {
             )}
 
             {/* Startups */}
-            {matchedStartups.length > 0 && (
-              <section id="startups">
-                <div className="flex items-center gap-3 mb-6 pb-3 border-b border-brand-border pb-3">
-                  <Rocket size={18} className="text-brand-red" />
-                  <h2 className="font-serif text-2xl font-bold text-brand-dark">Startups</h2>
-                  <span className="badge bg-purple-100 text-purple-700 text-[10px] ml-auto">{matchedStartups.length} found</span>
+            {startups.length > 0 && (
+              <section>
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-brand-border">
+                  <Rocket size={16} className="text-brand-red" />
+                  <h2 className="font-serif text-xl font-bold text-brand-dark">Startups</h2>
+                  <span className="ml-auto text-xs text-gray-400">{startups.length} found</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {matchedStartups.map((startup) => (
-                    <Link key={startup.id} href={`/startups/${startup.slug}`} className="group block dark-card hover:border-brand-red transition-colors card-hover">
-                      <div className="relative h-36 overflow-hidden">
-                        <Image src={startup.logo} alt={startup.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                        <div className="absolute bottom-3 left-3">
-                          <span className="badge bg-white/20 text-white border border-white/30 text-[10px]">{startup.stage}</span>
-                        </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {startups.map((s: any) => (
+                    <Link key={s.id} href={`/startups/${s.slug}`} className="group flex gap-4 p-4 bg-white border border-brand-border hover:border-brand-red transition-colors card-hover">
+                      <div className="w-14 h-14 flex-shrink-0 overflow-hidden bg-gray-50 border border-brand-border flex items-center justify-center">
+                        {s.logo ? <Image src={s.logo} alt={s.name} width={56} height={56} className="w-full h-full object-contain p-1" /> : (
+                          <div className="w-full h-full bg-brand-red flex items-center justify-center">
+                            <span className="text-white font-bold">{s.name?.charAt(0)}</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="p-4">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-brand-red">{startup.industry}</span>
-                        <h3 className="font-serif font-bold text-base text-white group-hover:text-brand-red transition-colors mt-0.5">
-                          {highlight(startup.name, query)}
-                        </h3>
-                        <p className="text-brand-muted text-sm mt-1 line-clamp-2">
-                          {highlight(startup.tagline, query)}
-                        </p>
-                        <div className="flex items-center gap-3 mt-2 text-xs text-brand-muted">
-                          <span className="flex items-center gap-1"><MapPin size={10} />{startup.location}</span>
-                          {startup.funding && <span className="text-green-600 font-semibold">{startup.funding}</span>}
+                      <div className="min-w-0">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-brand-red">{s.industry}</span>
+                        <h3 className="font-serif font-bold text-sm text-brand-dark group-hover:text-brand-red transition-colors"><Highlight text={s.name} query={query} /></h3>
+                        <p className="text-gray-500 text-xs line-clamp-1"><Highlight text={s.tagline} query={query} /></p>
+                        <div className="flex items-center gap-2 mt-1 text-[10px] text-gray-400">
+                          <span>{s.stage}</span>
+                          {s.funding && <span className="text-green-600 font-semibold">{s.funding}</span>}
                         </div>
                       </div>
                     </Link>
@@ -271,7 +207,6 @@ export default function SearchPage({ searchParams }: Props) {
                 </div>
               </section>
             )}
-
           </div>
         )}
       </div>
