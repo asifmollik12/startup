@@ -223,7 +223,7 @@ export default function Navbar() {
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Search founders, startups, articles..."
-                  className="flex-1 text-lg text-gray-900 placeholder-gray-300 focus:outline-none bg-transparent border-0"
+                  className="flex-1 text-lg text-gray-900 placeholder-gray-300 focus:outline-none bg-transparent border-0 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
                 />
                 {searching && <div className="w-5 h-5 border-2 border-brand-red border-t-transparent rounded-full animate-spin flex-shrink-0" />}
                 <button onClick={handleClose} className="p-2 text-gray-400 hover:text-gray-700 transition-colors flex-shrink-0">

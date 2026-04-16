@@ -49,7 +49,7 @@ export default async function SearchPage({ searchParams }: Props) {
               <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               <input type="search" name="q" defaultValue={query} autoFocus
                 placeholder="Search founders, startups, articles..."
-                className="w-full bg-white/10 border border-white/20 text-white placeholder-gray-500 pl-11 pr-32 py-4 text-base focus:outline-none focus:border-brand-red transition-colors" />
+                className="w-full bg-white/10 border border-white/20 text-white placeholder-gray-500 pl-11 pr-36 py-4 text-base focus:outline-none focus:border-brand-red transition-colors [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden" />
               <button type="submit"
                 className="absolute right-0 top-0 bottom-0 bg-brand-red text-white px-6 text-sm font-bold uppercase tracking-wider hover:bg-red-700 transition-colors flex items-center gap-2">
                 Search <ArrowRight size={14} />
