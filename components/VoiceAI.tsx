@@ -288,11 +288,13 @@ export default function VoiceAI() {
     stopAudio();
     setSpeaking(true);
 
+    const isBengali = /[\u0980-\u09FF]/.test(text);
+
     try {
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, userId: countCredit ? user.id : null }),
+        body: JSON.stringify({ text, userId: countCredit ? user.id : null, isBengali }),
       });
 
       if (!res.ok) {

@@ -50,18 +50,18 @@ export async function POST(req: NextRequest) {
 
     // Detect if the user's message is Bengali
     const isBengaliMessage = /[\u0980-\u09FF]/.test(message);
-    const langInstruction = isBengaliMessage
-      ? "IMPORTANT: The user wrote in Bengali. You MUST reply entirely in Bengali (বাংলা). Do NOT use English."
-      : "IMPORTANT: The user wrote in English. You MUST reply entirely in English. Do NOT use Bengali.";
 
-    const context = `
-You are the AI assistant for Start-Up News — Bangladesh's startup magazine.
-${langInstruction}
+    // Strict language system instruction — placed first so the model honours it
+    const langRule = isBengaliMessage
+      ? `LANGUAGE RULE: You MUST respond ONLY in Bengali (বাংলা). Every single word of your response must be Bengali. Do NOT write any English words or sentences. If a name or term has a Bengali equivalent use it; otherwise write the English name as-is but the rest must be Bengali.`
+      : `LANGUAGE RULE: You MUST respond ONLY in English. Every single word of your response must be English. Do NOT write any Bengali words or sentences.`;
+
+    const context = `${langRule}
+
+You are the AI assistant for Start-Up News — Bangladesh's premier startup magazine.
 FORMAT RULES:
 - Use **bold** for names, companies, key terms
 - Use bullet points (- item) for lists of 3+ items
-- NO raw quotes around titles — just write the title in bold
-- NO parentheses for categories — use a dash or bold label
 - Keep responses concise and scannable
 
 SITE DATA:
@@ -85,8 +85,21 @@ ${ideas.map((i: any) => `${i.title} (${i.category}) by ${i.submittedBy} — ${i.
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `${context}\n\nUser: ${message}\nAssistant:` }] }],
-          generationConfig: { maxOutputTokens: 300, temperature: 0.4 },
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: context }]
+            },
+            {
+              role: "model",
+              parts: [{ text: "Understood. I will follow all rules strictly." }]
+            },
+            {
+              role: "user",
+              parts: [{ text: message }]
+            }
+          ],
+          generationConfig: { maxOutputTokens: 400, temperature: 0.3 },
         }),
       }
     );
