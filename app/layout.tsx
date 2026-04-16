@@ -23,10 +23,20 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = s.seoTitle || "Start-Up News — Bangladesh's Premier Business Magazine";
   const description = s.seoDescription || "Discover Bangladesh's top entrepreneurs, startups, rankings, and business ideas. The definitive voice of Bangladeshi innovation.";
   const keywords = s.seoKeywords || "Bangladesh entrepreneurs, startups, business, founders, rankings";
+  // Use uploaded OG image, or fall back to site logo
+  const ogImage = s.ogImage || s.logoUrl || "https://start-upnews.com/og-default.png";
   return {
     title, description, keywords,
-    openGraph: { title, description, type: "website", ...(s.ogImage ? { images: [{ url: s.ogImage, width: 1200, height: 630 }] } : {}) },
-    twitter: { card: "summary_large_image", title, description, ...(s.ogImage ? { images: [s.ogImage] } : {}) },
+    metadataBase: new URL("https://start-upnews.com"),
+    openGraph: {
+      title, description, type: "website",
+      siteName: "Start-Up News",
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image", title, description,
+      images: [ogImage],
+    },
     ...(s.favicon ? { icons: { icon: s.favicon, shortcut: s.favicon } } : {}),
   };
 }

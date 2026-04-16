@@ -5,6 +5,7 @@ import { MapPin, Building2, Calendar, ArrowLeft, Twitter, Linkedin, Globe, Check
 import { connectDB } from "@/lib/mongodb";
 import { Founder as FounderModel } from "@/lib/models/Founder";
 import { Article as ArticleModel } from "@/lib/models/Article";
+import type { Metadata } from "next";
 
 export const revalidate = 60;
 
@@ -39,6 +40,31 @@ async function getAllFounders() {
     const data = await FounderModel.find().sort({ rank: 1 }).lean() as any[];
     return data.map((f: any) => ({ ...f, id: f._id.toString() }));
   } catch { return []; }
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  try {
+    await connectDB();
+    const f = await FounderModel.findOne({ slug: params.slug }).lean() as any;
+    if (!f) return {};
+    return {
+      title: `${f.name} — ${f.title} at ${f.company} | Start-Up News`,
+      description: f.bio?.slice(0, 160) || `${f.name} is a leading entrepreneur in Bangladesh.`,
+      metadataBase: new URL("https://start-upnews.com"),
+      openGraph: {
+        title: `${f.name} — ${f.company}`,
+        description: f.bio?.slice(0, 160) || "",
+        type: "profile",
+        siteName: "Start-Up News",
+        ...(f.avatar ? { images: [{ url: f.avatar, width: 800, height: 800, alt: f.name }] } : {}),
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${f.name} — ${f.company}`,
+        ...(f.avatar ? { images: [f.avatar] } : {}),
+      },
+    };
+  } catch { return {}; }
 }
 
 export default async function FounderPage({ params }: { params: { slug: string } }) {

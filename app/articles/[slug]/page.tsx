@@ -5,8 +5,41 @@ import { formatDate } from "@/lib/utils";
 import { Clock, ArrowLeft, Share2, Bookmark, Twitter, Linkedin } from "lucide-react";
 import { connectDB } from "@/lib/mongodb";
 import { Article as ArticleModel } from "@/lib/models/Article";
+import type { Metadata } from "next";
 
 export const revalidate = 60;
+
+async function getArticle(slug: string) {
+  try {
+    await connectDB();
+    const a = await ArticleModel.findOne({ slug }).lean() as any;
+    if (!a) return null;
+    return { ...a, id: a._id.toString() };
+  } catch { return null; }
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const article = await getArticle(params.slug);
+  if (!article) return {};
+  return {
+    title: `${article.title} — Start-Up News`,
+    description: article.excerpt,
+    metadataBase: new URL("https://start-upnews.com"),
+    openGraph: {
+      title: article.title,
+      description: article.excerpt,
+      type: "article",
+      siteName: "Start-Up News",
+      ...(article.coverImage ? { images: [{ url: article.coverImage, width: 1200, height: 630, alt: article.title }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.excerpt,
+      ...(article.coverImage ? { images: [article.coverImage] } : {}),
+    },
+  };
+}
 
 async function getArticle(slug: string) {
   try {
