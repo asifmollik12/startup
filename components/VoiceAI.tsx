@@ -1,11 +1,9 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { Mic, MicOff, X, Loader2, Volume2, Send } from "lucide-react";
+import { Mic, MicOff, X, Loader2, Volume2, Send, Zap, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 
 type Message = { role: "user" | "ai"; text: string; typing?: boolean };
-// Track how each message was sent so we know which credit to count
-type MessageMeta = { mode: "voice" | "text" };
 
 function parseMarkdown(text: string) {
   const lines = text.split("\n");
@@ -47,22 +45,76 @@ function TypingMessage({ text }: { text: string }) {
   );
 }
 
-// Animated sound wave shown while voice is processing
 function VoiceWave() {
   return (
     <div className="flex justify-start">
       <div className="bg-white border border-brand-border px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm flex items-center gap-1.5">
         {[0, 1, 2, 3, 4].map(i => (
-          <span
-            key={i}
-            className="w-1 bg-brand-red rounded-full"
-            style={{
-              height: `${12 + (i % 3) * 8}px`,
-              animation: `voiceBar 0.8s ease-in-out ${i * 0.12}s infinite alternate`,
-            }}
-          />
+          <span key={i} className="w-1 bg-brand-red rounded-full"
+            style={{ height: `${12 + (i % 3) * 8}px`, animation: `voiceBar 0.8s ease-in-out ${i * 0.12}s infinite alternate` }} />
         ))}
         <span className="text-xs text-gray-400 ml-2">Processing...</span>
+      </div>
+    </div>
+  );
+}
+
+// Subscription upsell popup shown when a daily limit is hit
+function LimitPopup({ type, onClose }: { type: "voice" | "text"; onClose: () => void }) {
+  const isVoice = type === "voice";
+  return (
+    <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-2xl">
+      <div className="bg-white mx-4 shadow-2xl overflow-hidden w-full max-w-sm">
+        {/* Top accent */}
+        <div className="h-1 bg-brand-red" />
+        <div className="p-6">
+          {/* Icon + title */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-brand-red/10 flex items-center justify-center rounded-full flex-shrink-0">
+                <Zap size={18} className="text-brand-red" />
+              </div>
+              <div>
+                <p className="font-bold text-brand-dark text-sm">
+                  {isVoice ? "Voice Limit Reached" : "Chat Limit Reached"}
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">Resets tomorrow at midnight</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
+              <X size={16} />
+            </button>
+          </div>
+
+          <p className="text-sm text-gray-600 mb-5 leading-relaxed">
+            {isVoice
+              ? "You've used all your daily voice responses. Upgrade to Pro for unlimited voice AI — or keep chatting by text."
+              : "You've used all your daily text messages. Upgrade to Pro for unlimited AI access."}
+          </p>
+
+          {/* Pro perks */}
+          <div className="bg-brand-gray border border-brand-border p-4 mb-5 space-y-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Pro includes</p>
+            {["Unlimited AI chat messages", "Unlimited voice responses", "Exclusive startup reports", "Founder interviews & podcasts"].map(f => (
+              <div key={f} className="flex items-center gap-2">
+                <Check size={12} className="text-brand-red flex-shrink-0" />
+                <span className="text-xs text-gray-600">{f}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* CTAs */}
+          <div className="space-y-2">
+            <Link href="/subscribe" onClick={onClose}
+              className="flex items-center justify-center gap-2 w-full bg-brand-red text-white py-3 text-sm font-bold uppercase tracking-wider hover:bg-red-700 transition-colors">
+              Upgrade to Pro <ArrowRight size={13} />
+            </Link>
+            <button onClick={onClose}
+              className="w-full text-center py-2.5 border border-brand-border text-sm text-gray-500 hover:border-brand-red hover:text-brand-red transition-colors">
+              {isVoice ? "Continue with text" : "Maybe later"}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -82,6 +134,7 @@ export default function VoiceAI() {
   const [textInput, setTextInput] = useState("");
   const [speaking, setSpeaking] = useState(false);
   const [error, setError] = useState("");
+  const [limitPopup, setLimitPopup] = useState<"voice" | "text" | null>(null);
   // Separate counters: voice uses TTS credits, text uses chat credits
   const [chatUsed, setChatUsed] = useState(0);   // text-only
   const [ttsUsed, setTtsUsed] = useState(0);     // voice-only
@@ -123,7 +176,7 @@ export default function VoiceAI() {
 
   const startListening = () => {
     if (!user) { setError("Please sign in to use voice chat."); return; }
-    if (ttsUsed >= TTS_LIMIT) { setError(`Voice limit reached (${TTS_LIMIT}/day). Resets tomorrow.`); return; }
+    if (ttsUsed >= TTS_LIMIT) { setLimitPopup("voice"); return; }
 
     // Stop AI speaking first, then wait a moment before listening
     if (speaking) {
@@ -184,10 +237,10 @@ export default function VoiceAI() {
     if (!text.trim() || !user) return;
 
     if (mode === "voice" && ttsUsed >= TTS_LIMIT) {
-      setError(`Voice limit reached (${TTS_LIMIT}/day). Resets tomorrow.`); return;
+      setLimitPopup("voice"); return;
     }
     if (mode === "text" && chatUsed >= CHAT_LIMIT) {
-      setError(`Chat limit reached (${CHAT_LIMIT}/day). Resets tomorrow.`); return;
+      setLimitPopup("text"); return;
     }
 
     setMessages(prev => [...prev, { role: "user", text }]);
@@ -230,7 +283,7 @@ export default function VoiceAI() {
   // countCredit=true only when called from voice mode (counts TTS credit)
   const speak = async (text: string, countCredit = false) => {
     if (!user) return;
-    if (ttsUsed >= TTS_LIMIT) { setError(`Voice limit reached (${TTS_LIMIT}/day). Resets tomorrow.`); return; }
+    if (ttsUsed >= TTS_LIMIT) { setLimitPopup("voice"); return; }
 
     stopAudio();
     setSpeaking(true);
@@ -244,7 +297,7 @@ export default function VoiceAI() {
 
       if (!res.ok) {
         const data = await res.json();
-        if (data.limitReached) { setError(data.error); setSpeaking(false); return; }
+        if (data.limitReached) { setLimitPopup("voice"); setSpeaking(false); return; }
         speakFallback(text);
         return;
       }
@@ -305,7 +358,10 @@ export default function VoiceAI() {
 
       {open && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60">
-          <div className="bg-white w-full sm:max-w-md sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden" style={{ height: "85vh", maxHeight: "600px" }}>
+          <div className="bg-white w-full sm:max-w-md sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden relative" style={{ height: "85vh", maxHeight: "600px" }}>
+
+            {/* Limit popup overlay */}
+            {limitPopup && <LimitPopup type={limitPopup} onClose={() => setLimitPopup(null)} />}
 
             {/* Header */}
             <div className="bg-brand-dark px-5 py-4 flex items-center justify-between flex-shrink-0">
