@@ -40,7 +40,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Fetch site data for context
+    // Hardcoded identity intercept — never let the model answer these
+    const lowerMsg = message.toLowerCase().trim();
+    const isNameQuestion = /\b(your name|who are you|what are you|what('s| is) your name|তোমার নাম|আপনার নাম|তুমি কে|আপনি কে)\b/.test(lowerMsg);
+    const isDevQuestion = /\b(who (made|built|created|developed) you|who('s| is) your (creator|developer|owner|maker)|কে তোমাকে|কে বানিয়েছে|কে তৈরি)\b/.test(lowerMsg);
+    const isModelQuestion = /\b(what model|which model|what (api|technology|tech)|powered by|built with|গেমিনি|gemini|gemma|openai|chatgpt)\b/.test(lowerMsg);
+
+    if (isNameQuestion) {
+      const reply = /[\u0980-\u09FF]/.test(message)
+        ? "আমি **Start-Up News AI** — Start-Up News-এর কৃত্রিম বুদ্ধিমত্তা সহকারী।"
+        : "I'm **Start-Up News AI**, the AI assistant for Start-Up News.";
+      return NextResponse.json({ reply, remaining: CHAT_LIMIT - user.aiChatCount });
+    }
+    if (isDevQuestion) {
+      const reply = /[\u0980-\u09FF]/.test(message)
+        ? "আমাকে **Alphainno** তৈরি করেছে **Start-Up News**-এর জন্য।"
+        : "I was developed by **Alphainno** for **Start-Up News**.";
+      return NextResponse.json({ reply, remaining: CHAT_LIMIT - user.aiChatCount });
+    }
+    if (isModelQuestion) {
+      const reply = /[\u0980-\u09FF]/.test(message)
+        ? "আমি **Alphainno**-এর তৈরি নিজস্ব AI প্রযুক্তি দ্বারা পরিচালিত।"
+        : "I'm powered by proprietary AI technology developed by **Alphainno**.";
+      return NextResponse.json({ reply, remaining: CHAT_LIMIT - user.aiChatCount });
+    }
     const [founders, startups, articles, ideas] = await Promise.all([
       Founder.find().select("name company industry location netWorth rank bio").limit(20).lean(),
       Startup.find().select("name industry stage funding location tagline").limit(20).lean(),
