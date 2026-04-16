@@ -8,9 +8,6 @@ const nextConfig = {
     ],
     minimumCacheTTL: 3600,
   },
-  experimental: {
-    optimizeCss: true,
-  },
   compress: true,
   poweredByHeader: false,
 };
