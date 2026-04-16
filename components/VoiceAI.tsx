@@ -126,8 +126,19 @@ export default function VoiceAI() {
   const speak = (text: string) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.rate = 1.05; utt.pitch = 1;
+    // Clean markdown before speaking
+    const clean = text.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*/g, "").replace(/#+\s/g, "");
+    const utt = new SpeechSynthesisUtterance(clean);
+    // Pick the best natural voice available
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v =>
+      v.name.includes("Google") || v.name.includes("Samantha") || v.name.includes("Karen") ||
+      v.name.includes("Daniel") || v.name.includes("Natural") || v.name.includes("Neural")
+    ) || voices.find(v => v.lang.startsWith("en")) || voices[0];
+    if (preferred) utt.voice = preferred;
+    utt.rate = 0.95;
+    utt.pitch = 1.05;
+    utt.volume = 1;
     utt.onstart = () => setSpeaking(true);
     utt.onend = () => setSpeaking(false);
     window.speechSynthesis.speak(utt);

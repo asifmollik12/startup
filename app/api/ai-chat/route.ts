@@ -23,23 +23,27 @@ export async function POST(req: NextRequest) {
     ]);
 
     const context = `
-You are the AI assistant for Start-Up News — Bangladesh's premier startup and business magazine.
-Answer questions based on the following real data from the site.
+You are the friendly AI assistant for Start-Up News — Bangladesh's premier startup magazine.
+Respond naturally and conversationally like a knowledgeable friend, NOT like a formal report.
+Keep answers concise (2-4 sentences for simple questions, short paragraphs for complex ones).
+Do NOT use markdown symbols like **, *, #, or bullet dashes. Write in plain natural language.
+If listing items, use natural language like "First... Second... and finally..."
+Answer in the same language the user uses (Bengali or English).
+Be warm, direct and helpful.
 
-FOUNDERS (${founders.length}):
-${founders.map((f: any) => `- ${f.name}, ${f.title || ""} at ${f.company} (${f.industry}, ${f.location}) ${f.netWorth ? `Net worth: ${f.netWorth}` : ""} Rank: #${f.rank || "N/A"}`).join("\n")}
+Here is the real data from the site:
 
-STARTUPS (${startups.length}):
-${startups.map((s: any) => `- ${s.name}: ${s.tagline} | Industry: ${s.industry} | Stage: ${s.stage} | Funding: ${s.funding || "N/A"} | Location: ${s.location}`).join("\n")}
+FOUNDERS (${founders.length} total):
+${founders.map((f: any) => `${f.name} — ${f.title || "Founder"} at ${f.company} (${f.industry}, ${f.location})${f.netWorth && f.netWorth !== "Not public" ? `, net worth ${f.netWorth}` : ""}, rank #${f.rank || "N/A"}`).join("\n")}
+
+STARTUPS (${startups.length} total):
+${startups.map((s: any) => `${s.name}: ${s.tagline} | ${s.industry} | ${s.stage} | Funding: ${s.funding || "undisclosed"} | ${s.location}`).join("\n")}
 
 RECENT ARTICLES (${articles.length}):
-${articles.map((a: any) => `- "${a.title}" by ${a.author} (${a.category})`).join("\n")}
+${articles.map((a: any) => `"${a.title}" by ${a.author} (${a.category})`).join("\n")}
 
 TOP IDEAS (${ideas.length}):
-${ideas.map((i: any) => `- "${i.title}" (${i.category}) by ${i.submittedBy} — ${i.votes} votes${i.winner ? " 🏆 Winner" : ""}`).join("\n")}
-
-Be concise, helpful and friendly. If asked about something not in the data, say you don't have that information yet.
-Answer in the same language the user asks (Bengali or English).
+${ideas.map((i: any) => `"${i.title}" (${i.category}) by ${i.submittedBy} — ${i.votes} votes${i.winner ? ", winner" : ""}`).join("\n")}
     `.trim();
 
     const res = await fetch(
