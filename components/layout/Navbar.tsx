@@ -110,25 +110,8 @@ type Result = {
   title: string;
   subtitle: string;
   href: string;
+  image?: string;
 };
-
-function getResults(query: string): Result[] {
-  if (!query.trim()) return [];
-  const q = query.toLowerCase();
-  const articleResults: Result[] = articles
-    .filter((a) => a.title.toLowerCase().includes(q) || a.category.toLowerCase().includes(q) || a.excerpt.toLowerCase().includes(q))
-    .slice(0, 3)
-    .map((a) => ({ type: "article", title: a.title, subtitle: a.category, href: `/articles/${a.slug}` }));
-  const founderResults: Result[] = founders
-    .filter((f) => f.name.toLowerCase().includes(q) || f.company.toLowerCase().includes(q) || f.industry.toLowerCase().includes(q))
-    .slice(0, 3)
-    .map((f) => ({ type: "founder", title: f.name, subtitle: f.company, href: `/founders/${f.slug}` }));
-  const startupResults: Result[] = startups
-    .filter((s) => s.name.toLowerCase().includes(q) || s.industry.toLowerCase().includes(q) || s.tagline.toLowerCase().includes(q))
-    .slice(0, 3)
-    .map((s) => ({ type: "startup", title: s.name, subtitle: s.industry, href: `/startups/${s.slug}` }));
-  return [...articleResults, ...founderResults, ...startupResults];
-}
 
 const typeBadge: Record<string, string> = {
   article: "bg-blue-100 text-blue-700",
@@ -142,11 +125,25 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Result[]>([]);
+  const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
-  useEffect(() => { setResults(getResults(query)); }, [query]);
+  useEffect(() => {
+    if (!query.trim()) { setResults([]); return; }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}`);
+        const data = await res.json();
+        setResults(data);
+      } catch { setResults([]); }
+      setSearching(false);
+    }, 250);
+  }, [query]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -159,7 +156,7 @@ export default function Navbar() {
   }, [searchOpen]);
 
   const handleOpen = () => { setSearchOpen(true); setTimeout(() => inputRef.current?.focus(), 50); };
-  const handleClose = () => { setSearchOpen(false); setQuery(""); };
+  const handleClose = () => { setSearchOpen(false); setQuery(""); setResults([]); };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && query.trim()) { router.push(`/search?q=${encodeURIComponent(query.trim())}`); handleClose(); }
     if (e.key === "Escape") handleClose();
@@ -211,10 +208,11 @@ export default function Navbar() {
         </div>
 
         {/* Search bar */}
-        {searchOpen && (
-          <div ref={searchRef} className="pb-4 border-t border-brand-border pt-3 relative">
-            <div className="relative">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div ref={searchRef} className={`border-t border-brand-border overflow-hidden transition-all duration-300 ease-out ${searchOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
+          <div className="py-3 relative">
+            <div className="relative flex items-center">
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              {searching && <div className="absolute right-10 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-brand-red border-t-transparent rounded-full animate-spin" />}
               <input
                 ref={inputRef}
                 type="search"
@@ -222,41 +220,52 @@ export default function Navbar() {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search founders, startups, articles..."
-                className="w-full bg-white border border-gray-300 text-gray-900 placeholder-gray-400 pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:border-brand-red transition-colors"
+                className="w-full bg-white border border-brand-border text-gray-900 placeholder-gray-400 pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:border-brand-red transition-colors"
               />
-              <button onClick={handleClose} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700">
+              <button onClick={handleClose} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors">
                 <X size={15} />
               </button>
             </div>
 
             {query.trim() && (
-              <div className="absolute left-0 right-0 bg-white border border-gray-200 shadow-xl mt-1 z-50 max-h-80 overflow-y-auto">
-                {results.length === 0 ? (
+              <div className="absolute left-0 right-0 bg-white border border-gray-200 shadow-2xl mt-1 z-50 max-h-96 overflow-y-auto">
+                {!searching && results.length === 0 ? (
                   <div className="px-4 py-6 text-center text-gray-400 text-sm">No results for &ldquo;{query}&rdquo;</div>
                 ) : (
                   <>
                     {results.map((r, i) => (
                       <Link key={i} href={r.href} onClick={handleClose}
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-brand-gray border-b border-gray-100 last:border-0 transition-colors">
-                        <span className={`badge text-[9px] flex-shrink-0 ${typeBadge[r.type]}`}>{typeLabel[r.type]}</span>
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 truncate">{r.title}</p>
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-brand-gray border-b border-gray-100 last:border-0 transition-colors group">
+                        {/* Image */}
+                        <div className="w-10 h-10 flex-shrink-0 overflow-hidden bg-gray-100">
+                          {r.image ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={r.image} alt={r.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-brand-red flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">{r.title.charAt(0)}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-brand-red transition-colors">{r.title}</p>
                           <p className="text-xs text-gray-400">{r.subtitle}</p>
                         </div>
+                        <span className={`badge text-[9px] flex-shrink-0 ${typeBadge[r.type]}`}>{typeLabel[r.type]}</span>
                       </Link>
                     ))}
-                    <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-100 text-center">
+                    {results.length > 0 && (
                       <button onClick={() => { router.push(`/search?q=${encodeURIComponent(query.trim())}`); handleClose(); }}
-                        className="text-xs text-brand-red font-semibold hover:underline">
-                        Press Enter — see all {results.length} results →
+                        className="w-full px-4 py-3 bg-brand-gray border-t border-gray-100 text-xs text-brand-red font-semibold hover:bg-brand-red hover:text-white transition-colors text-center">
+                        See all results for &ldquo;{query}&rdquo; →
                       </button>
-                    </div>
+                    )}
                   </>
                 )}
               </div>
             )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Mobile menu — full screen overlay with smooth animation */}
