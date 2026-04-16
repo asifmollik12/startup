@@ -4,15 +4,40 @@ import { Founder } from "@/lib/models/Founder";
 import { Startup } from "@/lib/models/Startup";
 import { Article as ArticleModel } from "@/lib/models/Article";
 import { Idea } from "@/lib/models/Idea";
+import { User } from "@/lib/models/User";
 
 export const dynamic = "force-dynamic";
 
+const CHAT_LIMIT = 20;
+
 export async function POST(req: NextRequest) {
   try {
-    const { message } = await req.json();
+    const { message, userId } = await req.json();
     if (!message) return NextResponse.json({ error: "No message" }, { status: 400 });
 
+    // Auth required
+    if (!userId) return NextResponse.json({ error: "Login required to use AI chat." }, { status: 401 });
+
     await connectDB();
+
+    // Daily limit check
+    const today = new Date().toISOString().slice(0, 10);
+    const user = await User.findById(userId);
+    if (!user) return NextResponse.json({ error: "User not found." }, { status: 401 });
+
+    // Reset counters if it's a new day
+    if (user.aiUsageDate !== today) {
+      user.aiChatCount = 0;
+      user.ttsCount = 0;
+      user.aiUsageDate = today;
+    }
+
+    if (user.aiChatCount >= CHAT_LIMIT) {
+      return NextResponse.json(
+        { error: `Daily limit reached. You can send ${CHAT_LIMIT} chat messages per day.`, limitReached: true },
+        { status: 429 }
+      );
+    }
 
     // Fetch site data for context
     const [founders, startups, articles, ideas] = await Promise.all([
@@ -61,7 +86,12 @@ ${ideas.map((i: any) => `${i.title} (${i.category}) by ${i.submittedBy} — ${i.
 
     const data = await res.json();
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "Sorry, I couldn't process that.";
-    return NextResponse.json({ reply });
+
+    // Increment counter after successful response
+    user.aiChatCount += 1;
+    await user.save();
+
+    return NextResponse.json({ reply, remaining: CHAT_LIMIT - user.aiChatCount });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

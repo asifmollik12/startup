@@ -1,21 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
+import { connectDB } from "@/lib/mongodb";
+import { User } from "@/lib/models/User";
 
 export const dynamic = "force-dynamic";
 
+const TTS_LIMIT = 10;
+
 export async function POST(req: NextRequest) {
   try {
-    const { text } = await req.json();
+    const { text, userId } = await req.json();
     if (!text) return NextResponse.json({ error: "No text" }, { status: 400 });
+
+    // Auth required
+    if (!userId) return NextResponse.json({ error: "Login required to use voice AI." }, { status: 401 });
+
+    await connectDB();
+
+    // Daily limit check
+    const today = new Date().toISOString().slice(0, 10);
+    const user = await User.findById(userId);
+    if (!user) return NextResponse.json({ error: "User not found." }, { status: 401 });
+
+    // Reset counters if it's a new day
+    if (user.aiUsageDate !== today) {
+      user.aiChatCount = 0;
+      user.ttsCount = 0;
+      user.aiUsageDate = today;
+    }
+
+    if (user.ttsCount >= TTS_LIMIT) {
+      return NextResponse.json(
+        { error: `Daily limit reached. You can use voice AI ${TTS_LIMIT} times per day.`, limitReached: true },
+        { status: 429 }
+      );
+    }
 
     // Clean markdown
     const clean = text
       .replace(/\*\*(.*?)\*\*/g, "$1")
       .replace(/\*/g, "")
       .replace(/#+\s/g, "")
-      .slice(0, 500); // limit chars to save quota
+      .slice(0, 500);
 
     const res = await fetch(
-      "https://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL", // "Sarah" — natural female voice
+      "https://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL",
       {
         method: "POST",
         headers: {
@@ -25,7 +53,7 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           text: clean,
-          model_id: "eleven_turbo_v2_5", // fastest + most natural
+          model_id: "eleven_turbo_v2_5",
           voice_settings: { stability: 0.4, similarity_boost: 0.8, style: 0.3, use_speaker_boost: true },
         }),
       }
@@ -36,11 +64,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: err }, { status: res.status });
     }
 
+    // Increment counter after successful response
+    user.ttsCount += 1;
+    await user.save();
+
     const audioBuffer = await res.arrayBuffer();
     return new NextResponse(audioBuffer, {
       headers: {
         "Content-Type": "audio/mpeg",
         "Cache-Control": "no-store",
+        "X-TTS-Remaining": String(TTS_LIMIT - user.ttsCount),
       },
     });
   } catch (e: any) {
