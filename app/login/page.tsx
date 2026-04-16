@@ -22,6 +22,7 @@ export default function LoginPage() {
     const data = await res.json();
     if (!res.ok) { setError(data.error); setLoading(false); return; }
     localStorage.setItem("user", JSON.stringify(data));
+    window.dispatchEvent(new Event("userLogin"));
     router.push("/");
     router.refresh();
   };

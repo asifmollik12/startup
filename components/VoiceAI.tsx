@@ -77,7 +77,11 @@ export default function VoiceAI() {
       setUser(s ? JSON.parse(s) : null);
     };
     window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
+    window.addEventListener("userLogin", handler);
+    return () => {
+      window.removeEventListener("storage", handler);
+      window.removeEventListener("userLogin", handler);
+    };
   }, []);
 
   useEffect(() => {

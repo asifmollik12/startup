@@ -16,13 +16,16 @@ function UserMenu() {
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) setUser(JSON.parse(stored));
-    // Listen for storage changes (login/logout in other tabs)
     const handler = () => {
       const s = localStorage.getItem("user");
       setUser(s ? JSON.parse(s) : null);
     };
     window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
+    window.addEventListener("userLogin", handler);
+    return () => {
+      window.removeEventListener("storage", handler);
+      window.removeEventListener("userLogin", handler);
+    };
   }, []);
 
   useEffect(() => {
