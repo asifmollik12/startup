@@ -12,7 +12,7 @@ const CHAT_LIMIT = 20;
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, userId } = await req.json();
+    const { message, userId, mode } = await req.json();
     if (!message) return NextResponse.json({ error: "No message" }, { status: 400 });
 
     // Auth required
@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
       user.aiUsageDate = today;
     }
 
-    if (user.aiChatCount >= CHAT_LIMIT) {
+    // Voice mode uses TTS credits (checked in /api/tts), text mode uses chat credits
+    if (mode !== "voice" && user.aiChatCount >= CHAT_LIMIT) {
       return NextResponse.json(
         { error: `Daily limit reached. You can send ${CHAT_LIMIT} chat messages per day.`, limitReached: true },
         { status: 429 }
@@ -87,9 +88,11 @@ ${ideas.map((i: any) => `${i.title} (${i.category}) by ${i.submittedBy} — ${i.
     const data = await res.json();
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "Sorry, I couldn't process that.";
 
-    // Increment counter after successful response
-    user.aiChatCount += 1;
-    await user.save();
+    // Only increment chat counter for text mode; voice mode credits are counted in /api/tts
+    if (mode !== "voice") {
+      user.aiChatCount += 1;
+      await user.save();
+    }
 
     return NextResponse.json({ reply, remaining: CHAT_LIMIT - user.aiChatCount });
   } catch (e: any) {

@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    // Daily limit check
+    // Daily limit check — only when userId is provided (voice mode auto-speak)
     const today = new Date().toISOString().slice(0, 10);
     const user = await User.findById(userId);
     if (!user) return NextResponse.json({ error: "User not found." }, { status: 401 });
