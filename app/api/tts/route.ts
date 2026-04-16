@@ -4,7 +4,7 @@ import { User } from "@/lib/models/User";
 
 export const dynamic = "force-dynamic";
 
-const TTS_LIMIT = 10;
+const TTS_LIMIT = 30;
 
 export async function POST(req: NextRequest) {
   try {

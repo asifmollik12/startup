@@ -68,8 +68,8 @@ function VoiceWave() {
   );
 }
 
-const CHAT_LIMIT = 20;
-const TTS_LIMIT = 10;
+const CHAT_LIMIT = 50;
+const TTS_LIMIT = 30;
 
 export default function VoiceAI() {
   const [open, setOpen] = useState(false);

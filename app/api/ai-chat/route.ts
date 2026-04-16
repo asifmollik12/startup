@@ -8,7 +8,7 @@ import { User } from "@/lib/models/User";
 
 export const dynamic = "force-dynamic";
 
-const CHAT_LIMIT = 20;
+const CHAT_LIMIT = 50;
 
 export async function POST(req: NextRequest) {
   try {
