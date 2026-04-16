@@ -42,6 +42,9 @@ export async function POST(req: NextRequest) {
       .replace(/#+\s/g, "")
       .slice(0, 500);
 
+    // Detect if text contains Bengali characters
+    const isBengali = /[\u0980-\u09FF]/.test(clean);
+
     const res = await fetch(
       "https://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL",
       {
@@ -53,8 +56,9 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify({
           text: clean,
-          model_id: "eleven_turbo_v2_5",
-          voice_settings: { stability: 0.4, similarity_boost: 0.8, style: 0.3, use_speaker_boost: true },
+          // eleven_multilingual_v2 supports Bengali; turbo only supports English
+          model_id: isBengali ? "eleven_multilingual_v2" : "eleven_turbo_v2_5",
+          voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.2, use_speaker_boost: true },
         }),
       }
     );

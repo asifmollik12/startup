@@ -103,7 +103,7 @@ export default function VoiceAI() {
       return;
     }
     const rec = new SpeechRecognition();
-    rec.lang = "en-US";
+    rec.lang = "bn-BD"; // Bengali (Bangladesh) — browser will still accept English too
     rec.interimResults = true;
     rec.continuous = false;
     let finalText = "";
@@ -221,9 +221,12 @@ export default function VoiceAI() {
     if (!window.speechSynthesis) { setSpeaking(false); return; }
     window.speechSynthesis.cancel();
     const clean = text.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*/g, "").replace(/\n+/g, ". ");
+    const isBengali = /[\u0980-\u09FF]/.test(clean);
     const utt = new SpeechSynthesisUtterance(clean);
     const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => v.name.includes("Google") && v.lang.startsWith("en")) || voices.find(v => v.lang.startsWith("en"));
+    const preferred = isBengali
+      ? voices.find(v => v.lang.startsWith("bn"))
+      : voices.find(v => v.name.includes("Google") && v.lang.startsWith("en")) || voices.find(v => v.lang.startsWith("en"));
     if (preferred) utt.voice = preferred;
     utt.rate = 0.92; utt.pitch = 1.0;
     utt.onend = () => setSpeaking(false);
