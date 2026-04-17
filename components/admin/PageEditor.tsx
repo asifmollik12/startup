@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Save, Plus, Trash2, Loader2 } from "lucide-react";
+import RichTextEditor from "./RichTextEditor";
 
 export type PageSection = { title: string; content: string };
 export type StatItem = { value: string; label: string };
@@ -200,8 +201,12 @@ export default function PageEditor({
                 placeholder="Section title" className={inp} />
             </Field>
             <Field label="Content">
-              <textarea value={section.content} onChange={e => updateSection(i, "content", e.target.value)}
-                rows={3} placeholder="Section content..." className={ta} />
+              <RichTextEditor
+                value={section.content}
+                onChange={val => updateSection(i, "content", val)}
+                placeholder="Section content..."
+                rows={4}
+              />
             </Field>
           </div>
         ))}

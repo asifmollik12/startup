@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Save, Plus, Trash2, Loader2, ExternalLink } from "lucide-react";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 
 const PAGE_KEY = "page_about";
 
@@ -170,7 +171,12 @@ export default function AdminAboutPage() {
               </div>
               <div>
                 <Label>Content</Label>
-                <textarea value={s.content} onChange={e => updateSection(i, "content", e.target.value)} rows={2} className={ta} placeholder="Description..." />
+                <RichTextEditor
+                  value={s.content}
+                  onChange={val => updateSection(i, "content", val)}
+                  placeholder="Description..."
+                  rows={3}
+                />
               </div>
             </div>
           ))}

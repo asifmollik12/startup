@@ -43,7 +43,7 @@ export default async function PrivacyPage() {
           {sections.map((s: any, i: number) => (
             <div key={i}>
               <h2 className="font-serif text-xl font-bold text-brand-dark mb-3">{s.title}</h2>
-              <p className="text-gray-600 leading-relaxed">{s.content}</p>
+              <div className="text-gray-600 leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: s.content }} />
             </div>
           ))}
           <div className="border-t border-brand-border pt-8">

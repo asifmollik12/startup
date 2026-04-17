@@ -71,7 +71,7 @@ export default async function AboutPage() {
                   <Icon size={20} className="text-brand-red group-hover:text-white transition-colors" />
                 </div>
                 <h3 className="font-serif text-xl font-bold text-brand-dark mb-3">{s.title}</h3>
-                <p className="text-gray-500 leading-relaxed">{s.content}</p>
+                <div className="text-gray-500 leading-relaxed prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: s.content }} />
               </div>
             );
           })}
