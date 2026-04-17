@@ -16,12 +16,19 @@ export async function POST(req: NextRequest) {
     const amount = plan === "pro" ? "499" : "0";
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://start-upnews.com";
 
-    const res = await fetch(`${process.env.UDDOKTA_BASE_URL}/api/checkout-v2`, {
+    const uddoktaBase = process.env.UDDOKTA_BASE_URL;
+    const uddoktaKey = process.env.UDDOKTA_API_KEY;
+
+    if (!uddoktaBase || !uddoktaKey) {
+      return NextResponse.json({ error: "Payment gateway not configured" }, { status: 500 });
+    }
+
+    const res = await fetch(`${uddoktaBase}/api/checkout-v2`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "RT-UDDOKTAPAY-API-KEY": process.env.UDDOKTA_API_KEY!,
+        "RT-UDDOKTAPAY-API-KEY": uddoktaKey,
       },
       body: JSON.stringify({
         full_name: user.name,
