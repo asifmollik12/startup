@@ -7,11 +7,12 @@ import { SiteSettings } from "@/lib/models/SiteSettings";
 export const revalidate = 60;
 export const metadata: Metadata = { title: "About Us — Start-Up News" };
 
-const defaultValues = [
-  { icon: Target, title: "Our Mission", desc: "To be the definitive voice of Bangladeshi entrepreneurship — telling the stories of founders, startups, and innovators shaping the nation's future." },
-  { icon: Globe, title: "Our Reach", desc: "Serving 2M+ monthly readers across Bangladesh and the diaspora, covering 64 districts and every major industry vertical." },
-  { icon: Users, title: "Our Community", desc: "A growing network of 500+ profiled founders, 1,200+ listed startups, and thousands of investors, operators, and ecosystem builders." },
-  { icon: Award, title: "Our Standard", desc: "Rigorous, independent journalism. We don't take money for editorial coverage. Every ranking, profile, and story is earned on merit." },
+const icons = [Target, Globe, Users, Award];
+const defaultSections = [
+  { title: "Our Mission", content: "To be the definitive voice of Bangladeshi entrepreneurship — telling the stories of founders, startups, and innovators shaping the nation's future." },
+  { title: "Our Reach", content: "Serving 2M+ monthly readers across Bangladesh and the diaspora, covering 64 districts and every major industry vertical." },
+  { title: "Our Community", content: "A growing network of 500+ profiled founders, 1,200+ listed startups, and thousands of investors, operators, and ecosystem builders." },
+  { title: "Our Standard", content: "Rigorous, independent journalism. We don't take money for editorial coverage. Every ranking, profile, and story is earned on merit." },
 ];
 
 async function getPageData() {
@@ -23,30 +24,36 @@ async function getPageData() {
 }
 
 export default async function AboutPage() {
-  const page = await getPageData();
-  const heroTitle = page?.hero_title || "Bangladesh's Premier Startup Intelligence Platform";
-  const heroSubtitle = page?.hero_subtitle || "Start-Up News was founded with a single belief: the stories of Bangladeshi entrepreneurs deserve world-class coverage.";
-  const sections = page?.sections?.length ? page.sections : defaultValues.map(v => ({ title: v.title, content: v.desc }));
-  const icons = [Target, Globe, Users, Award];
+  const p = await getPageData();
+  const badge = p?.hero_badge || "About Us";
+  const title = p?.hero_title || "Bangladesh's Premier Startup Intelligence Platform";
+  const subtitle = p?.hero_subtitle || "Start-Up News was founded with a single belief: the stories of Bangladeshi entrepreneurs deserve world-class coverage.";
+  const ctaText = p?.hero_cta_text || "Join Our Community";
+  const ctaHref = p?.hero_cta_href || "/subscribe";
+  const secBadge = p?.sections_badge || "What We Stand For";
+  const secTitle = p?.sections_title || "Our Values";
+  const sections = p?.sections?.length ? p.sections : defaultSections;
+  const ctaTitle = p?.cta_title || "Want to work with us?";
+  const ctaSub = p?.cta_subtitle || "We're always looking for journalists, researchers, and builders who care about Bangladesh's startup ecosystem.";
+  const ctaBtnText = p?.cta_btn_text || "View Openings";
+  const ctaBtnHref = p?.cta_btn_href || "/careers";
 
   return (
     <div className="min-h-screen bg-white">
       <div className="bg-brand-dark text-white py-20 lg:py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(200,16,46,0.15)_0%,_transparent_60%)] pointer-events-none" />
         <div className="container-wide relative">
-          <span className="section-label mb-4 block">About Us</span>
-          <h1 className="font-serif text-4xl lg:text-6xl font-bold leading-tight max-w-3xl mb-6">
-            <span className="text-brand-red">{heroTitle}</span>
-          </h1>
-          <p className="text-gray-400 text-lg max-w-2xl leading-relaxed mb-8">{heroSubtitle}</p>
-          <Link href="/subscribe" className="btn-primary">Join Our Community <ArrowRight size={15} /></Link>
+          <span className="section-label mb-4 block">{badge}</span>
+          <h1 className="font-serif text-4xl lg:text-6xl font-bold leading-tight max-w-3xl mb-6 text-brand-red">{title}</h1>
+          <p className="text-gray-400 text-lg max-w-2xl leading-relaxed mb-8">{subtitle}</p>
+          <Link href={ctaHref} className="btn-primary">{ctaText} <ArrowRight size={15} /></Link>
         </div>
       </div>
 
       <div className="container-wide py-16 lg:py-20">
         <div className="text-center mb-12">
-          <span className="section-label">What We Stand For</span>
-          <h2 className="font-serif text-3xl lg:text-4xl font-bold text-brand-dark mt-2">Our Values</h2>
+          <span className="section-label">{secBadge}</span>
+          <h2 className="font-serif text-3xl lg:text-4xl font-bold text-brand-dark mt-2">{secTitle}</h2>
           <div className="w-10 h-0.5 bg-brand-red mx-auto mt-3" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -80,10 +87,10 @@ export default async function AboutPage() {
 
       <div className="bg-brand-gray border-t border-brand-border py-16">
         <div className="container-wide text-center max-w-xl mx-auto">
-          <h2 className="font-serif text-3xl font-bold text-brand-dark mb-3">Want to work with us?</h2>
-          <p className="text-gray-500 mb-6">We&apos;re always looking for journalists, researchers, and builders who care about Bangladesh&apos;s startup ecosystem.</p>
+          <h2 className="font-serif text-3xl font-bold text-brand-dark mb-3">{ctaTitle}</h2>
+          <p className="text-gray-500 mb-6">{ctaSub}</p>
           <div className="flex gap-3 justify-center">
-            <Link href="/careers" className="btn-primary">View Openings <ArrowRight size={14} /></Link>
+            <Link href={ctaBtnHref} className="btn-primary">{ctaBtnText} <ArrowRight size={14} /></Link>
             <Link href="/contact" className="btn-outline">Get in Touch</Link>
           </div>
         </div>
