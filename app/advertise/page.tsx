@@ -14,12 +14,14 @@ const defaultSections = [
   { title: "Custom Packages", content: "Need something tailored? We work with brands of all sizes on custom campaigns, events, and partnerships. Contact us to discuss your goals." },
 ];
 
-const stats = [
-  { icon: Users, value: "2M+", label: "Monthly Readers" },
-  { icon: Target, value: "500+", label: "Founders in Network" },
-  { icon: BarChart2, value: "64", label: "Districts Covered" },
-  { icon: Zap, value: "50K+", label: "Newsletter Subscribers" },
+const defaultStats = [
+  { value: "2M+", label: "Monthly Readers" },
+  { value: "500+", label: "Founders in Network" },
+  { value: "64", label: "Districts Covered" },
+  { value: "50K+", label: "Newsletter Subscribers" },
 ];
+
+const statIcons = [Users, Target, BarChart2, Zap];
 
 async function getPageData() {
   try {
@@ -34,6 +36,7 @@ export default async function AdvertisePage() {
   const heroTitle = page?.hero_title || "Reach Bangladesh's Top Entrepreneurs";
   const heroSubtitle = page?.hero_subtitle || "Start-Up News connects your brand with 2M+ monthly readers — founders, investors, operators, and business leaders across Bangladesh.";
   const sections = page?.sections?.length ? page.sections : defaultSections;
+  const stats = page?.stats?.length ? page.stats : defaultStats;
 
   return (
     <div className="min-h-screen bg-white">
@@ -49,22 +52,27 @@ export default async function AdvertisePage() {
         </div>
       </div>
 
+      {/* Dynamic stats */}
       <div className="border-b border-brand-border">
         <div className="container-wide py-12">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map(({ icon: Icon, value, label }) => (
-              <div key={label} className="text-center">
-                <div className="w-12 h-12 bg-brand-red/10 flex items-center justify-center mx-auto mb-3">
-                  <Icon size={20} className="text-brand-red" />
+            {stats.map((stat: any, i: number) => {
+              const Icon = statIcons[i % statIcons.length];
+              return (
+                <div key={i} className="text-center">
+                  <div className="w-12 h-12 bg-brand-red/10 flex items-center justify-center mx-auto mb-3">
+                    <Icon size={20} className="text-brand-red" />
+                  </div>
+                  <div className="font-serif text-3xl font-bold text-brand-dark">{stat.value}</div>
+                  <div className="text-gray-400 text-xs uppercase tracking-wider mt-1">{stat.label}</div>
                 </div>
-                <div className="font-serif text-3xl font-bold text-brand-dark">{value}</div>
-                <div className="text-gray-400 text-xs uppercase tracking-wider mt-1">{label}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
 
+      {/* Dynamic sections */}
       <div className="container-wide py-16 lg:py-20">
         <div className="text-center mb-12">
           <span className="section-label">Packages</span>

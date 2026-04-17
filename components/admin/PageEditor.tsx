@@ -3,10 +3,12 @@ import { useState, useEffect } from "react";
 import { Save, Plus, Trash2, Loader2 } from "lucide-react";
 
 export type PageSection = { title: string; content: string };
+export type StatItem = { value: string; label: string };
 export type PageData = {
   hero_title: string;
   hero_subtitle: string;
   sections: PageSection[];
+  stats?: StatItem[];
 };
 
 const defaultData: PageData = {
@@ -52,6 +54,12 @@ export default function PageEditor({ pageKey, label }: { pageKey: string; label:
       sections: d.sections.map((s, idx) => idx === i ? { ...s, [field]: val } : s),
     }));
 
+  const updateStat = (i: number, field: keyof StatItem, val: string) =>
+    setData(d => ({
+      ...d,
+      stats: (d.stats ?? []).map((s, idx) => idx === i ? { ...s, [field]: val } : s),
+    }));
+
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <Loader2 size={24} className="animate-spin text-gray-400" />
@@ -91,6 +99,27 @@ export default function PageEditor({ pageKey, label }: { pageKey: string; label:
             className="w-full bg-gray-900 border border-gray-700 text-white px-4 py-2.5 rounded-lg text-sm focus:outline-none focus:border-brand-red transition-colors resize-none" />
         </div>
       </div>
+
+      {/* Stats (optional) */}
+      {data.stats !== undefined && (
+        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4">
+          <h2 className="text-sm font-bold text-gray-300 uppercase tracking-wider">Stats Bar</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {(data.stats ?? []).map((stat, i) => (
+              <div key={i} className="flex gap-2">
+                <input value={stat.value}
+                  onChange={e => updateStat(i, "value", e.target.value)}
+                  placeholder="e.g. 2M+"
+                  className="w-24 bg-gray-900 border border-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-brand-red transition-colors" />
+                <input value={stat.label}
+                  onChange={e => updateStat(i, "label", e.target.value)}
+                  placeholder="Label"
+                  className="flex-1 bg-gray-900 border border-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-brand-red transition-colors" />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Sections */}
       <div className="space-y-4">
