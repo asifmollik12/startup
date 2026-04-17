@@ -103,7 +103,7 @@ export default function Footer() {
       <div className="border-t border-white/10">
         <div className="container-wide py-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-500">
           <span>© 2026 Start-Up News. All rights reserved.</span>
-          <span>Made with ❤️ for Bangladesh · Powered by <span className="text-gray-400 font-semibold">Alphainno</span></span>
+          <span>Powered by <span className="text-gray-400 font-semibold">Alphainno</span></span>
         </div>
       </div>
     </footer>
