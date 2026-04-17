@@ -3,7 +3,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, FileText, Users, Rocket, Lightbulb,
-  Trophy, Settings, ExternalLink, ChevronRight, PanelTop, PanelBottom, Megaphone, ClipboardList,
+  Trophy, Settings, ExternalLink, ChevronRight, PanelTop, PanelBottom,
+  Megaphone, ClipboardList, Building2, Scale, Info, Briefcase, Phone, Lock, Cookie, BookOpen,
 } from "lucide-react";
 import { useSiteLogo } from "@/lib/SiteLogoContext";
 
@@ -19,6 +20,19 @@ const navItems = [
   { label: "Rankings", href: "/admin/rankings", icon: Trophy },
   { label: "Advertising", href: "/admin/advertising", icon: Megaphone },
   { label: "Settings", href: "/admin/settings", icon: Settings },
+];
+
+const companyPages = [
+  { label: "About Us", href: "/admin/pages/about", icon: Info },
+  { label: "Advertise", href: "/admin/pages/advertise", icon: Briefcase },
+  { label: "Careers", href: "/admin/pages/careers", icon: BookOpen },
+  { label: "Contact", href: "/admin/pages/contact", icon: Phone },
+];
+
+const legalPages = [
+  { label: "Privacy Policy", href: "/admin/pages/privacy", icon: Lock },
+  { label: "Terms of Use", href: "/admin/pages/terms", icon: Scale },
+  { label: "Cookie Policy", href: "/admin/pages/cookies", icon: Cookie },
 ];
 
 export default function AdminSidebar() {
@@ -49,15 +63,50 @@ export default function AdminSidebar() {
         {navItems.map(({ label, href, icon: Icon }) => {
           const active = pathname === href || (href !== "/admin" && pathname.startsWith(href));
           return (
-            <Link
-              key={href}
-              href={href}
+            <Link key={href} href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group ${
-                active
-                  ? "bg-brand-red text-white"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800"
-              }`}
-            >
+                active ? "bg-brand-red text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"
+              }`}>
+              <Icon size={16} className="flex-shrink-0" />
+              <span className="flex-1">{label}</span>
+              {active && <ChevronRight size={13} className="opacity-70" />}
+            </Link>
+          );
+        })}
+
+        {/* Company Pages */}
+        <div className="pt-4 pb-1">
+          <p className="px-3 text-[10px] font-bold uppercase tracking-widest text-gray-600 flex items-center gap-2">
+            <Building2 size={11} /> Company Pages
+          </p>
+        </div>
+        {companyPages.map(({ label, href, icon: Icon }) => {
+          const active = pathname === href;
+          return (
+            <Link key={href} href={href}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                active ? "bg-brand-red text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"
+              }`}>
+              <Icon size={16} className="flex-shrink-0" />
+              <span className="flex-1">{label}</span>
+              {active && <ChevronRight size={13} className="opacity-70" />}
+            </Link>
+          );
+        })}
+
+        {/* Legal Pages */}
+        <div className="pt-4 pb-1">
+          <p className="px-3 text-[10px] font-bold uppercase tracking-widest text-gray-600 flex items-center gap-2">
+            <Scale size={11} /> Legal
+          </p>
+        </div>
+        {legalPages.map(({ label, href, icon: Icon }) => {
+          const active = pathname === href;
+          return (
+            <Link key={href} href={href}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                active ? "bg-brand-red text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"
+              }`}>
               <Icon size={16} className="flex-shrink-0" />
               <span className="flex-1">{label}</span>
               {active && <ChevronRight size={13} className="opacity-70" />}
