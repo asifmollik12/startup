@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, Lock, Zap, BarChart2, Users, FileText, Trophy, Star } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { ArrowRight, Check, Lock, Zap, BarChart2, Users, FileText, Trophy, Star, CheckCircle, XCircle } from "lucide-react";
 
 const plans = [
   {
@@ -71,14 +72,58 @@ const perks = [
 export default function SubscribePage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [payLoading, setPayLoading] = useState(false);
+  const [user, setUser] = useState<{ id: string; name: string } | null>(null);
+  const searchParams = useSearchParams();
+  const status = searchParams.get("status");
+  const plan = searchParams.get("plan");
+
+  useEffect(() => {
+    const s = localStorage.getItem("user");
+    if (s) setUser(JSON.parse(s));
+  }, []);
 
   const handleNotify = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
   };
 
+  const handlePay = async (planName: string) => {
+    if (!user) { window.location.href = "/login"; return; }
+    setPayLoading(true);
+    try {
+      const res = await fetch("/api/payment/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, plan: planName }),
+      });
+      const data = await res.json();
+      if (data.payment_url) window.location.href = data.payment_url;
+      else alert(data.error || "Payment initiation failed");
+    } catch {
+      alert("Something went wrong. Please try again.");
+    }
+    setPayLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-white">
+
+      {/* Payment status banner */}
+      {status === "success" && (
+        <div className="bg-green-50 border-b border-green-200 py-3">
+          <div className="container-wide flex items-center justify-center gap-2 text-green-700 text-sm font-semibold">
+            <CheckCircle size={16} /> Payment successful! Your {plan} plan is now active.
+          </div>
+        </div>
+      )}
+      {status === "failed" && (
+        <div className="bg-red-50 border-b border-red-200 py-3">
+          <div className="container-wide flex items-center justify-center gap-2 text-red-600 text-sm font-semibold">
+            <XCircle size={16} /> Payment failed or was cancelled. Please try again.
+          </div>
+        </div>
+      )}
 
       {/* Hero */}
       <div className="bg-brand-dark text-white py-20 lg:py-28 relative overflow-hidden">
@@ -136,7 +181,17 @@ export default function SubscribePage() {
                     </li>
                   ))}
                 </ul>
-                {plan.comingSoon ? (
+                {plan.comingSoon && plan.name === "Pro" ? (
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => handlePay("pro")}
+                      disabled={payLoading}
+                      className="w-full flex items-center justify-center gap-2 bg-brand-red text-white py-3 text-sm font-bold uppercase tracking-wider hover:bg-red-700 transition-colors disabled:opacity-60">
+                      {payLoading ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><span>Subscribe Now — ৳499/mo</span><ArrowRight size={13} /></>}
+                    </button>
+                    <p className="text-[10px] text-center text-gray-400">bKash · Nagad · Rocket · Card</p>
+                  </div>
+                ) : plan.comingSoon ? (
                   <div className="space-y-2">
                     <div className={`w-full text-center py-3 text-sm font-bold uppercase tracking-wider border ${plan.highlight ? "border-white/20 text-gray-400" : "border-brand-border text-gray-400"}`}>
                       Coming Soon

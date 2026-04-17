@@ -8,9 +8,11 @@ const UserSchema = new Schema({
   role: { type: String, default: "user" },
   bio: { type: String, default: "" },
   readingList: [{ type: String }], // article slugs
-  aiChatCount: { type: Number, default: 0 },   // daily chat usage
-  ttsCount: { type: Number, default: 0 },       // daily voice usage
-  aiUsageDate: { type: String, default: "" },   // YYYY-MM-DD of last reset
+  aiChatCount: { type: Number, default: 0 },
+  ttsCount: { type: Number, default: 0 },
+  aiUsageDate: { type: String, default: "" },
+  subscription: { type: String, default: "free" }, // "free" | "pro"
+  subscriptionExpiry: { type: Date, default: null },
 }, { timestamps: true });
 
 export const User = models.User || mongoose.model("User", UserSchema);
