@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
         full_name: user.name,
         email: user.email,
         amount,
+        currency: "BDT",
         metadata: { user_id: userId, plan },
         redirect_url: `${baseUrl}/api/payment/callback`,
         cancel_url: `${baseUrl}/subscribe?status=cancelled`,
