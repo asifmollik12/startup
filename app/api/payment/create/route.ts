@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const amount = plan === "pro" ? "499" : "0";
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://start-upnews.com";
+    const baseUrl = "https://start-upnews.com";
 
     const uddoktaBase = process.env.UDDOKTA_BASE_URL;
     const uddoktaKey = process.env.UDDOKTA_API_KEY;

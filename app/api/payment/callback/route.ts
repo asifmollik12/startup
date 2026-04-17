@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const invoice_id = searchParams.get("invoice_id");
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://start-upnews.com";
+  const baseUrl = "https://start-upnews.com";
 
   if (!invoice_id) return NextResponse.redirect(`${baseUrl}/subscribe?status=failed`);
 
