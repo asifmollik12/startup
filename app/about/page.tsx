@@ -37,6 +37,12 @@ export default async function AboutPage() {
   const ctaSub = p?.cta_subtitle || "We're always looking for journalists, researchers, and builders who care about Bangladesh's startup ecosystem.";
   const ctaBtnText = p?.cta_btn_text || "View Openings";
   const ctaBtnHref = p?.cta_btn_href || "/careers";
+  const stats = p?.stats?.length ? p.stats : [
+    { value: "2M+", label: "Monthly Readers" },
+    { value: "500+", label: "Founders Profiled" },
+    { value: "1,200+", label: "Startups Listed" },
+    { value: "2026", label: "Est. Year" },
+  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -75,10 +81,10 @@ export default async function AboutPage() {
       <div className="bg-brand-dark py-16">
         <div className="container-wide">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 divide-x divide-white/10">
-            {[["2M+","Monthly Readers"],["500+","Founders Profiled"],["1,200+","Startups Listed"],["2026","Est. Year"]].map(([v,l]) => (
-              <div key={l} className="text-center px-6 py-4">
-                <div className="font-serif text-4xl font-bold text-white mb-1">{v}</div>
-                <div className="text-gray-500 text-xs uppercase tracking-widest">{l}</div>
+            {stats.map((s: any) => (
+              <div key={s.label} className="text-center px-6 py-4">
+                <div className="font-serif text-4xl font-bold text-white mb-1">{s.value}</div>
+                <div className="text-gray-500 text-xs uppercase tracking-widest">{s.label}</div>
               </div>
             ))}
           </div>

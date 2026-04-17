@@ -22,6 +22,12 @@ const DEFAULTS = {
   cta_subtitle: "We're always looking for journalists, researchers, and builders who care about Bangladesh's startup ecosystem.",
   cta_btn_text: "View Openings",
   cta_btn_href: "/careers",
+  stats: [
+    { value: "2M+", label: "Monthly Readers" },
+    { value: "500+", label: "Founders Profiled" },
+    { value: "1,200+", label: "Startups Listed" },
+    { value: "2026", label: "Est. Year" },
+  ],
 };
 
 const inp = "w-full bg-gray-900 border border-gray-700 text-white px-4 py-2.5 rounded-lg text-sm focus:outline-none focus:border-brand-red transition-colors placeholder-gray-600";
@@ -59,6 +65,9 @@ export default function AdminAboutPage() {
 
   const updateSection = (i: number, field: string, val: string) =>
     setData(d => ({ ...d, sections: d.sections.map((s, idx) => idx === i ? { ...s, [field]: val } : s) }));
+
+  const updateStat = (i: number, field: string, val: string) =>
+    setData((d: any) => ({ ...d, stats: d.stats.map((s: any, idx: number) => idx === i ? { ...s, [field]: val } : s) }));
 
   const addSection = () =>
     setData(d => ({ ...d, sections: [...d.sections, { title: "", content: "" }] }));
@@ -169,6 +178,20 @@ export default function AdminAboutPage() {
             className="flex items-center gap-2 text-xs text-brand-red border border-brand-red/50 px-4 py-2 rounded-lg hover:bg-brand-red hover:text-white transition-colors w-full justify-center">
             <Plus size={13} /> Add Card
           </button>
+        </div>
+      </Card>
+
+      {/* Stats bar */}
+      <Card title="Stats Bar">
+        <div className="grid grid-cols-2 gap-3">
+          {(data as any).stats?.map((stat: any, i: number) => (
+            <div key={i} className="flex gap-2">
+              <input value={stat.value} onChange={e => updateStat(i, "value", e.target.value)}
+                className="w-24 bg-gray-900 border border-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-brand-red transition-colors" placeholder="2M+" />
+              <input value={stat.label} onChange={e => updateStat(i, "label", e.target.value)}
+                className="flex-1 bg-gray-900 border border-gray-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-brand-red transition-colors" placeholder="Label" />
+            </div>
+          ))}
         </div>
       </Card>
 
