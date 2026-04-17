@@ -5,7 +5,7 @@ import { useState } from "react";
 import {
   LayoutDashboard, FileText, Users, Rocket, Lightbulb,
   Trophy, Settings, ExternalLink, ChevronRight, PanelTop, PanelBottom,
-  Megaphone, ClipboardList, Building2, Scale, Info, Briefcase, Phone, Lock, Cookie, BookOpen, ChevronDown,
+  Megaphone, ClipboardList, Building2, Scale, Info, Briefcase, Phone, Lock, Cookie, ChevronDown,
 } from "lucide-react";
 import { useSiteLogo } from "@/lib/SiteLogoContext";
 
@@ -26,7 +26,6 @@ const navItems = [
 const companyPages = [
   { label: "About Us", href: "/admin/pages/about", icon: Info },
   { label: "Advertise", href: "/admin/pages/advertise", icon: Briefcase },
-  { label: "Careers", href: "/admin/pages/careers", icon: BookOpen },
   { label: "Contact", href: "/admin/pages/contact", icon: Phone },
 ];
 
