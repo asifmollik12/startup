@@ -29,17 +29,19 @@ export default function AdminSidebar() {
     <aside className="w-60 bg-gray-900 border-r border-gray-800 flex flex-col flex-shrink-0">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-gray-800">
-        {logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <div className="flex items-center gap-3">
-            <img src={logoUrl} alt="Site Logo" className="h-8 w-auto object-contain" />
-          </div>
-        ) : (
-          <div className="flex items-center gap-3">
-            <div className="bg-brand-red text-white font-serif font-bold text-sm px-2 py-1 leading-tight">SUN</div>
-            <div className="text-white font-bold text-sm tracking-tight">START-UP NEWS</div>
-          </div>
-        )}
+        <a href="/admin" onClick={() => window.location.href = "/admin"} className="cursor-pointer">
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <div className="flex items-center gap-3">
+              <img src={logoUrl} alt="Site Logo" className="h-8 w-auto object-contain" />
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="bg-brand-red text-white font-serif font-bold text-sm px-2 py-1 leading-tight">SUN</div>
+              <div className="text-white font-bold text-sm tracking-tight">START-UP NEWS</div>
+            </div>
+          )}
+        </a>
       </div>
 
       {/* Nav */}
