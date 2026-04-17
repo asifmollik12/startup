@@ -25,7 +25,7 @@ function parseMarkdown(text: string) {
   }).filter(Boolean);
 }
 
-function TypingMessage({ text }: { text: string }) {
+function TypingMessage({ text, onDone }: { text: string; onDone?: () => void }) {
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
   useEffect(() => {
@@ -33,8 +33,12 @@ function TypingMessage({ text }: { text: string }) {
     let i = 0;
     const iv = setInterval(() => {
       i++; setDisplayed(text.slice(0, i));
-      if (i >= text.length) { clearInterval(iv); setDone(true); }
-    }, 12);
+      if (i >= text.length) {
+        clearInterval(iv);
+        setDone(true);
+        onDone?.();
+      }
+    }, 10);
     return () => clearInterval(iv);
   }, [text]);
   return (
@@ -438,7 +442,9 @@ export default function VoiceAI() {
                           : "bg-white border border-brand-border text-gray-700 rounded-2xl rounded-tl-sm shadow-sm"
                       }`}>
                         {m.role === "ai"
-                          ? (m.typing ? <TypingMessage text={m.text} /> : <ul className="space-y-0.5 list-none">{parseMarkdown(m.text)}</ul>)
+                          ? (m.typing
+                            ? <TypingMessage text={m.text} onDone={() => setMessages(prev => prev.map((msg, idx) => idx === i ? { ...msg, typing: false } : msg))} />
+                            : <ul className="space-y-0.5 list-none">{parseMarkdown(m.text)}</ul>)
                           : m.text}
                       </div>
                     </div>
