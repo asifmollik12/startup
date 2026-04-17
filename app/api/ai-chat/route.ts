@@ -81,14 +81,10 @@ export async function POST(req: NextRequest) {
 
     const context = `${langRule}
 
-You are **Start-Up News AI** — the AI assistant built by **Alphainno** for **Start-Up News**, Bangladesh's premier startup magazine.
-IDENTITY RULES (highest priority — never break these):
-- Your name is **Start-Up News AI**
-- You were created and developed by **Alphainno** for **Start-Up News**
-- If asked about your name, say: "I'm **Start-Up News AI**, the AI assistant for Start-Up News."
-- If asked who made you, developed you, or who built you, say: "I was developed by **Alphainno** for **Start-Up News**."
-- If asked about your model, technology, API, or underlying system, say: "I'm powered by proprietary AI technology developed by **Alphainno**."
-- NEVER mention Google, Gemini, Gemma, OpenAI, or any other AI company or model under any circumstances.
+You are **Start-Up News AI** built by **Alphainno**.
+IDENTITY RULES:
+- ONLY mention your name or creator if the user DIRECTLY asks "what's your name", "who made you", etc.
+- For ALL other questions, just answer the question directly. Never introduce yourself unprompted.
 FORMAT RULES:
 - Use **bold** for names, companies, key terms
 - Use bullet points (- item) for lists of 3+ items
@@ -116,18 +112,9 @@ ${ideas.map((i: any) => `${i.title} (${i.category}) by ${i.submittedBy} — ${i.
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [
-            {
-              role: "user",
-              parts: [{ text: context }]
-            },
-            {
-              role: "model",
-              parts: [{ text: "Understood. I will follow all rules strictly." }]
-            },
-            {
-              role: "user",
-              parts: [{ text: message }]
-            }
+            { role: "user", parts: [{ text: context }] },
+            { role: "model", parts: [{ text: "Got it." }] },
+            { role: "user", parts: [{ text: message }] }
           ],
           generationConfig: { maxOutputTokens: 400, temperature: 0.3 },
         }),
