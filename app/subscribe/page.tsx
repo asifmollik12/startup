@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight, Check, Lock, Zap, BarChart2, Users, FileText, Trophy, Star, CheckCircle, XCircle } from "lucide-react";
@@ -70,6 +70,14 @@ const perks = [
 ];
 
 export default function SubscribePage() {
+  return (
+    <Suspense>
+      <SubscribeContent />
+    </Suspense>
+  );
+}
+
+function SubscribeContent() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [payLoading, setPayLoading] = useState(false);
