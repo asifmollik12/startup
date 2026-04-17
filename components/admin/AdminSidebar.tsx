@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   LayoutDashboard, FileText, Users, Rocket, Lightbulb,
   Trophy, Settings, ExternalLink, ChevronRight, PanelTop, PanelBottom,
-  Megaphone, ClipboardList, Building2, Scale, Info, Briefcase, Phone, Lock, Cookie, BookOpen,
+  Megaphone, ClipboardList, Building2, Scale, Info, Briefcase, Phone, Lock, Cookie, BookOpen, ChevronDown,
 } from "lucide-react";
 import { useSiteLogo } from "@/lib/SiteLogoContext";
 
@@ -34,6 +35,45 @@ const legalPages = [
   { label: "Terms of Use", href: "/admin/pages/terms", icon: Scale },
   { label: "Cookie Policy", href: "/admin/pages/cookies", icon: Cookie },
 ];
+
+function NavGroup({ icon: Icon, label, items, pathname }: {
+  icon: React.ElementType; label: string;
+  items: { label: string; href: string; icon: React.ElementType }[];
+  pathname: string;
+}) {
+  const isAnyActive = items.some(i => pathname === i.href);
+  const [open, setOpen] = useState(isAnyActive);
+
+  return (
+    <div>
+      <button onClick={() => setOpen(o => !o)}
+        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+          isAnyActive ? "text-white bg-gray-800" : "text-gray-400 hover:text-white hover:bg-gray-800"
+        }`}>
+        <Icon size={16} className="flex-shrink-0" />
+        <span className="flex-1 text-left">{label}</span>
+        <ChevronDown size={13} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="mt-0.5 ml-3 pl-3 border-l border-gray-700 space-y-0.5">
+          {items.map(({ label, href, icon: ItemIcon }) => {
+            const active = pathname === href;
+            return (
+              <Link key={href} href={href}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  active ? "bg-brand-red text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"
+                }`}>
+                <ItemIcon size={14} className="flex-shrink-0" />
+                <span className="flex-1">{label}</span>
+                {active && <ChevronRight size={12} className="opacity-70" />}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -74,45 +114,12 @@ export default function AdminSidebar() {
           );
         })}
 
-        {/* Company Pages */}
-        <div className="pt-4 pb-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-widest text-gray-600 flex items-center gap-2">
-            <Building2 size={11} /> Company Pages
-          </p>
+        <div className="pt-3">
+          <NavGroup icon={Building2} label="Company Pages" items={companyPages} pathname={pathname} />
         </div>
-        {companyPages.map(({ label, href, icon: Icon }) => {
-          const active = pathname === href;
-          return (
-            <Link key={href} href={href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                active ? "bg-brand-red text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"
-              }`}>
-              <Icon size={16} className="flex-shrink-0" />
-              <span className="flex-1">{label}</span>
-              {active && <ChevronRight size={13} className="opacity-70" />}
-            </Link>
-          );
-        })}
-
-        {/* Legal Pages */}
-        <div className="pt-4 pb-1">
-          <p className="px-3 text-[10px] font-bold uppercase tracking-widest text-gray-600 flex items-center gap-2">
-            <Scale size={11} /> Legal
-          </p>
+        <div className="pt-1">
+          <NavGroup icon={Scale} label="Legal" items={legalPages} pathname={pathname} />
         </div>
-        {legalPages.map(({ label, href, icon: Icon }) => {
-          const active = pathname === href;
-          return (
-            <Link key={href} href={href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                active ? "bg-brand-red text-white" : "text-gray-400 hover:text-white hover:bg-gray-800"
-              }`}>
-              <Icon size={16} className="flex-shrink-0" />
-              <span className="flex-1">{label}</span>
-              {active && <ChevronRight size={13} className="opacity-70" />}
-            </Link>
-          );
-        })}
       </nav>
 
       {/* Footer */}
