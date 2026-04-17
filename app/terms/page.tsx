@@ -25,18 +25,18 @@ async function getPageData() {
 }
 
 export default async function TermsPage() {
-  const page = await getPageData();
-  const heroTitle = page?.hero_title || "Terms of Use";
-  const heroSubtitle = page?.hero_subtitle || "Last updated: January 2026";
-  const sections = page?.sections?.length ? page.sections : defaultSections;
+  const p = await getPageData();
+  const title = p?.hero_title || "Terms of Use";
+  const subtitle = p?.hero_subtitle || "Last updated: January 2026";
+  const sections = p?.sections?.length ? p.sections : defaultSections;
 
   return (
     <div className="min-h-screen bg-white">
       <div className="bg-brand-dark text-white py-16">
         <div className="container-wide">
           <span className="section-label mb-3 block">Legal</span>
-          <h1 className="font-serif text-4xl font-bold">{heroTitle}</h1>
-          <p className="text-gray-400 mt-3 text-sm">{heroSubtitle}</p>
+          <h1 className="font-serif text-4xl font-bold">{title}</h1>
+          <p className="text-gray-400 mt-3 text-sm">{subtitle}</p>
         </div>
       </div>
       <div className="container-wide py-16">
