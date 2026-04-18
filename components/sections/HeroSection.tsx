@@ -54,7 +54,7 @@ export default async function HeroSection() {
 
           {/* Ad banner — managed from admin */}
           <div className="mt-4">
-            <InlineAdBanner placement="Homepage Hero" label="Advertisement" />
+            <InlineAdBanner placement="Homepage Hero" fullSize />
           </div>
         </div>
 

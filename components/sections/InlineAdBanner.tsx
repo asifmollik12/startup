@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 type AdSlot = { id: string; name: string; placement: string; type: string; imageUrl?: string; code?: string; linkUrl: string; active: boolean };
 
-export default function InlineAdBanner({ label = "Advertisement", placement = "Between Article Paragraphs" }: { label?: string; placement?: string }) {
+export default function InlineAdBanner({ label = "Advertisement", placement = "Between Article Paragraphs", fullSize = false }: { label?: string; placement?: string; fullSize?: boolean }) {
   const [ad, setAd] = useState<AdSlot | null | undefined>(undefined);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function InlineAdBanner({ label = "Advertisement", placement = "B
       ) : ad?.imageUrl ? (
         <a href={ad.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="block w-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={ad.imageUrl} alt={ad.name} className="w-full h-[90px] object-cover block" />
+          <img src={ad.imageUrl} alt={ad.name} className={`w-full block object-cover ${fullSize ? "aspect-video" : "h-[90px]"}`} />
         </a>
       ) : (
         <a href="/advertise"
