@@ -43,11 +43,9 @@ export default async function HeroSection() {
             <div className="bg-white px-0 lg:px-0 pt-4 pb-2">
               <span className="badge-red text-[10px]">{main.category}</span>
               <h1 className="font-serif text-2xl lg:text-4xl font-bold text-gray-900 leading-tight mt-2 mb-3">{main.title}</h1>
-              <p className="text-gray-500 text-sm lg:text-base line-clamp-2 mb-3 leading-relaxed">{main.excerpt}</p>
-              <div className="flex items-center gap-3 text-gray-400 text-xs border-t border-brand-border pt-3">
-                <span>{formatDate(main.publishedAt)}</span>
-                <span>·</span><span className="flex items-center gap-1"><Clock size={10} />{main.readTime} min</span>
-              </div>
+              <p className="text-gray-500 text-sm lg:text-base line-clamp-2 leading-relaxed">
+                {main.excerpt} <span className="text-gray-400 text-xs ml-1">{formatDate(main.publishedAt)}</span>
+              </p>
             </div>
           </Link>
 

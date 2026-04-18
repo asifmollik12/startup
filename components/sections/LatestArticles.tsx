@@ -47,11 +47,9 @@ export default async function LatestArticles() {
                 <div className="p-5">
                   <span className="section-label text-[9px]">{article.category}</span>
                   <h3 className="font-serif font-bold text-base text-brand-dark mt-1 mb-2 leading-snug group-hover:text-brand-red transition-colors line-clamp-2">{article.title}</h3>
-                  <p className="text-gray-500 text-sm line-clamp-2 mb-4">{article.excerpt}</p>
-                  <div className="flex items-center gap-2 text-xs text-gray-400 border-t border-brand-border pt-3">
-                    <span>{formatDate(article.publishedAt)}</span>
-                    <span>·</span><span className="flex items-center gap-1"><Clock size={9} />{article.readTime}m</span>
-                  </div>
+                  <p className="text-gray-500 text-sm line-clamp-2 mb-4">
+                    {article.excerpt} <span className="text-gray-400 text-xs ml-1">{formatDate(article.publishedAt)}</span>
+                  </p>
                 </div>
               </Link>
             ))}
