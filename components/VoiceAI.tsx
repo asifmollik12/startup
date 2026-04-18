@@ -312,7 +312,7 @@ export default function VoiceAI() {
               if (mode === "voice") {
                 speechBuffer += json.text;
                 // Speak when we hit a sentence boundary
-                const match = speechBuffer.match(/^(.*[.!?।])\s*/s);
+                const match = speechBuffer.match(/^([\s\S]*[.!?।])\s*/);
                 if (match) {
                   const sentence = match[1].replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*/g, "").replace(/#+\s/g, "");
                   speakChunk(sentence);
