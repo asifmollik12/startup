@@ -18,7 +18,6 @@ export default function InlineAdBanner({ label = "Advertisement", placement = "B
 
   return (
     <div className="container-wide py-1">
-      <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-2 text-center">{label}</p>
       {ad?.type === "code" && ad.code ? (
         <div dangerouslySetInnerHTML={{ __html: ad.code }} />
       ) : ad?.imageUrl ? (
