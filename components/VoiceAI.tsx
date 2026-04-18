@@ -142,6 +142,7 @@ export default function VoiceAI() {
   // Separate counters: voice uses TTS credits, text uses chat credits
   const [chatUsed, setChatUsed] = useState(0);   // text-only
   const [ttsUsed, setTtsUsed] = useState(0);     // voice-only
+  const transcriptRef = useRef("");
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -196,42 +197,27 @@ export default function VoiceAI() {
     if (!SpeechRecognition) { setError("Voice not supported. Use the text box below."); return; }
 
     const rec = new SpeechRecognition();
-    // Use 'en-US' as default — browser handles Bengali too if user speaks it
-    // We detect language from the transcript after capture
     rec.lang = "en-US";
-    rec.interimResults = true;
-    rec.continuous = true; // keep listening until silence detected
-    let finalText = "";
-    let lastSpeechTime = Date.now();
+    rec.interimResults = false; // disable interim — only get final results, no duplicates
+    rec.continuous = false;     // single utterance — most reliable on mobile
+    rec.maxAlternatives = 1;
 
     rec.onresult = (e: any) => {
-      lastSpeechTime = Date.now();
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      // Only use the latest final + current interim — don't concat all results
-      let interim = "";
-      let final = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) final += e.results[i][0].transcript;
-        else interim += e.results[i][0].transcript;
-      }
-      finalText = (finalText + final).trim();
-      setTranscript(finalText || interim);
-
-      // Auto-stop after 2s of silence
-      silenceTimerRef.current = setTimeout(() => {
-        rec.stop();
-      }, 2000);
+      const text = e.results[0]?.[0]?.transcript ?? "";
+      transcriptRef.current = text;
+      setTranscript(text);
     };
 
     rec.onend = () => {
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       setListening(false);
+      const finalText = transcriptRef.current;
+      transcriptRef.current = "";
       if (finalText.trim()) sendMessage(finalText.trim(), "voice");
       else setTranscript("");
     };
 
     rec.onerror = (e: any) => {
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       setListening(false);
       if (e.error !== "no-speech") setError(`Mic error: ${e.error}. Try typing instead.`);
     };
