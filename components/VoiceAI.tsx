@@ -265,26 +265,6 @@ export default function VoiceAI() {
       setLoading(false);
       setMessages(prev => [...prev, { role: "ai", text: "", typing: false }]);
 
-      // For voice mode: use browser speechSynthesis to speak chunks as they stream
-      let speechBuffer = "";
-      let speechStarted = false;
-
-      const speakChunk = (text: string) => {
-        if (!window.speechSynthesis) return;
-        const utt = new SpeechSynthesisUtterance(text);
-        utt.rate = 0.95;
-        utt.pitch = 1.0;
-        const voices = window.speechSynthesis.getVoices();
-        const isBengali = /[\u0980-\u09FF]/.test(text);
-        const preferred = isBengali
-          ? voices.find(v => v.lang.startsWith("bn"))
-          : voices.find(v => v.name.includes("Google") && v.lang.startsWith("en")) || voices.find(v => v.lang.startsWith("en"));
-        if (preferred) utt.voice = preferred;
-        window.speechSynthesis.speak(utt);
-        setSpeaking(true);
-        utt.onend = () => { if (!window.speechSynthesis.speaking) setSpeaking(false); };
-      };
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -307,28 +287,14 @@ export default function VoiceAI() {
                 updated[updated.length - 1] = { role: "ai", text: fullReply, typing: false };
                 return updated;
               });
-
-              // Voice mode: speak each sentence as it arrives
-              if (mode === "voice") {
-                speechBuffer += json.text;
-                // Speak when we hit a sentence boundary
-                const match = speechBuffer.match(/^([\s\S]*[.!?।])\s*/);
-                if (match) {
-                  const sentence = match[1].replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*/g, "").replace(/#+\s/g, "");
-                  speakChunk(sentence);
-                  speechBuffer = speechBuffer.slice(match[0].length);
-                  speechStarted = true;
-                }
-              }
             }
           } catch {}
         }
       }
 
-      // Speak any remaining buffer
-      if (mode === "voice" && speechBuffer.trim()) {
-        const clean = speechBuffer.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*/g, "").replace(/#+\s/g, "");
-        speakChunk(clean);
+      // Use ElevenLabs for natural voice after full reply is ready
+      if (mode === "voice" && fullReply) {
+        speak(fullReply, true);
       }
 
     } catch (e: any) {
