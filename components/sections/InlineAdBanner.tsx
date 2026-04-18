@@ -21,9 +21,10 @@ export default function InlineAdBanner({ label = "Advertisement", placement = "B
       {ad?.type === "code" && ad.code ? (
         <div dangerouslySetInnerHTML={{ __html: ad.code }} />
       ) : ad?.imageUrl ? (
-        <a href={ad.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="block w-full">
+        <a href={ad.linkUrl || "#"} target="_blank" rel="noopener noreferrer"
+          className="block w-full overflow-hidden border-y border-brand-border hover:opacity-95 transition-opacity">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={ad.imageUrl} alt={ad.name} className={`w-full block object-cover ${fullSize ? "h-[200px]" : "h-[90px]"}`} />
+          <img src={ad.imageUrl} alt={ad.name} className={`w-full block object-cover ${fullSize ? "h-[120px]" : "h-[90px]"}`} />
         </a>
       ) : (
         <a href="/advertise"
