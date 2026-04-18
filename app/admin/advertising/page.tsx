@@ -192,8 +192,15 @@ export default function AdminAdvertising() {
                     </td>
                     <td className="px-5 py-4">
                       <button onClick={() => toggleActive(slot.id)}
-                        className={`flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-full font-semibold transition-colors ${slot.active ? "bg-green-500/20 text-green-400 hover:bg-green-500/30" : "bg-gray-700 text-gray-400 hover:bg-gray-600"}`}>
-                        {slot.active ? <><Eye size={10} /> Live</> : <><EyeOff size={10} /> Paused</>}
+                        className="flex items-center gap-2 group"
+                        title={slot.active ? "Click to pause" : "Click to activate"}>
+                        {/* Toggle switch */}
+                        <div className={`relative w-10 h-5 rounded-full transition-colors ${slot.active ? "bg-green-500" : "bg-gray-600"}`}>
+                          <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${slot.active ? "translate-x-5" : "translate-x-0.5"}`} />
+                        </div>
+                        <span className={`text-xs font-semibold ${slot.active ? "text-green-400" : "text-gray-500"}`}>
+                          {slot.active ? "Live" : "Off"}
+                        </span>
                       </button>
                     </td>
                     <td className="px-5 py-4">
