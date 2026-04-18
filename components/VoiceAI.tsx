@@ -229,16 +229,11 @@ export default function VoiceAI() {
     setError("");
   };
 
-  // mode: "voice" uses TTS credit, "text" uses chat credit
   const sendMessage = async (text: string, mode: "voice" | "text" = "text") => {
     if (!text.trim() || !user) return;
 
-    if (mode === "voice" && ttsUsed >= TTS_LIMIT) {
-      setLimitPopup("voice"); return;
-    }
-    if (mode === "text" && chatUsed >= CHAT_LIMIT) {
-      setLimitPopup("text"); return;
-    }
+    if (mode === "voice" && ttsUsed >= TTS_LIMIT) { setLimitPopup("voice"); return; }
+    if (mode === "text" && chatUsed >= CHAT_LIMIT) { setLimitPopup("text"); return; }
 
     setMessages(prev => [...prev, { role: "user", text }]);
     setTranscript("");
@@ -253,30 +248,74 @@ export default function VoiceAI() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, userId: user.id, mode }),
       });
-      const data = await res.json();
 
       if (!res.ok) {
+        const data = await res.json();
         setError(data.error || "Something went wrong.");
         setMessages(prev => prev.slice(0, -1));
-      } else {
-        const reply = data.reply || "I didn't get a response. Please try again.";
-
-        if (mode === "text") {
-          if (data.remaining !== undefined) setChatUsed(CHAT_LIMIT - data.remaining);
-          else setChatUsed(c => c + 1);
-        }
-
-        // Start TTS fetch immediately in parallel — don't wait for typing to finish
-        if (mode === "voice") speak(reply, true);
-
-        // Show typing animation concurrently with audio
-        setMessages(prev => [...prev, { role: "ai", text: reply, typing: true }]);
+        setLoading(false);
+        return;
       }
+
+      // Stream the response
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let fullReply = "";
+      let ttsTriggered = false;
+      let ttsBuffer = "";
+
+      setLoading(false);
+      // Add empty AI message that we'll fill as stream comes in
+      setMessages(prev => [...prev, { role: "ai", text: "", typing: false }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const json = JSON.parse(line.slice(6));
+            if (json.done) {
+              if (json.remaining !== undefined && mode === "text") setChatUsed(CHAT_LIMIT - json.remaining);
+              break;
+            }
+            if (json.text) {
+              fullReply += json.text;
+              ttsBuffer += json.text;
+              // Update the last message in real-time
+              setMessages(prev => {
+                const updated = [...prev];
+                updated[updated.length - 1] = { role: "ai", text: fullReply, typing: false };
+                return updated;
+              });
+
+              // Trigger TTS on first sentence boundary (voice mode only)
+              if (mode === "voice" && !ttsTriggered) {
+                const sentenceEnd = /[.!?।\n]/.test(ttsBuffer);
+                if (sentenceEnd || ttsBuffer.length > 80) {
+                  ttsTriggered = true;
+                  speak(fullReply, true); // speak what we have so far
+                }
+              }
+            }
+          } catch {}
+        }
+      }
+
+      // If voice mode and TTS wasn't triggered yet (short answer), speak now
+      if (mode === "voice" && !ttsTriggered && fullReply) {
+        speak(fullReply, true);
+      }
+
     } catch (e: any) {
       setMessages(prev => [...prev, { role: "ai", text: "Sorry, something went wrong." }]);
       setError(e.message);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // countCredit=true only when called from voice mode (counts TTS credit)

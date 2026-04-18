@@ -106,7 +106,7 @@ ${ideas.map((i: any) => `${i.title} (${i.category}) by ${i.submittedBy} — ${i.
     `.trim();
 
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-4b-it:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-4b-it:streamGenerateContent?alt=sse&key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -121,16 +121,54 @@ ${ideas.map((i: any) => `${i.title} (${i.category}) by ${i.submittedBy} — ${i.
       }
     );
 
-    const data = await res.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "Sorry, I couldn't process that.";
-
-    // Only increment chat counter for text mode; voice mode credits are counted in /api/tts
-    if (mode !== "voice") {
-      user.aiChatCount += 1;
-      await user.save();
+    if (!res.ok || !res.body) {
+      return NextResponse.json({ error: "AI unavailable" }, { status: 500 });
     }
 
-    return NextResponse.json({ reply, remaining: CHAT_LIMIT - user.aiChatCount });
+    // Stream SSE chunks back to client
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = res.body!.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const json = line.slice(6).trim();
+            if (json === "[DONE]") continue;
+            try {
+              const chunk = JSON.parse(json);
+              const text = chunk?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+              if (text) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+            } catch {}
+          }
+        }
+
+        // Save usage counter after stream completes
+        if (mode !== "voice") {
+          user.aiChatCount += 1;
+          await user.save();
+        }
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, remaining: CHAT_LIMIT - user.aiChatCount })}\n\n`));
+        controller.close();
+      }
+    });
+
+    return new NextResponse(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+      },
+    });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
