@@ -262,10 +262,8 @@ export default function VoiceAI() {
       const decoder = new TextDecoder();
       let fullReply = "";
       let ttsTriggered = false;
-      let ttsBuffer = "";
 
       setLoading(false);
-      // Add empty AI message that we'll fill as stream comes in
       setMessages(prev => [...prev, { role: "ai", text: "", typing: false }]);
 
       while (true) {
@@ -285,29 +283,18 @@ export default function VoiceAI() {
             }
             if (json.text) {
               fullReply += json.text;
-              ttsBuffer += json.text;
-              // Update the last message in real-time
               setMessages(prev => {
                 const updated = [...prev];
                 updated[updated.length - 1] = { role: "ai", text: fullReply, typing: false };
                 return updated;
               });
-
-              // Trigger TTS on first sentence boundary (voice mode only)
-              if (mode === "voice" && !ttsTriggered) {
-                const sentenceEnd = /[.!?।\n]/.test(ttsBuffer);
-                if (sentenceEnd || ttsBuffer.length > 80) {
-                  ttsTriggered = true;
-                  speak(fullReply, true); // speak what we have so far
-                }
-              }
             }
           } catch {}
         }
       }
 
-      // If voice mode and TTS wasn't triggered yet (short answer), speak now
-      if (mode === "voice" && !ttsTriggered && fullReply) {
+      // Speak the FULL reply after stream completes
+      if (mode === "voice" && fullReply) {
         speak(fullReply, true);
       }
 
