@@ -3,15 +3,18 @@ import { useEffect, useState } from "react";
 
 type AdSlot = { id: string; name: string; placement: string; type: string; imageUrl?: string; code?: string; linkUrl: string; active: boolean };
 
-export default function InlineAdBanner({ label = "Advertisement" }: { label?: string }) {
-  const [ad, setAd] = useState<AdSlot | null>(null);
+export default function InlineAdBanner({ label = "Advertisement", placement = "Between Article Paragraphs" }: { label?: string; placement?: string }) {
+  const [ad, setAd] = useState<AdSlot | null | undefined>(undefined);
 
   useEffect(() => {
     fetch("/api/ads").then(r => r.json()).then((slots: AdSlot[]) => {
-      const match = slots.find(s => s.active && s.placement === "Between Article Paragraphs");
+      const match = slots.find(s => s.active && s.placement === placement);
       setAd(match ?? null);
-    }).catch(() => {});
-  }, []);
+    }).catch(() => setAd(null));
+  }, [placement]);
+
+  // Still loading — render nothing to avoid layout shift
+  if (ad === undefined) return null;
 
   return (
     <div className="container-wide py-1">
@@ -21,11 +24,11 @@ export default function InlineAdBanner({ label = "Advertisement" }: { label?: st
       ) : ad?.imageUrl ? (
         <a href={ad.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="block w-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={ad.imageUrl} alt={ad.name} className="w-full h-[90px] object-cover" />
+          <img src={ad.imageUrl} alt={ad.name} className="w-full max-h-[120px] object-cover" />
         </a>
       ) : (
         <a href="/advertise"
-          className="group relative flex items-center justify-between overflow-hidden bg-brand-dark border border-white/10 px-8 py-10 hover:border-brand-red transition-colors cursor-pointer w-full">
+          className="group relative flex items-center justify-between overflow-hidden bg-brand-dark border border-white/10 px-8 py-6 hover:border-brand-red transition-colors cursor-pointer w-full">
           <div className="relative flex items-center gap-5">
             <div className="w-10 h-10 bg-brand-red flex items-center justify-center flex-shrink-0">
               <span className="text-white font-serif font-bold text-sm">SUN</span>

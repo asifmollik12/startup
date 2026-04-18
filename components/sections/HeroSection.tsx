@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/utils";
 import { Clock } from "lucide-react";
 import { connectDB } from "@/lib/mongodb";
 import { Article as ArticleModel } from "@/lib/models/Article";
+import InlineAdBanner from "@/components/sections/InlineAdBanner";
 
 async function getArticles() {
   try {
@@ -51,28 +52,9 @@ export default async function HeroSection() {
             </div>
           </Link>
 
-          {/* Ad banner */}
+          {/* Ad banner — managed from admin */}
           <div className="mt-4">
-            <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-1.5 text-center">Advertisement</p>
-            <a href="/advertise" className="group relative flex items-center justify-between overflow-hidden bg-brand-dark border border-white/10 px-6 py-4 hover:border-brand-red transition-colors cursor-pointer">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,_rgba(200,16,46,0.12)_0%,_transparent_60%)] pointer-events-none" />
-              <div className="relative flex items-center gap-4">
-                <div className="w-9 h-9 bg-brand-red flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-serif font-bold text-sm">SUN</span>
-                </div>
-                <div>
-                  <p className="text-white font-semibold text-sm leading-tight">Advertise with Start-Up News</p>
-                  <p className="text-gray-500 text-xs mt-0.5">Reach 2M+ Bangladeshi entrepreneurs & investors</p>
-                </div>
-              </div>
-              <div className="relative hidden sm:flex items-center gap-5">
-                <div className="text-center"><p className="text-white font-bold text-sm">2M+</p><p className="text-gray-600 text-[10px] uppercase tracking-wider">Readers</p></div>
-                <div className="w-px h-7 bg-white/10" />
-                <div className="text-center"><p className="text-white font-bold text-sm">500+</p><p className="text-gray-600 text-[10px] uppercase tracking-wider">Founders</p></div>
-                <div className="w-px h-7 bg-white/10" />
-                <span className="bg-brand-red text-white text-xs font-bold uppercase tracking-wider px-4 py-2 group-hover:bg-red-700 transition-colors whitespace-nowrap">Get Started →</span>
-              </div>
-            </a>
+            <InlineAdBanner placement="Homepage Hero" label="Advertisement" />
           </div>
         </div>
 
