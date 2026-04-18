@@ -65,9 +65,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ reply, remaining: CHAT_LIMIT - user.aiChatCount });
     }
     const [founders, startups, articles, ideas] = await Promise.all([
-      Founder.find().select("name company industry location netWorth rank bio").limit(20).lean(),
-      Startup.find().select("name industry stage funding location tagline").limit(20).lean(),
-      ArticleModel.find().select("title category author publishedAt excerpt").limit(10).lean(),
+      Founder.find().select("name company industry location netWorth rank bio slug").limit(20).lean(),
+      Startup.find().select("name industry stage funding location tagline slug").limit(20).lean(),
+      ArticleModel.find().select("title category author publishedAt excerpt slug").limit(10).lean(),
       Idea.find().select("title category submittedBy votes winner").limit(10).lean(),
     ]);
 
@@ -96,17 +96,21 @@ FORMAT:
 
 SITE DATA:
 
-FOUNDERS:
-${founders.map((f: any) => `#${f.rank || "?"} ${f.name} — ${f.title || "Founder"} at ${f.company} (${f.industry})`).join("\n")}
+FOUNDERS (with page URLs):
+${founders.map((f: any) => `#${f.rank || "?"} ${f.name} — ${f.title || "Founder"} at ${f.company} (${f.industry}) [url:/founders/${f.slug}]`).join("\n")}
 
-STARTUPS:
-${startups.map((s: any) => `${s.name}: ${s.tagline} | ${s.industry} | ${s.stage} | Funding: ${s.funding || "undisclosed"}`).join("\n")}
+STARTUPS (with page URLs):
+${startups.map((s: any) => `${s.name}: ${s.tagline} | ${s.industry} | ${s.stage} [url:/startups/${s.slug}]`).join("\n")}
 
-RECENT ARTICLES:
-${articles.map((a: any) => `${a.title} by ${a.author} — ${a.category}`).join("\n")}
+RECENT ARTICLES (with page URLs):
+${articles.map((a: any) => `${a.title} by ${a.author} — ${a.category} [url:/articles/${a.slug}]`).join("\n")}
 
 TOP IDEAS:
 ${ideas.map((i: any) => `${i.title} (${i.category}) by ${i.submittedBy} — ${i.votes} votes${i.winner ? ", winner" : ""}`).join("\n")}
+
+SOURCES RULE: At the end of your answer, if you referenced specific founders, startups, or articles from the data above, add a SOURCES section like this (max 3 sources):
+SOURCES:
+- [Name or Title](/path/to/page)
     `.trim();
 
     const res = await fetch(

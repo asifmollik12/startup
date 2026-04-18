@@ -3,7 +3,20 @@ import { useState, useRef, useEffect } from "react";
 import { Mic, MicOff, X, Loader2, Volume2, Send, Zap, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 
-type Message = { role: "user" | "ai"; text: string; typing?: boolean };
+type Message = { role: "user" | "ai"; text: string; typing?: boolean; sources?: { label: string; href: string }[] };
+
+function parseSources(text: string): { clean: string; sources: { label: string; href: string }[] } {
+  const sourceMatch = text.match(/\nSOURCES:\n([\s\S]*?)$/);
+  if (!sourceMatch) return { clean: text, sources: [] };
+  const clean = text.slice(0, text.indexOf("\nSOURCES:")).trim();
+  const sources: { label: string; href: string }[] = [];
+  const lines = sourceMatch[1].split("\n");
+  for (const line of lines) {
+    const m = line.match(/^-\s*\[(.+?)\]\((.+?)\)/);
+    if (m) sources.push({ label: m[1], href: m[2] });
+  }
+  return { clean, sources };
+}
 
 function parseMarkdown(text: string) {
   const lines = text.split("\n");
@@ -292,9 +305,17 @@ export default function VoiceAI() {
         }
       }
 
-      // Use ElevenLabs for natural voice after full reply is ready
-      if (mode === "voice" && fullReply) {
-        speak(fullReply, true);
+      // Parse sources from reply
+      const { clean: cleanReply, sources } = parseSources(fullReply);
+
+      setMessages(prev => {
+        const updated = [...prev];
+        updated[updated.length - 1] = { role: "ai", text: cleanReply, typing: false, sources };
+        return updated;
+      });
+
+      if (mode === "voice" && cleanReply) {
+        speak(cleanReply, true);
       }
 
     } catch (e: any) {
@@ -466,6 +487,18 @@ export default function VoiceAI() {
                             ? <TypingMessage text={m.text} onDone={() => setMessages(prev => prev.map((msg, idx) => idx === i ? { ...msg, typing: false } : msg))} />
                             : <ul className="space-y-0.5 list-none">{parseMarkdown(m.text)}</ul>)
                           : m.text}
+                        {m.role === "ai" && m.sources && m.sources.length > 0 && (
+                          <div className="mt-2.5 pt-2 border-t border-gray-100 space-y-1">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Sources</p>
+                            {m.sources.map((s, si) => (
+                              <a key={si} href={s.href}
+                                className="flex items-center gap-1.5 text-xs text-brand-red hover:underline block">
+                                <span className="w-1 h-1 bg-brand-red rounded-full flex-shrink-0 inline-block" />
+                                {s.label}
+                              </a>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
