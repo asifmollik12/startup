@@ -68,7 +68,18 @@ export default function PageEditor({
   useEffect(() => {
     fetch(`/api/settings?key=${pageKey}`)
       .then(r => r.json())
-      .then(v => { if (v && typeof v === "object" && Object.keys(v).length > 0) setData({ ...baseDefaults, ...v }); })
+      .then(v => {
+        if (v && typeof v === "object" && Object.keys(v).length > 0) {
+          const merged: any = { ...baseDefaults };
+          for (const key of Object.keys(v)) {
+            const val = v[key];
+            if (Array.isArray(val) ? val.length > 0 : val !== "" && val !== null && val !== undefined) {
+              merged[key] = val;
+            }
+          }
+          setData(merged);
+        }
+      })
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageKey]);

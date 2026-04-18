@@ -58,7 +58,19 @@ export default function AdminAboutPage() {
   useEffect(() => {
     fetch(`/api/settings?key=${PAGE_KEY}`)
       .then(r => r.json())
-      .then(v => { if (v && typeof v === "object") setData({ ...DEFAULTS, ...v }); })
+      .then(v => {
+        if (v && typeof v === "object") {
+          // Only override defaults with DB values that are non-empty
+          const merged: any = { ...DEFAULTS };
+          for (const key of Object.keys(v)) {
+            const val = v[key];
+            if (Array.isArray(val) ? val.length > 0 : val !== "" && val !== null && val !== undefined) {
+              merged[key] = val;
+            }
+          }
+          setData(merged);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 
