@@ -21,20 +21,8 @@ interface AdBannerProps {
 }
 
 export default function AdBanner({ variant = "leaderboard", placement, label = "Advertisement" }: AdBannerProps) {
-  const placementKey = placement ?? (variant === "leaderboard" ? "Homepage Hero" : variant === "rectangle" ? "Article Sidebar" : "Article Sidebar");
+  const placementKey = placement ?? (variant === "leaderboard" ? "Homepage Hero" : "Article Sidebar");
   const ad = useAd(placementKey);
-
-  const renderContent = (height: string, fallback: React.ReactNode) => {
-    if (!ad) return fallback;
-    if (ad.type === "code" && ad.code) return <div dangerouslySetInnerHTML={{ __html: ad.code }} />;
-    if (ad.imageUrl) return (
-      <a href={ad.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={ad.imageUrl} alt={ad.name} className={`w-full ${height} object-cover`} />
-      </a>
-    );
-    return fallback;
-  };
 
   if (variant === "leaderboard") {
     return (
@@ -43,8 +31,15 @@ export default function AdBanner({ variant = "leaderboard", placement, label = "
           <div className="flex flex-col items-center justify-center">
             <span className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-2">{label}</span>
             <div className="w-full max-w-[728px] h-[90px] overflow-hidden border border-brand-border">
-              {renderContent("h-[90px]", (
-                <a href="/advertise" className="group relative flex items-center justify-between w-full h-full bg-brand-dark px-8 hover:border-brand-red transition-colors">
+              {ad?.type === "code" && ad.code ? (
+                <div dangerouslySetInnerHTML={{ __html: ad.code }} />
+              ) : ad?.imageUrl ? (
+                <a href={ad.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={ad.imageUrl} alt={ad.name} className="w-full h-full object-cover" />
+                </a>
+              ) : (
+                <a href="/advertise" className="group relative flex items-center justify-between w-full h-full bg-brand-dark px-8">
                   <div className="flex items-center gap-5">
                     <div className="w-12 h-12 bg-brand-red flex items-center justify-center flex-shrink-0">
                       <span className="text-white font-serif font-bold text-lg">BD</span>
@@ -54,9 +49,9 @@ export default function AdBanner({ variant = "leaderboard", placement, label = "
                       <p className="text-gray-400 text-xs mt-0.5">Reach 2M+ entrepreneurs, founders & investors</p>
                     </div>
                   </div>
-                  <span className="hidden sm:block bg-brand-red text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 hover:bg-red-700 transition-colors whitespace-nowrap">Advertise Now</span>
+                  <span className="hidden sm:block bg-brand-red text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 whitespace-nowrap">Advertise Now</span>
                 </a>
-              ))}
+              )}
             </div>
           </div>
         </div>
@@ -69,7 +64,14 @@ export default function AdBanner({ variant = "leaderboard", placement, label = "
       <div className="w-full">
         <span className="block text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-2 text-center">{label}</span>
         <div className="w-full h-[250px] border border-brand-border overflow-hidden">
-          {renderContent("h-[250px]", (
+          {ad?.type === "code" && ad.code ? (
+            <div dangerouslySetInnerHTML={{ __html: ad.code }} />
+          ) : ad?.imageUrl ? (
+            <a href={ad.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={ad.imageUrl} alt={ad.name} className="w-full h-full object-cover" />
+            </a>
+          ) : (
             <a href="/advertise" className="flex flex-col items-center justify-center w-full h-full bg-brand-dark">
               <div className="w-10 h-10 bg-brand-red flex items-center justify-center mx-auto mb-3">
                 <span className="text-white font-serif font-bold">BD</span>
@@ -78,18 +80,24 @@ export default function AdBanner({ variant = "leaderboard", placement, label = "
               <p className="text-gray-400 text-xs mb-4">300 × 250 · Premium Placement</p>
               <span className="bg-brand-red text-white text-xs font-bold uppercase tracking-wider px-5 py-2">Get Started</span>
             </a>
-          ))}
+          )}
         </div>
       </div>
     );
   }
 
-  // sidebar
   return (
     <div className="w-full">
       <span className="block text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-2">{label}</span>
       <div className="w-full h-[600px] border border-brand-border overflow-hidden">
-        {renderContent("h-[600px]", (
+        {ad?.type === "code" && ad.code ? (
+          <div dangerouslySetInnerHTML={{ __html: ad.code }} />
+        ) : ad?.imageUrl ? (
+          <a href={ad.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={ad.imageUrl} alt={ad.name} className="w-full h-full object-cover" />
+          </a>
+        ) : (
           <a href="/advertise" className="flex flex-col items-center justify-center w-full h-full bg-brand-dark">
             <div className="w-12 h-12 bg-brand-red flex items-center justify-center mx-auto mb-4">
               <span className="text-white font-serif font-bold text-lg">BD</span>
@@ -98,7 +106,7 @@ export default function AdBanner({ variant = "leaderboard", placement, label = "
             <p className="text-gray-400 text-xs mb-6">160 × 600 · Skyscraper</p>
             <span className="bg-brand-red text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5">Advertise</span>
           </a>
-        ))}
+        )}
       </div>
     </div>
   );
