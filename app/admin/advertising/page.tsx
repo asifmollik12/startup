@@ -333,15 +333,15 @@ function AdModal({ slot, onSave, onClose }: { slot: AdSlot | null; onSave: (d: A
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1.5">Type</label>
               <select value={form.type} onChange={(e) => set("type", e.target.value as "image" | "code")} className={inp}>
-                <option value="image">Image Ad</option>
-                <option value="code">HTML/Script Code</option>
+                <option value="image">Image Ad (upload banner)</option>
+                <option value="code">Google AdSense / HTML Code</option>
               </select>
             </div>
           </div>
 
           {form.type === "image" ? (
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">Ad Image</label>
+              <label className="block text-xs font-medium text-gray-400 mb-1.5">Ad Image <span className="text-gray-600">(upload your own banner)</span></label>
               {form.imageUrl ? (
                 <div className="flex items-center gap-3 bg-gray-800 border border-gray-700 rounded-lg p-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -359,9 +359,13 @@ function AdModal({ slot, onSave, onClose }: { slot: AdSlot | null; onSave: (d: A
             </div>
           ) : (
             <div>
-              <label className="block text-xs font-medium text-gray-400 mb-1.5">HTML / Script Code</label>
-              <textarea value={form.code} onChange={(e) => set("code", e.target.value)} rows={4}
-                className={inp + " resize-none font-mono text-xs"} placeholder="<script>...</script> or <a href='...'><img src='...' /></a>" />
+              <label className="block text-xs font-medium text-gray-400 mb-1">
+                HTML / Script Code
+                <span className="ml-2 text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded font-semibold">Google AdSense supported</span>
+              </label>
+              <p className="text-[11px] text-gray-500 mb-2">Paste your Google AdSense code or any HTML ad code here. Scripts will execute automatically.</p>
+              <textarea value={form.code} onChange={(e) => set("code", e.target.value)} rows={5}
+                className={inp + " resize-none font-mono text-xs"} placeholder={`<!-- Google AdSense example -->\n<ins class="adsbygoogle"\n  style="display:block"\n  data-ad-client="ca-pub-XXXXXXXX"\n  data-ad-slot="XXXXXXXX"\n  data-ad-format="auto">\n</ins>\n<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>`} />
             </div>
           )}
 
