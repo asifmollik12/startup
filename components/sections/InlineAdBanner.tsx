@@ -23,7 +23,7 @@ export default function InlineAdBanner({ label = "Advertisement", placement = "B
       ) : ad?.imageUrl ? (
         <a href={ad.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="block w-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={ad.imageUrl} alt={ad.name} className="w-full object-cover" />
+          <img src={ad.imageUrl} alt={ad.name} className="w-full h-auto block" />
         </a>
       ) : (
         <a href="/advertise"
