@@ -38,7 +38,7 @@ function TypingMessage({ text, onDone }: { text: string; onDone?: () => void }) 
         setDone(true);
         onDone?.();
       }
-    }, 10);
+    }, 6); // faster — syncs better with audio playback
     return () => clearInterval(iv);
   }, [text]);
   return (
@@ -274,15 +274,17 @@ export default function VoiceAI() {
         setMessages(prev => prev.slice(0, -1));
       } else {
         const reply = data.reply || "I didn't get a response. Please try again.";
-        setMessages(prev => [...prev, { role: "ai", text: reply, typing: true }]);
 
         if (mode === "text") {
           if (data.remaining !== undefined) setChatUsed(CHAT_LIMIT - data.remaining);
           else setChatUsed(c => c + 1);
         }
 
-        // Voice mode: auto-speak the reply (TTS credit counted there)
+        // Start TTS fetch immediately in parallel — don't wait for typing to finish
         if (mode === "voice") speak(reply, true);
+
+        // Show typing animation concurrently with audio
+        setMessages(prev => [...prev, { role: "ai", text: reply, typing: true }]);
       }
     } catch (e: any) {
       setMessages(prev => [...prev, { role: "ai", text: "Sorry, something went wrong." }]);
