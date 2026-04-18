@@ -25,7 +25,7 @@ export type PageData = {
   cta_btn_href?: string;
 };
 
-const defaultData: PageData = {
+const emptyData: PageData = {
   hero_title: "",
   hero_subtitle: "",
   sections: [],
@@ -49,6 +49,7 @@ export default function PageEditor({
   showHeroCta = true,
   showSectionsMeta = true,
   showBottomCta = true,
+  defaults,
 }: {
   pageKey: string;
   label: string;
@@ -56,8 +57,10 @@ export default function PageEditor({
   showHeroCta?: boolean;
   showSectionsMeta?: boolean;
   showBottomCta?: boolean;
+  defaults?: Partial<PageData>;
 }) {
-  const [data, setData] = useState<PageData>(defaultData);
+  const baseDefaults: PageData = { ...emptyData, ...defaults };
+  const [data, setData] = useState<PageData>(baseDefaults);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -65,8 +68,9 @@ export default function PageEditor({
   useEffect(() => {
     fetch(`/api/settings?key=${pageKey}`)
       .then(r => r.json())
-      .then(v => { if (v) setData(v); })
+      .then(v => { if (v && typeof v === "object" && Object.keys(v).length > 0) setData({ ...baseDefaults, ...v }); })
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pageKey]);
 
   const set = (key: keyof PageData, val: any) => setData(d => ({ ...d, [key]: val }));
