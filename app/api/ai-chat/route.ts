@@ -65,9 +65,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ reply, remaining: CHAT_LIMIT - user.aiChatCount });
     }
     const [founders, startups, articles, ideas] = await Promise.all([
-      Founder.find().select("name company industry location netWorth rank bio slug").limit(20).lean(),
-      Startup.find().select("name industry stage funding location tagline slug").limit(20).lean(),
-      ArticleModel.find().select("title category author publishedAt excerpt slug").limit(10).lean(),
+      Founder.find().select("name company industry location netWorth rank bio slug avatar").limit(20).lean(),
+      Startup.find().select("name industry stage funding location tagline slug logo coverImage").limit(20).lean(),
+      ArticleModel.find().select("title category author publishedAt excerpt slug coverImage authorAvatar").limit(10).lean(),
       Idea.find().select("title category submittedBy votes winner").limit(10).lean(),
     ]);
 
@@ -165,7 +165,29 @@ SOURCES:
           user.aiChatCount += 1;
           await user.save();
         }
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, remaining: CHAT_LIMIT - user.aiChatCount })}\n\n`));
+
+        // Build resource map for rich source cards
+        const resourceMap: Record<string, { title: string; subtitle: string; image: string; href: string; type: string }> = {};
+        founders.forEach((f: any) => {
+          if (f.slug) resourceMap[`/founders/${f.slug}`] = {
+            title: f.name, subtitle: `${f.company} · ${f.industry}`,
+            image: f.avatar || "", href: `/founders/${f.slug}`, type: "founder"
+          };
+        });
+        startups.forEach((s: any) => {
+          if (s.slug) resourceMap[`/startups/${s.slug}`] = {
+            title: s.name, subtitle: s.tagline || s.industry,
+            image: s.logo || s.coverImage || "", href: `/startups/${s.slug}`, type: "startup"
+          };
+        });
+        articles.forEach((a: any) => {
+          if (a.slug) resourceMap[`/articles/${a.slug}`] = {
+            title: a.title, subtitle: `${a.author} · ${a.category}`,
+            image: a.coverImage || "", href: `/articles/${a.slug}`, type: "article"
+          };
+        });
+
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, remaining: CHAT_LIMIT - user.aiChatCount, resourceMap })}\n\n`));
         controller.close();
       }
     });

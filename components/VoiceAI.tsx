@@ -3,17 +3,18 @@ import { useState, useRef, useEffect } from "react";
 import { Mic, MicOff, X, Loader2, Volume2, Send, Zap, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 
-type Message = { role: "user" | "ai"; text: string; typing?: boolean; sources?: { label: string; href: string }[] };
+type ResourceCard = { title: string; subtitle: string; image: string; href: string; type: string };
+type Message = { role: "user" | "ai"; text: string; typing?: boolean; sources?: { label: string; href: string; card?: ResourceCard }[] };
 
-function parseSources(text: string): { clean: string; sources: { label: string; href: string }[] } {
+function parseSources(text: string, resourceMap?: Record<string, ResourceCard>): { clean: string; sources: { label: string; href: string; card?: ResourceCard }[] } {
   const sourceMatch = text.match(/\nSOURCES:\n([\s\S]*?)$/);
   if (!sourceMatch) return { clean: text, sources: [] };
   const clean = text.slice(0, text.indexOf("\nSOURCES:")).trim();
-  const sources: { label: string; href: string }[] = [];
+  const sources: { label: string; href: string; card?: ResourceCard }[] = [];
   const lines = sourceMatch[1].split("\n");
   for (const line of lines) {
     const m = line.match(/^-\s*\[(.+?)\]\((.+?)\)/);
-    if (m) sources.push({ label: m[1], href: m[2] });
+    if (m) sources.push({ label: m[1], href: m[2], card: resourceMap?.[m[2]] });
   }
   return { clean, sources };
 }
@@ -274,6 +275,7 @@ export default function VoiceAI() {
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();
       let fullReply = "";
+      let resourceMap: Record<string, ResourceCard> = {};
 
       setLoading(false);
       setMessages(prev => [...prev, { role: "ai", text: "", typing: false }]);
@@ -281,16 +283,15 @@ export default function VoiceAI() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split("\n");
-
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
           try {
             const json = JSON.parse(line.slice(6));
             if (json.done) {
               if (json.remaining !== undefined && mode === "text") setChatUsed(CHAT_LIMIT - json.remaining);
+              if (json.resourceMap) resourceMap = json.resourceMap;
               break;
             }
             if (json.text) {
@@ -305,18 +306,14 @@ export default function VoiceAI() {
         }
       }
 
-      // Parse sources from reply
-      const { clean: cleanReply, sources } = parseSources(fullReply);
-
+      const { clean: cleanReply, sources } = parseSources(fullReply, resourceMap);
       setMessages(prev => {
         const updated = [...prev];
         updated[updated.length - 1] = { role: "ai", text: cleanReply, typing: false, sources };
         return updated;
       });
 
-      if (mode === "voice" && cleanReply) {
-        speak(cleanReply, true);
-      }
+      if (mode === "voice" && cleanReply) speak(cleanReply, true);
 
     } catch (e: any) {
       setMessages(prev => [...prev, { role: "ai", text: "Sorry, something went wrong." }]);
@@ -488,14 +485,36 @@ export default function VoiceAI() {
                             : <ul className="space-y-0.5 list-none">{parseMarkdown(m.text)}</ul>)
                           : m.text}
                         {m.role === "ai" && m.sources && m.sources.length > 0 && (
-                          <div className="mt-2.5 pt-2 border-t border-gray-100 space-y-1">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Sources</p>
+                          <div className="mt-3 pt-2.5 border-t border-gray-100 space-y-2">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Sources</p>
                             {m.sources.map((s, si) => (
-                              <a key={si} href={s.href}
-                                className="flex items-center gap-1.5 text-xs text-brand-red hover:underline block">
-                                <span className="w-1 h-1 bg-brand-red rounded-full flex-shrink-0 inline-block" />
-                                {s.label}
-                              </a>
+                              s.card ? (
+                                <a key={si} href={s.card.href}
+                                  className="flex items-center gap-2.5 p-2 rounded-xl border border-gray-100 hover:border-brand-red transition-colors group bg-gray-50">
+                                  <div className="w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
+                                    {s.card.image
+                                      // eslint-disable-next-line @next/next/no-img-element
+                                      ? <img src={s.card.image} alt={s.card.title} className="w-full h-full object-cover" />
+                                      : <div className="w-full h-full bg-brand-red flex items-center justify-center">
+                                          <span className="text-white text-xs font-bold">{s.card.title.charAt(0)}</span>
+                                        </div>
+                                    }
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-semibold text-gray-800 truncate group-hover:text-brand-red transition-colors">{s.card.title}</p>
+                                    <p className="text-[10px] text-gray-400 truncate">{s.card.subtitle}</p>
+                                  </div>
+                                  <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded flex-shrink-0 ${
+                                    s.card.type === "article" ? "bg-blue-100 text-blue-600" :
+                                    s.card.type === "founder" ? "bg-green-100 text-green-600" :
+                                    "bg-purple-100 text-purple-600"
+                                  }`}>{s.card.type}</span>
+                                </a>
+                              ) : (
+                                <a key={si} href={s.href} className="flex items-center gap-1.5 text-xs text-brand-red hover:underline">
+                                  <span className="w-1 h-1 bg-brand-red rounded-full flex-shrink-0 inline-block" />{s.label}
+                                </a>
+                              )
                             ))}
                           </div>
                         )}
