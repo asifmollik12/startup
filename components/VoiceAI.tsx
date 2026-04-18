@@ -207,8 +207,15 @@ export default function VoiceAI() {
     rec.onresult = (e: any) => {
       lastSpeechTime = Date.now();
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      finalText = Array.from(e.results).map((r: any) => r[0].transcript).join("");
-      setTranscript(finalText);
+      // Only use the latest final + current interim — don't concat all results
+      let interim = "";
+      let final = "";
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript;
+        else interim += e.results[i][0].transcript;
+      }
+      finalText = (finalText + final).trim();
+      setTranscript(finalText || interim);
 
       // Auto-stop after 2s of silence
       silenceTimerRef.current = setTimeout(() => {
