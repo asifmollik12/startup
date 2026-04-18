@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
-import { Save, Plus, Trash2, Eye, EyeOff, BarChart2, DollarSign, Monitor, Smartphone, LayoutTemplate, ExternalLink, Upload, X, ImageIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Save, Plus, Trash2, Eye, EyeOff, BarChart2, DollarSign, Monitor, LayoutTemplate, Upload, X, Loader2 } from "lucide-react";
 import Toast from "@/components/admin/Toast";
 
 type AdSlot = {
@@ -50,8 +50,21 @@ export default function AdminAdvertising() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [toastMsg, setToastMsg] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const toast = (msg: string) => { setToastMsg(msg); setShowToast(false); setTimeout(() => setShowToast(true), 10); };
+
+  useEffect(() => {
+    fetch("/api/ads").then(r => r.json()).then(v => { if (Array.isArray(v) && v.length) setSlots(v); }).finally(() => setLoading(false));
+  }, []);
+
+  const saveAll = async (updated: AdSlot[]) => {
+    setSaving(true);
+    await fetch("/api/ads", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(updated) });
+    setSaving(false);
+    toast("Ad slots saved");
+  };
 
   const totalImpressions = slots.reduce((a, s) => a + s.impressions, 0);
   const totalClicks = slots.reduce((a, s) => a + s.clicks, 0);
@@ -59,26 +72,29 @@ export default function AdminAdvertising() {
   const activeCount = slots.filter((s) => s.active).length;
 
   const toggleActive = (id: string) => {
-    setSlots((prev) => prev.map((s) => s.id === id ? { ...s, active: !s.active } : s));
-    toast("Ad slot updated");
+    const updated = slots.map(s => s.id === id ? { ...s, active: !s.active } : s);
+    setSlots(updated);
+    saveAll(updated);
   };
 
   const handleSave = (data: AdSlot) => {
+    let updated: AdSlot[];
     if (creating) {
-      setSlots((prev) => [...prev, { ...data, id: String(Date.now()), impressions: 0, clicks: 0 }]);
-      toast("Ad slot created");
+      updated = [...slots, { ...data, id: String(Date.now()), impressions: 0, clicks: 0 }];
     } else {
-      setSlots((prev) => prev.map((s) => s.id === data.id ? data : s));
-      toast("Ad slot saved");
+      updated = slots.map(s => s.id === data.id ? data : s);
     }
+    setSlots(updated);
+    saveAll(updated);
     setEditing(null);
     setCreating(false);
   };
 
   const handleDelete = (id: string) => {
-    setSlots((prev) => prev.filter((s) => s.id !== id));
+    const updated = slots.filter(s => s.id !== id);
+    setSlots(updated);
+    saveAll(updated);
     setDeleteId(null);
-    toast("Ad slot deleted");
   };
 
   return (
@@ -91,10 +107,16 @@ export default function AdminAdvertising() {
           <h1 className="text-2xl font-bold text-white">Advertising</h1>
           <p className="text-gray-500 text-sm mt-0.5">Manage ad placements, banners, and performance</p>
         </div>
-        <button onClick={() => setCreating(true)}
-          className="flex items-center gap-2 bg-brand-red text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors">
-          <Plus size={16} /> New Ad Slot
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => saveAll(slots)} disabled={saving}
+            className="flex items-center gap-2 bg-gray-800 border border-gray-700 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-gray-700 transition-colors disabled:opacity-60">
+            {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Save
+          </button>
+          <button onClick={() => setCreating(true)}
+            className="flex items-center gap-2 bg-brand-red text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors">
+            <Plus size={16} /> New Ad Slot
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
