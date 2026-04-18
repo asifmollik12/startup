@@ -17,13 +17,13 @@ export default function InlineAdBanner({ label = "Advertisement", placement = "B
   if (ad === undefined) return null;
 
   return (
-    <div className="container-wide py-1">
+    <div className="w-full">
       {ad?.type === "code" && ad.code ? (
         <div dangerouslySetInnerHTML={{ __html: ad.code }} />
       ) : ad?.imageUrl ? (
         <a href={ad.linkUrl || "#"} target="_blank" rel="noopener noreferrer" className="block w-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={ad.imageUrl} alt={ad.name} className="w-full max-h-[120px] object-cover" />
+          <img src={ad.imageUrl} alt={ad.name} className="w-full object-cover" />
         </a>
       ) : (
         <a href="/advertise"
