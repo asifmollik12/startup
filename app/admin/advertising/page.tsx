@@ -166,8 +166,20 @@ export default function AdminAdvertising() {
                 return (
                   <tr key={slot.id} className="hover:bg-gray-800/40 transition-colors">
                     <td className="px-5 py-4">
-                      <p className="font-medium text-white">{slot.name}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{slot.type === "image" ? "Image Ad" : "Code/Script"}</p>
+                      <div className="flex items-center gap-3">
+                        {slot.imageUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={slot.imageUrl} alt={slot.name} className="w-16 h-9 object-cover rounded border border-gray-700 flex-shrink-0" />
+                        ) : (
+                          <div className="w-16 h-9 bg-gray-800 border border-gray-700 rounded flex items-center justify-center flex-shrink-0">
+                            <span className="text-[9px] text-gray-600 uppercase tracking-wider">{slot.type === "code" ? "Code" : "No img"}</span>
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium text-white">{slot.name}</p>
+                          <p className="text-xs text-gray-500 mt-0.5">{slot.type === "image" ? "Image Ad" : "Code/Script"}</p>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-gray-400 hidden md:table-cell text-xs">{slot.placement}</td>
                     <td className="px-5 py-4 hidden lg:table-cell">
