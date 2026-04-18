@@ -27,6 +27,8 @@ const DEFAULTS = {
 export default function Footer() {
   const { footerLogoUrl } = useFooterLogo();
   const [cfg, setCfg] = useState(DEFAULTS);
+  const [subEmail, setSubEmail] = useState("");
+  const [subStatus, setSubStatus] = useState<"idle" | "ok" | "exists" | "error">("idle");
 
   useEffect(() => {
     fetch("/api/settings?key=footer_config")
@@ -45,6 +47,20 @@ export default function Footer() {
       .catch(() => {});
   }, []);
 
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!subEmail.trim()) return;
+    const res = await fetch("/api/subscribers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: subEmail }),
+    });
+    if (res.status === 409) setSubStatus("exists");
+    else if (res.ok) { setSubStatus("ok"); setSubEmail(""); }
+    else setSubStatus("error");
+    setTimeout(() => setSubStatus("idle"), 4000);
+  };
+
   return (
     <footer className="bg-brand-dark text-white">
       {/* Newsletter */}
@@ -56,12 +72,18 @@ export default function Footer() {
               <h3 className="font-serif text-2xl font-bold text-white mb-1">{cfg.newsletter.heading}</h3>
               <p className="text-gray-400 text-sm">{cfg.newsletter.subtext}</p>
             </div>
-            <form className="flex w-full md:w-auto gap-0">
-              <input type="email" placeholder="Enter your email"
-                className="bg-white/10 border border-white/20 text-white placeholder-gray-500 px-4 py-3 text-sm w-full md:w-72 focus:outline-none focus:border-brand-red transition-colors" />
-              <button type="submit" className="bg-brand-red text-white px-6 py-3 text-sm font-semibold hover:bg-red-700 transition-colors whitespace-nowrap">
-                {cfg.newsletter.buttonText}
-              </button>
+            <form className="flex w-full md:w-auto gap-0 flex-col sm:flex-row" onSubmit={handleSubscribe}>
+              <div className="flex gap-0 w-full md:w-auto">
+                <input type="email" required placeholder="Enter your email" value={subEmail}
+                  onChange={e => setSubEmail(e.target.value)}
+                  className="bg-white/10 border border-white/20 text-white placeholder-gray-500 px-4 py-3 text-sm w-full md:w-72 focus:outline-none focus:border-brand-red transition-colors" />
+                <button type="submit" className="bg-brand-red text-white px-6 py-3 text-sm font-semibold hover:bg-red-700 transition-colors whitespace-nowrap">
+                  {cfg.newsletter.buttonText}
+                </button>
+              </div>
+              {subStatus === "ok" && <p className="text-green-400 text-xs mt-1.5">✓ Subscribed successfully!</p>}
+              {subStatus === "exists" && <p className="text-yellow-400 text-xs mt-1.5">Already subscribed.</p>}
+              {subStatus === "error" && <p className="text-red-400 text-xs mt-1.5">Something went wrong. Try again.</p>}
             </form>
           </div>
         </div>

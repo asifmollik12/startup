@@ -5,7 +5,7 @@ import { useState } from "react";
 import {
   LayoutDashboard, FileText, Users, Rocket, Lightbulb,
   Trophy, Settings, ExternalLink, ChevronRight, PanelTop, PanelBottom,
-  Megaphone, ClipboardList, Building2, Scale, Info, Briefcase, Phone, Lock, Cookie, ChevronDown, Inbox,
+  Megaphone, ClipboardList, Building2, Scale, Info, Briefcase, Phone, Lock, Cookie, ChevronDown, Inbox, Mail,
 } from "lucide-react";
 import { useSiteLogo } from "@/lib/SiteLogoContext";
 
@@ -21,6 +21,7 @@ const navItems = [
   { label: "Rankings", href: "/admin/rankings", icon: Trophy },
   { label: "Advertising", href: "/admin/advertising", icon: Megaphone },
   { label: "Messages", href: "/admin/messages", icon: Inbox },
+  { label: "Subscribers", href: "/admin/subscribers", icon: Mail },
   { label: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
