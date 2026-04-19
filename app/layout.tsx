@@ -51,6 +51,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
         {s.favicon && <link rel="icon" href={s.favicon} />}
         {s.favicon && <link rel="shortcut icon" href={s.favicon} />}
+        {/* Google AdSense */}
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5828434850207466" crossOrigin="anonymous"></script>
       </head>
       <body>
         <SiteLogoProvider>
