@@ -19,10 +19,6 @@ type AdSlot = {
 
 const defaultSlots: AdSlot[] = [
   {
-    id: "1", name: "Top Leaderboard", placement: "Above Header", size: "970×90",
-    type: "image", imageUrl: "", linkUrl: "#", active: true, impressions: 24500, clicks: 312,
-  },
-  {
     id: "2", name: "Homepage Banner", placement: "Homepage Hero", size: "728×90",
     type: "image", imageUrl: "", linkUrl: "#", active: true, impressions: 18200, clicks: 245,
   },
@@ -37,7 +33,6 @@ const defaultSlots: AdSlot[] = [
 ];
 
 const placementInfo: Record<string, { label: string; desc: string; color: string }> = {
-  "Above Header":               { label: "Above Header",        desc: "Top of every page, above navbar",         color: "bg-purple-500/20 text-purple-400" },
   "Homepage Hero":              { label: "Homepage — Hero",     desc: "Below main article on homepage",          color: "bg-blue-500/20 text-blue-400" },
   "Between Article Paragraphs": { label: "Homepage + Articles", desc: "Mid-page on homepage & article pages",   color: "bg-green-500/20 text-green-400" },
   "Article Sidebar":            { label: "Article Sidebar",     desc: "Right sidebar on article pages",          color: "bg-amber-500/20 text-amber-400" },
