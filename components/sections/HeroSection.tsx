@@ -49,10 +49,7 @@ export default async function HeroSection() {
             </div>
           </Link>
 
-          {/* Ad banner — managed from admin */}
-          <div className="mt-4">
-            <InlineAdBanner placement="Homepage Hero" fullSize />
-          </div>
+          {/* Ad banner removed from here — now rendered outside grid */}
         </div>
 
         {/* Right sidebar — desktop only */}
@@ -94,6 +91,8 @@ export default async function HeroSection() {
           </div>
         )}
       </div>
+      {/* Full-width ad banner below the grid */}
+      <InlineAdBanner placement="Homepage Hero" fullSize />
     </section>
   );
 }
