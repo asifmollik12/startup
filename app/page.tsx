@@ -15,7 +15,7 @@ export default function HomePage() {
       <StatsBar />
       <TopFounders />
       <StartupSpotlight />
-      <InlineAdBanner placement="Between Article Paragraphs" label="Sponsored" />
+      <InlineAdBanner placement="Between Article Paragraphs" />
       <BestIdea />
       <LatestArticles />
     </>
