@@ -91,8 +91,10 @@ export default async function HeroSection() {
           </div>
         )}
       </div>
-      {/* Full-width ad banner below the grid */}
-      <InlineAdBanner placement="Homepage Hero" fullSize />
+      {/* Ad banner — constrained to hero article width */}
+      <div className="lg:w-2/3">
+        <InlineAdBanner placement="Homepage Hero" fullSize />
+      </div>
     </section>
   );
 }
