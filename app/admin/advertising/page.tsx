@@ -36,12 +36,17 @@ const defaultSlots: AdSlot[] = [
   },
 ];
 
-const placements = [
-  "Above Header", "Homepage Hero", "Article Sidebar", "Between Article Paragraphs",
-  "Footer Banner", "Below Navigation", "Rankings Page", "Founders Page",
-];
+const placementInfo: Record<string, { label: string; desc: string; color: string }> = {
+  "Above Header":               { label: "Above Header",        desc: "Top of every page, above navbar",         color: "bg-purple-500/20 text-purple-400" },
+  "Homepage Hero":              { label: "Homepage — Hero",     desc: "Below main article on homepage",          color: "bg-blue-500/20 text-blue-400" },
+  "Between Article Paragraphs": { label: "Homepage + Articles", desc: "Mid-page on homepage & article pages",   color: "bg-green-500/20 text-green-400" },
+  "Article Sidebar":            { label: "Article Sidebar",     desc: "Right sidebar on article pages",          color: "bg-amber-500/20 text-amber-400" },
+  "Footer Banner":              { label: "Footer",              desc: "Above footer on all pages",               color: "bg-gray-500/20 text-gray-400" },
+  "Rankings Page":              { label: "Rankings Page",       desc: "Rankings page banner",                    color: "bg-red-500/20 text-red-400" },
+  "Founders Page":              { label: "Founders Page",       desc: "Founders listing page banner",            color: "bg-pink-500/20 text-pink-400" },
+};
 
-const sizes = ["970×90", "728×90", "300×250", "300×600", "320×50", "160×600"];
+const placements = Object.keys(placementInfo);
 
 export default function AdminAdvertising() {
   const [slots, setSlots] = useState<AdSlot[]>(defaultSlots);
@@ -181,7 +186,14 @@ export default function AdminAdvertising() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4 text-gray-400 hidden md:table-cell text-xs">{slot.placement}</td>
+                    <td className="px-5 py-4 hidden md:table-cell">
+                      <div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${placementInfo[slot.placement]?.color ?? "bg-gray-700 text-gray-400"}`}>
+                          {placementInfo[slot.placement]?.label ?? slot.placement}
+                        </span>
+                        <p className="text-[10px] text-gray-600 mt-1">{placementInfo[slot.placement]?.desc ?? ""}</p>
+                      </div>
+                    </td>
                     <td className="px-5 py-4 hidden lg:table-cell">
                       <span className="text-[10px] bg-gray-700 text-gray-300 px-2 py-0.5 rounded font-mono">{slot.size}</span>
                     </td>
@@ -397,3 +409,5 @@ function AdModal({ slot, onSave, onClose }: { slot: AdSlot | null; onSave: (d: A
     </div>
   );
 }
+
+const sizes = ["970×90", "728×90", "300×250", "300×600", "320×50", "160×600"];
