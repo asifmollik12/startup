@@ -6,6 +6,8 @@ import { Clock, ArrowLeft, Share2, Bookmark, Twitter, Linkedin } from "lucide-re
 import { connectDB } from "@/lib/mongodb";
 import { Article as ArticleModel } from "@/lib/models/Article";
 import type { Metadata } from "next";
+import InlineAdBanner from "@/components/sections/InlineAdBanner";
+import AdBanner from "@/components/sections/AdBanner";
 
 export const revalidate = 60;
 
@@ -113,21 +115,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             )}
           </div>
 
-          {/* Mid-article ad */}
+          {/* Mid-article ad — dynamic from admin */}
           <div className="my-10">
-            <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 mb-2 text-center">Advertisement</p>
-            <a href="/advertise" className="group flex items-center justify-between bg-brand-dark border border-white/10 px-6 py-4 hover:border-brand-red transition-colors">
-              <div className="flex items-center gap-4">
-                <div className="w-9 h-9 bg-brand-red flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-serif font-bold text-sm">SUN</span>
-                </div>
-                <div>
-                  <p className="text-white font-semibold text-sm">Advertise with Start-Up News</p>
-                  <p className="text-gray-500 text-xs mt-0.5">Reach 2M+ Bangladeshi entrepreneurs & investors</p>
-                </div>
-              </div>
-              <span className="hidden sm:block bg-brand-red text-white text-xs font-bold uppercase tracking-wider px-5 py-2 group-hover:bg-red-700 transition-colors whitespace-nowrap">Get Started →</span>
-            </a>
+            <InlineAdBanner placement="Between Article Paragraphs" />
           </div>
 
           {/* Tags */}
