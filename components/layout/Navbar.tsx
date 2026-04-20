@@ -170,7 +170,7 @@ export default function Navbar() {
       {/* Top bar */}
       <div className="bg-brand-dark text-white border-b border-white/10">
         <div className="container-wide py-1.5 flex justify-between items-center">
-          <span className="text-[10px] tracking-[0.2em] uppercase text-gray-400 font-medium">
+          <span className="text-[10px] tracking-[0.2em] uppercase text-gray-300 font-medium">
             Bangladesh&apos;s Premier Startup & Business News
           </span>
           <div className="hidden sm:flex gap-5 text-[10px] tracking-widest uppercase text-gray-500">
@@ -296,7 +296,7 @@ export default function Navbar() {
         {/* Drawer */}
         <div className={`absolute top-0 right-0 h-full w-[80vw] max-w-sm bg-brand-dark shadow-2xl flex flex-col transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}>
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-[#1a1a1a]">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10 bg-brand-dark">
             <MobileSidebarLogo />
             <button onClick={() => setOpen(false)} className="p-2 text-gray-400 hover:text-white transition-colors">
               <X size={20} />

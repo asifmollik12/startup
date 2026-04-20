@@ -15,7 +15,7 @@ async function getTopFounders() {
 export default async function TopFounders() {
   const top = await getTopFounders();
   return (
-    <section className="bg-brand-dark section-pad">
+    <section className="bg-brand-gray border-y border-brand-border section-pad">
       <div className="container-wide">
         <div className="flex items-end justify-between mb-10">
           <div>
@@ -23,10 +23,10 @@ export default async function TopFounders() {
               <Trophy size={14} className="text-brand-gold" />
               <span className="section-label">2026 Rankings</span>
             </div>
-            <h2 className="font-serif text-3xl lg:text-4xl font-bold text-white">Top Entrepreneurs</h2>
+            <h2 className="font-serif text-3xl lg:text-4xl font-bold text-brand-dark">Top Entrepreneurs</h2>
             <div className="divider-red mt-3" />
           </div>
-          <Link href="/rankings" className="hidden sm:flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors uppercase tracking-wider">
+          <Link href="/rankings" className="hidden sm:flex items-center gap-2 text-xs text-gray-500 hover:text-brand-red transition-colors uppercase tracking-wider">
             Full Rankings <ArrowRight size={13} />
           </Link>
         </div>

@@ -39,13 +39,13 @@ export default function InlineAdBanner({ placement = "Between Article Paragraphs
   // Default fallback — no ad configured
   return (
     <a href="/advertise"
-      className="group relative flex items-center justify-between overflow-hidden bg-brand-dark border border-white/10 px-8 py-6 hover:border-brand-red transition-colors cursor-pointer w-full">
+      className="group relative flex items-center justify-between overflow-hidden bg-brand-gray border border-brand-border px-8 py-6 hover:border-brand-red transition-colors cursor-pointer w-full">
       <div className="relative flex items-center gap-5">
         <div className="w-10 h-10 bg-brand-red flex items-center justify-center flex-shrink-0">
           <span className="text-white font-serif font-bold text-sm">SUN</span>
         </div>
         <div>
-          <p className="text-white font-serif font-bold text-base leading-tight">Grow Your Business with Start-Up News</p>
+          <p className="text-brand-dark font-serif font-bold text-base leading-tight">Grow Your Business with Start-Up News</p>
           <p className="text-gray-500 text-xs mt-0.5">Premium placements across Bangladesh&apos;s #1 startup media platform</p>
         </div>
       </div>
