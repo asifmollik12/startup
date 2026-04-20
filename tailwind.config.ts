@@ -11,13 +11,13 @@ const config: Config = {
       colors: {
         brand: {
           red: "#C8102E",
-          dark: "#1B2A4A",      // deep navy — professional, not black
+          dark: "#0A0A0A",
           gold: "#B8960C",
-          gray: "#F7F8FA",      // very light blue-gray
-          border: "#E2E8F0",    // soft blue-tinted border
-          muted: "#64748B",
+          gray: "#F5F5F0",
+          border: "#E5E5E5",
+          muted: "#6B7280",
           card: "#FFFFFF",
-          surface: "#F0F4F8",   // light blue-gray surface
+          surface: "#F9F9F7",
         },
       },
       fontFamily: {
