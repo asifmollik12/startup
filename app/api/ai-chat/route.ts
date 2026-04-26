@@ -64,7 +64,11 @@ export async function POST(req: NextRequest) {
         : "I'm powered by proprietary AI technology developed by **Alphainno**.";
       return NextResponse.json({ reply, remaining: CHAT_LIMIT - user.aiChatCount });
     }
-    const [founders, startups, articles, ideas] = await Promise.all([
+    // Casual conversation — no need to fetch DB data
+    const isCasual = /^(hi|hello|hey|how are you|good morning|good evening|good night|thanks|thank you|ok|okay|bye|goodbye|সালাম|হ্যালো|ধন্যবাদ)\b/i.test(message.trim());
+
+    const [founders, startups, articles, ideas] = isCasual ? [[], [], [], []] : await Promise.all([
+    const [founders, startups, articles, ideas] = isCasual ? [[], [], [], []] : await Promise.all([
       Founder.find().select("name company industry rank slug avatar").limit(10).lean(),
       Startup.find().select("name industry stage tagline slug logo").limit(10).lean(),
       ArticleModel.find().select("title category author slug coverImage").limit(6).lean(),
@@ -83,12 +87,17 @@ export async function POST(req: NextRequest) {
 
 You are **Start-Up News AI** — the smart assistant for Start-Up News, Bangladesh's premier startup magazine.
 IDENTITY: Only mention your name/creator if directly asked.
-CRITICAL: You have LIVE access to the site's data below. Use it to answer questions. Never say "I don't have access" — you DO have the data.
-ANSWER RULES:
-- Answer directly using the site data provided
-- Max 2-3 sentences. No filler, no greetings
-- For "breaking news" or "latest news" — use the RECENT ARTICLES list below
-- **bold** names/companies, bullet points for 3+ items
+CRITICAL RULES:
+- For casual greetings like "hi", "hello", "how are you" — respond naturally and briefly. Do NOT pull site data.
+- For questions about founders/startups/articles — use the SITE DATA below to answer accurately.
+- NEVER include raw URLs or [url:...] in your response text. Only use the SOURCES format at the end.
+- NEVER make up sources. Only add SOURCES if you actually referenced specific items from the data.
+- Max 2-3 sentences. No filler.
+- **bold** names/companies
+
+SOURCES FORMAT (only when referencing real data):
+SOURCES:
+- [Name](/path)
 
 SITE DATA:
 
