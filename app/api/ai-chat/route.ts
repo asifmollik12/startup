@@ -65,10 +65,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ reply, remaining: CHAT_LIMIT - user.aiChatCount });
     }
     const [founders, startups, articles, ideas] = await Promise.all([
-      Founder.find().select("name company industry location netWorth rank bio slug avatar").limit(20).lean(),
-      Startup.find().select("name industry stage funding location tagline slug logo coverImage").limit(20).lean(),
-      ArticleModel.find().select("title category author publishedAt excerpt slug coverImage authorAvatar").limit(10).lean(),
-      Idea.find().select("title category submittedBy votes winner").limit(10).lean(),
+      Founder.find().select("name company industry rank slug avatar").limit(10).lean(),
+      Startup.find().select("name industry stage tagline slug logo").limit(10).lean(),
+      ArticleModel.find().select("title category author slug coverImage").limit(6).lean(),
+      Idea.find().select("title category votes winner").limit(5).lean(),
     ]);
 
     // Detect if the user's message is Bengali
@@ -114,7 +114,7 @@ SOURCES:
     `.trim();
 
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-4b-it:streamGenerateContent?alt=sse&key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemma-3-1b-it:streamGenerateContent?alt=sse&key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -124,7 +124,7 @@ SOURCES:
             { role: "model", parts: [{ text: "Got it." }] },
             { role: "user", parts: [{ text: message }] }
           ],
-          generationConfig: { maxOutputTokens: 200, temperature: 0.3 },
+          generationConfig: { maxOutputTokens: 150, temperature: 0.2 },
         }),
       }
     );
