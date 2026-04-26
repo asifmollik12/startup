@@ -18,10 +18,10 @@ function parseSources(text: string, resourceMap?: Record<string, ResourceCard>):
   }).replace(/\s{2,}/g, " ").trim();
 
   // Also extract formal SOURCES: block
-  const sourceMatch = cleanedInline.match(/\nSOURCES:\n([\s\S]*?)$/);
+  const sourceMatch = cleanedInline.match(/\nSOURCES:\n?([\s\S]*?)$/) ?? cleanedInline.match(/SOURCES:\n?([\s\S]*?)$/);
   if (!sourceMatch) return { clean: cleanedInline, sources: inlineSources };
 
-  const clean = cleanedInline.slice(0, cleanedInline.indexOf("\nSOURCES:")).trim();
+  const clean = cleanedInline.replace(/\n?SOURCES:\n?([\s\S]*)$/, "").trim();
   const formalSources: { label: string; href: string; card?: ResourceCard }[] = [];
   for (const line of sourceMatch[1].split("\n")) {
     const m = line.match(/^-\s*\[(.+?)\]\((.+?)\)/);
