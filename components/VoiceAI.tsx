@@ -655,7 +655,7 @@ export default function VoiceAI() {
                         : <><Mic size={14} /> Speak</>}
                     </button>
                     {speaking && (
-                      <button onClick={stopAudio}
+                      <button onClick={() => stopAudio(true)}
                         className="flex items-center gap-1.5 px-3 py-2 text-xs text-brand-red border border-brand-red rounded-lg hover:bg-brand-red hover:text-white transition-colors">
                         <Volume2 size={13} /> Stop
                       </button>
