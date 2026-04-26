@@ -153,6 +153,8 @@ export default function VoiceAI() {
   const [speaking, setSpeaking] = useState(false);
   const [error, setError] = useState("");
   const [limitPopup, setLimitPopup] = useState<"voice" | "text" | null>(null);
+  const [conversationMode, setConversationMode] = useState(false);
+  const conversationModeRef = useRef(false);
   // Separate counters: voice uses TTS credits, text uses chat credits
   const [chatUsed, setChatUsed] = useState(0);   // text-only
   const [ttsUsed, setTtsUsed] = useState(0);     // voice-only
@@ -181,10 +183,14 @@ export default function VoiceAI() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, transcript, loading]);
 
-  const stopAudio = () => {
+  const stopAudio = (skipRestart = false) => {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
     window.speechSynthesis?.cancel();
     setSpeaking(false);
+    // Auto-restart listening in conversation mode
+    if (!skipRestart && conversationModeRef.current) {
+      setTimeout(() => beginRecognition(), 500);
+    }
   };
 
   const stopListening = () => {
@@ -197,10 +203,21 @@ export default function VoiceAI() {
     if (!user) { setError("Please sign in to use voice chat."); return; }
     if (ttsUsed >= TTS_LIMIT) { setLimitPopup("voice"); return; }
 
-    // Stop AI speaking first, then wait a moment before listening
+    // Toggle conversation mode
+    if (conversationMode) {
+      conversationModeRef.current = false;
+      setConversationMode(false);
+      stopAudio(true);
+      stopListening();
+      return;
+    }
+
+    conversationModeRef.current = true;
+    setConversationMode(true);
+
     if (speaking) {
-      stopAudio();
-      setTimeout(() => beginRecognition(), 600);
+      stopAudio(true);
+      setTimeout(() => beginRecognition(), 400);
     } else {
       beginRecognition();
     }
@@ -228,7 +245,12 @@ export default function VoiceAI() {
       const finalText = transcriptRef.current;
       transcriptRef.current = "";
       if (finalText.trim()) sendMessage(finalText.trim(), "voice");
-      else setTranscript("");
+      else if (conversationModeRef.current) {
+        // No speech detected — restart listening
+        setTimeout(() => beginRecognition(), 300);
+      } else {
+        setTranscript("");
+      }
     };
 
     rec.onerror = (e: any) => {
@@ -281,7 +303,7 @@ export default function VoiceAI() {
       setLoading(false);
       setMessages(prev => [...prev, { role: "ai", text: "", typing: false }]);
 
-      const speakChunkNow = (text: string) => {
+      const speakChunkNow = (text: string, isLast = false) => {
         if (!window.speechSynthesis) return;
         const clean = text.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*/g, "").replace(/#+\s/g, "").trim();
         if (!clean) return;
@@ -293,7 +315,15 @@ export default function VoiceAI() {
           ? voices.find(v => v.lang.startsWith("bn"))
           : voices.find(v => v.name.includes("Google") && v.lang.startsWith("en")) || voices.find(v => v.lang.startsWith("en"));
         if (preferred) utt.voice = preferred;
-        utt.onend = () => { if (!window.speechSynthesis.speaking) setSpeaking(false); };
+        utt.onend = () => {
+          if (!window.speechSynthesis.speaking) {
+            setSpeaking(false);
+            // Auto-restart listening after AI finishes speaking
+            if (isLast && conversationModeRef.current) {
+              setTimeout(() => beginRecognition(), 400);
+            }
+          }
+        };
         window.speechSynthesis.speak(utt);
         setSpeaking(true);
       };
@@ -345,7 +375,7 @@ export default function VoiceAI() {
       }
 
       // Speak any leftover text
-      if (mode === "voice" && speechBuffer.trim()) speakChunkNow(speechBuffer);
+      if (mode === "voice" && speechBuffer.trim()) speakChunkNow(speechBuffer, true);
 
       const { clean: cleanReply, sources } = parseSources(fullReply, resourceMap);
       setMessages(prev => {
@@ -463,7 +493,7 @@ export default function VoiceAI() {
                   </p>
                 </div>
               </div>
-              <button onClick={() => { setOpen(false); stopAudio(); stopListening(); }}
+              <button onClick={() => { setOpen(false); stopAudio(true); stopListening(); conversationModeRef.current = false; setConversationMode(false); }}
                 className="p-1.5 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10">
                 <X size={18} />
               </button>
@@ -612,12 +642,16 @@ export default function VoiceAI() {
                       onClick={listening ? stopListening : startListening}
                       disabled={loading}
                       className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold uppercase tracking-wider transition-all rounded-lg disabled:opacity-40 ${
-                        listening
+                        conversationMode
+                          ? "bg-brand-red text-white animate-pulse"
+                          : listening
                           ? "bg-red-50 border-2 border-brand-red text-brand-red"
                           : "bg-brand-dark text-white hover:bg-gray-800"
                       }`}>
                       {listening
                         ? <><MicOff size={14} className="animate-pulse" /> Listening...</>
+                        : conversationMode
+                        ? <><Mic size={14} /> Conversation On — Tap to Stop</>
                         : <><Mic size={14} /> Speak</>}
                     </button>
                     {speaking && (
