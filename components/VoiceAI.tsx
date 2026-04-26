@@ -313,7 +313,7 @@ export default function VoiceAI() {
         return updated;
       });
 
-      if (mode === "voice" && cleanReply) speak(cleanReply, true);
+      if (mode === "voice" && cleanReply) speakFallback(cleanReply);
 
     } catch (e: any) {
       setMessages(prev => [...prev, { role: "ai", text: "Sorry, something went wrong." }]);
