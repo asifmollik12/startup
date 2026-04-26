@@ -308,17 +308,23 @@ export default function VoiceAI() {
         const clean = text.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*/g, "").replace(/#+\s/g, "").trim();
         if (!clean) return;
         const utt = new SpeechSynthesisUtterance(clean);
-        utt.rate = 0.95;
+        utt.rate = 1.05;
+        utt.pitch = 1.1;
         const voices = window.speechSynthesis.getVoices();
         const isBengali = /[\u0980-\u09FF]/.test(clean);
+        // Pick the best available voice — Google voices sound most natural
         const preferred = isBengali
           ? voices.find(v => v.lang.startsWith("bn"))
-          : voices.find(v => v.name.includes("Google") && v.lang.startsWith("en")) || voices.find(v => v.lang.startsWith("en"));
+          : voices.find(v => v.name === "Google US English")
+            || voices.find(v => v.name.includes("Samantha"))
+            || voices.find(v => v.name.includes("Karen"))
+            || voices.find(v => v.name.includes("Google") && v.lang.startsWith("en"))
+            || voices.find(v => v.lang === "en-US")
+            || voices.find(v => v.lang.startsWith("en"));
         if (preferred) utt.voice = preferred;
         utt.onend = () => {
           if (!window.speechSynthesis.speaking) {
             setSpeaking(false);
-            // Auto-restart listening after AI finishes speaking
             if (isLast && conversationModeRef.current) {
               setTimeout(() => beginRecognition(), 400);
             }
@@ -444,9 +450,14 @@ export default function VoiceAI() {
     const voices = window.speechSynthesis.getVoices();
     const preferred = isBengali
       ? voices.find(v => v.lang.startsWith("bn"))
-      : voices.find(v => v.name.includes("Google") && v.lang.startsWith("en")) || voices.find(v => v.lang.startsWith("en"));
+      : voices.find(v => v.name === "Google US English")
+        || voices.find(v => v.name.includes("Samantha"))
+        || voices.find(v => v.name.includes("Karen"))
+        || voices.find(v => v.name.includes("Google") && v.lang.startsWith("en"))
+        || voices.find(v => v.lang === "en-US")
+        || voices.find(v => v.lang.startsWith("en"));
     if (preferred) utt.voice = preferred;
-    utt.rate = 0.92; utt.pitch = 1.0;
+    utt.rate = 1.05; utt.pitch = 1.1;
     utt.onend = () => setSpeaking(false);
     window.speechSynthesis.speak(utt);
   };
