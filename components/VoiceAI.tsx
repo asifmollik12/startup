@@ -314,11 +314,22 @@ export default function VoiceAI() {
             }
             if (json.text) {
               fullReply += json.text;
-              setMessages(prev => {
-                const updated = [...prev];
-                updated[updated.length - 1] = { role: "ai", text: fullReply, typing: false };
-                return updated;
-              });
+              // Animate new text character by character like ChatGPT
+              const newChars = json.text.split("");
+              let charIdx = 0;
+              const revealChars = () => {
+                if (charIdx < newChars.length) {
+                  const partial = fullReply.slice(0, fullReply.length - newChars.length + charIdx + 1);
+                  setMessages(prev => {
+                    const updated = [...prev];
+                    updated[updated.length - 1] = { role: "ai", text: partial, typing: false };
+                    return updated;
+                  });
+                  charIdx++;
+                  setTimeout(revealChars, 18);
+                }
+              };
+              revealChars();
               // Speak sentence by sentence as stream arrives
               if (mode === "voice") {
                 speechBuffer += json.text;
