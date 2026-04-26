@@ -7,16 +7,32 @@ type ResourceCard = { title: string; subtitle: string; image: string; href: stri
 type Message = { role: "user" | "ai"; text: string; typing?: boolean; sources?: { label: string; href: string; card?: ResourceCard }[] };
 
 function parseSources(text: string, resourceMap?: Record<string, ResourceCard>): { clean: string; sources: { label: string; href: string; card?: ResourceCard }[] } {
-  const sourceMatch = text.match(/\nSOURCES:\n([\s\S]*?)$/);
-  if (!sourceMatch) return { clean: text, sources: [] };
-  const clean = text.slice(0, text.indexOf("\nSOURCES:")).trim();
-  const sources: { label: string; href: string; card?: ResourceCard }[] = [];
-  const lines = sourceMatch[1].split("\n");
-  for (const line of lines) {
+  // Extract inline [url:...] patterns the model sometimes generates
+  const inlineSources: { label: string; href: string; card?: ResourceCard }[] = [];
+  const cleanedInline = text.replace(/\[url:([^\]]+)\]/g, (_, path) => {
+    const href = path.startsWith("/") ? path : `/${path}`;
+    const card = resourceMap?.[href];
+    const label = card?.title ?? href.split("/").pop() ?? href;
+    inlineSources.push({ label, href, card });
+    return ""; // remove from text
+  }).replace(/\s{2,}/g, " ").trim();
+
+  // Also extract formal SOURCES: block
+  const sourceMatch = cleanedInline.match(/\nSOURCES:\n([\s\S]*?)$/);
+  if (!sourceMatch) return { clean: cleanedInline, sources: inlineSources };
+
+  const clean = cleanedInline.slice(0, cleanedInline.indexOf("\nSOURCES:")).trim();
+  const formalSources: { label: string; href: string; card?: ResourceCard }[] = [];
+  for (const line of sourceMatch[1].split("\n")) {
     const m = line.match(/^-\s*\[(.+?)\]\((.+?)\)/);
-    if (m) sources.push({ label: m[1], href: m[2], card: resourceMap?.[m[2]] });
+    if (m) formalSources.push({ label: m[1], href: m[2], card: resourceMap?.[m[2]] });
   }
-  return { clean, sources };
+
+  // Merge, deduplicate by href
+  const all = [...inlineSources, ...formalSources];
+  const seen = new Set<string>();
+  const unique = all.filter(s => { if (seen.has(s.href)) return false; seen.add(s.href); return true; });
+  return { clean, sources: unique };
 }
 
 function parseMarkdown(text: string) {
@@ -567,37 +583,27 @@ export default function VoiceAI() {
                             : <ul className="space-y-0.5 list-none">{parseMarkdown(m.text)}</ul>)
                           : m.text}
                         {m.role === "ai" && m.sources && m.sources.length > 0 && (
-                          <div className="mt-3 pt-2.5 border-t border-gray-100 space-y-2">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Sources</p>
-                            {m.sources.map((s, si) => (
-                              s.card ? (
-                                <a key={si} href={s.card.href}
-                                  className="flex items-center gap-2.5 p-2 rounded-xl border border-gray-100 hover:border-brand-red transition-colors group bg-gray-50">
-                                  <div className="w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
-                                    {s.card.image
-                                      // eslint-disable-next-line @next/next/no-img-element
-                                      ? <img src={s.card.image} alt={s.card.title} className="w-full h-full object-cover" />
-                                      : <div className="w-full h-full bg-brand-red flex items-center justify-center">
-                                          <span className="text-white text-xs font-bold">{s.card.title.charAt(0)}</span>
-                                        </div>
-                                    }
+                          <div className="mt-3 pt-2.5 border-t border-gray-100">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">Sources</p>
+                            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                              {m.sources.map((s, si) => (
+                                <a key={si} href={s.card?.href ?? s.href}
+                                  className="flex-shrink-0 flex items-center gap-2 bg-gray-50 border border-gray-200 hover:border-brand-red transition-colors rounded-lg px-2.5 py-1.5 group max-w-[160px]">
+                                  {s.card?.image ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={s.card.image} alt="" className="w-7 h-7 rounded object-cover flex-shrink-0" />
+                                  ) : (
+                                    <div className="w-7 h-7 bg-brand-red rounded flex items-center justify-center flex-shrink-0">
+                                      <span className="text-white text-[9px] font-bold">{(s.card?.title ?? s.label).charAt(0)}</span>
+                                    </div>
+                                  )}
+                                  <div className="min-w-0">
+                                    <p className="text-[11px] font-semibold text-gray-700 truncate group-hover:text-brand-red transition-colors leading-tight">{s.card?.title ?? s.label}</p>
+                                    {s.card?.subtitle && <p className="text-[9px] text-gray-400 truncate">{s.card.subtitle}</p>}
                                   </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-semibold text-gray-800 truncate group-hover:text-brand-red transition-colors">{s.card.title}</p>
-                                    <p className="text-[10px] text-gray-400 truncate">{s.card.subtitle}</p>
-                                  </div>
-                                  <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded flex-shrink-0 ${
-                                    s.card.type === "article" ? "bg-blue-100 text-blue-600" :
-                                    s.card.type === "founder" ? "bg-green-100 text-green-600" :
-                                    "bg-purple-100 text-purple-600"
-                                  }`}>{s.card.type}</span>
                                 </a>
-                              ) : (
-                                <a key={si} href={s.href} className="flex items-center gap-1.5 text-xs text-brand-red hover:underline">
-                                  <span className="w-1 h-1 bg-brand-red rounded-full flex-shrink-0 inline-block" />{s.label}
-                                </a>
-                              )
-                            ))}
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
