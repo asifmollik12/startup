@@ -68,7 +68,6 @@ export async function POST(req: NextRequest) {
     const isCasual = /^(hi|hello|hey|how are you|good morning|good evening|good night|thanks|thank you|ok|okay|bye|goodbye|সালাম|হ্যালো|ধন্যবাদ)\b/i.test(message.trim());
 
     const [founders, startups, articles, ideas] = isCasual ? [[], [], [], []] : await Promise.all([
-    const [founders, startups, articles, ideas] = isCasual ? [[], [], [], []] : await Promise.all([
       Founder.find().select("name company industry rank slug avatar").limit(10).lean(),
       Startup.find().select("name industry stage tagline slug logo").limit(10).lean(),
       ArticleModel.find().select("title category author slug coverImage").limit(6).lean(),
