@@ -276,9 +276,27 @@ export default function VoiceAI() {
       const decoder = new TextDecoder();
       let fullReply = "";
       let resourceMap: Record<string, ResourceCard> = {};
+      let speechBuffer = "";
 
       setLoading(false);
       setMessages(prev => [...prev, { role: "ai", text: "", typing: false }]);
+
+      const speakChunkNow = (text: string) => {
+        if (!window.speechSynthesis) return;
+        const clean = text.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*/g, "").replace(/#+\s/g, "").trim();
+        if (!clean) return;
+        const utt = new SpeechSynthesisUtterance(clean);
+        utt.rate = 0.95;
+        const voices = window.speechSynthesis.getVoices();
+        const isBengali = /[\u0980-\u09FF]/.test(clean);
+        const preferred = isBengali
+          ? voices.find(v => v.lang.startsWith("bn"))
+          : voices.find(v => v.name.includes("Google") && v.lang.startsWith("en")) || voices.find(v => v.lang.startsWith("en"));
+        if (preferred) utt.voice = preferred;
+        utt.onend = () => { if (!window.speechSynthesis.speaking) setSpeaking(false); };
+        window.speechSynthesis.speak(utt);
+        setSpeaking(true);
+      };
 
       while (true) {
         const { done, value } = await reader.read();
@@ -301,10 +319,22 @@ export default function VoiceAI() {
                 updated[updated.length - 1] = { role: "ai", text: fullReply, typing: false };
                 return updated;
               });
+              // Speak sentence by sentence as stream arrives
+              if (mode === "voice") {
+                speechBuffer += json.text;
+                const idx = speechBuffer.search(/[.!?।\n]/);
+                if (idx !== -1) {
+                  speakChunkNow(speechBuffer.slice(0, idx + 1));
+                  speechBuffer = speechBuffer.slice(idx + 1);
+                }
+              }
             }
           } catch {}
         }
       }
+
+      // Speak any leftover text
+      if (mode === "voice" && speechBuffer.trim()) speakChunkNow(speechBuffer);
 
       const { clean: cleanReply, sources } = parseSources(fullReply, resourceMap);
       setMessages(prev => {
@@ -313,7 +343,7 @@ export default function VoiceAI() {
         return updated;
       });
 
-      if (mode === "voice" && cleanReply) speakFallback(cleanReply);
+      if (mode === "voice" && cleanReply) { /* already spoken during stream */ }
 
     } catch (e: any) {
       setMessages(prev => [...prev, { role: "ai", text: "Sorry, something went wrong." }]);
