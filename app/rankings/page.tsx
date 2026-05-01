@@ -19,8 +19,8 @@ export default async function RankingsPage() {
   const top3 = founders.slice(0, 3);
   const rest = founders.slice(3);
 
-  const podiumOrder = [top3[1], top3[0], top3[2]];
-  const podiumRanks = [2, 1, 3];
+  const podiumOrder = [top3[1], top3[0], top3[2]].filter(Boolean);
+  const podiumRanks = top3.length >= 3 ? [2, 1, 3] : top3.length === 2 ? [2, 1] : [1];
   const podiumHeights = ["h-28", "h-36", "h-24"];
   const podiumIcons = [Medal, Crown, Award];
   const podiumColors = ["text-gray-400", "text-brand-gold", "text-brand-red"];
