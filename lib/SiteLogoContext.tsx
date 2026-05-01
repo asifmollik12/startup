@@ -25,13 +25,9 @@ export function SiteLogoProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setLoaded(true));
   }, []);
 
-  const setLogoUrl = async (url: string | null) => {
+  const setLogoUrl = (url: string | null) => {
     setLogoUrlState(url);
-    await fetch("/api/settings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key: "site_logo", value: url }),
-    });
+    // DB save is handled by the caller (settings page)
   };
 
   return (

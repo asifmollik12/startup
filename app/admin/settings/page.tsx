@@ -29,13 +29,19 @@ export default function AdminSettings() {
     if (!res.ok) { alert("Upload failed. Check Cloudinary env vars."); return; }
     const data = await res.json();
     if (data.url) {
-      setLogoUrl(data.url);
-      // Persist to DB so it survives reload
-      await fetch("/api/settings", {
+      // Save to DB first
+      const saveRes = await fetch("/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key: "site_logo", value: data.url }),
       });
+      if (!saveRes.ok) {
+        const err = await saveRes.json().catch(() => ({}));
+        alert("Failed to save logo: " + (err.error || saveRes.status));
+        return;
+      }
+      // Update context after successful DB save
+      setLogoUrl(data.url);
       toast("Logo uploaded and saved");
     }
   };
