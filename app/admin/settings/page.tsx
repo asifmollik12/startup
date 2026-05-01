@@ -28,13 +28,27 @@ export default function AdminSettings() {
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     if (!res.ok) { alert("Upload failed. Check Cloudinary env vars."); return; }
     const data = await res.json();
-    if (data.url) { setLogoUrl(data.url); toast("Logo uploaded successfully"); }
+    if (data.url) {
+      setLogoUrl(data.url);
+      // Persist to DB so it survives reload
+      await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "site_logo", value: data.url }),
+      });
+      toast("Logo uploaded and saved");
+    }
   };
 
-  const removeLogo = () => {
+  const removeLogo = async () => {
     setLogoUrl(null);
     setLogoName(null);
     if (logoRef.current) logoRef.current.value = "";
+    await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "site_logo", value: "" }),
+    });
   };
   const [favicon, setFavicon] = useState<string | null>(null);
   const [faviconName, setFaviconName] = useState<string | null>(null);
