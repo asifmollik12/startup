@@ -16,7 +16,13 @@ async function getArticles() {
 
 export default async function HeroSection() {
   const articles = await getArticles();
-  if (articles.length === 0) return null;
+  if (articles.length === 0) return (
+    <section className="container-wide py-8">
+      <div className="border border-brand-border bg-brand-gray p-12 text-center">
+        <p className="text-gray-400 text-sm">No articles published yet. Add articles from the admin dashboard.</p>
+      </div>
+    </section>
+  );
 
   const featured = articles.filter((a: any) => a.featured);
   const main = featured[0] ?? articles[0];
