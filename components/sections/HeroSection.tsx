@@ -6,6 +6,8 @@ import { connectDB } from "@/lib/mongodb";
 import { Article as ArticleModel } from "@/lib/models/Article";
 import InlineAdBanner from "@/components/sections/InlineAdBanner";
 
+export const revalidate = 0;
+
 async function getArticles() {
   try {
     await connectDB();
