@@ -26,8 +26,11 @@ export default function AdminSettings() {
     const fd = new FormData();
     fd.append("file", file);
     const res = await fetch("/api/upload", { method: "POST", body: fd });
-    if (!res.ok) { alert("Upload failed. Check Cloudinary env vars."); return; }
     const data = await res.json();
+    if (!res.ok) {
+      alert("Upload failed: " + (data.error || res.status));
+      return;
+    }
     if (data.url) {
       // Save to DB first
       const saveRes = await fetch("/api/settings", {
