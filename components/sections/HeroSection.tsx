@@ -13,10 +13,7 @@ async function getArticles() {
     await connectDB();
     const data = await ArticleModel.find().sort({ publishedAt: -1 }).limit(8).lean();
     return data.map((a: any) => ({ ...a, id: a._id.toString() }));
-  } catch (e) {
-    console.error("HeroSection getArticles error:", e);
-    return [];
-  }
+  } catch { return []; }
 }
 
 export default async function HeroSection() {
